@@ -82,7 +82,7 @@ export function mountRoomPreview(document,view) {
   }
   function enterPoint(x,y){
     const parsed=parseCoordinate(x,y,room.bounds);
-    if(!parsed){report("Enter coordinates inside the room: 0 ≤ x ≤ 32, 0 ≤ y ≤ 14.");return false;}
+    if(!parsed){const b=room.bounds;report("Enter coordinates inside the room: "+b.minX+" ≤ x ≤ "+b.maxX+", "+b.minY+" ≤ y ≤ "+b.maxY+".");return false;}
     return setPoint(parsed);
   }
   function clearPoint(){point=null;if(xInput)xInput.value="";if(yInput)yInput.value="";report("No point selected");redraw();}

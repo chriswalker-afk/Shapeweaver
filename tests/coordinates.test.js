@@ -58,7 +58,7 @@ test("grid anchored to zero and axes not moved when origin is offscreen",()=>{
 });
 function mock(){
   const calls=[];let depth=0;
-  return {calls,get depth(){return depth},save(){depth++},restore(){depth--},beginPath(){},rect(){},clip(){},moveTo(x,y){calls.push(["move",x,y])},lineTo(x,y){calls.push(["line",x,y])},stroke(){},fill(){},arc(){},fillRect(){},strokeText(s){calls.push(["text",s])},fillText(){},measureText(s){return{width:s.length*7}}};
+  return {calls,get depth(){return depth},save(){depth++},restore(){depth--},beginPath(){},rect(){},clip(){},moveTo(x,y){calls.push(["move",x,y])},lineTo(x,y){calls.push(["line",x,y])},stroke(){calls.push(["stroke",this.strokeStyle])},fill(){},arc(){},fillRect(){calls.push(["band"])},strokeText(s){calls.push(["text",s])},fillText(){},measureText(s){return{width:s.length*7}}};
 }
 test("overlay draws independently and balances canvas state",()=>{
   const c=createCamera(b,1200,600),ctx=mock();
@@ -73,4 +73,12 @@ test("overlay draws independently and balances canvas state",()=>{
   const marker=mock();drawCoordinateOverlay(marker,c,b,{grid:false,axes:false,picking:true,point:{x:5,y:6}});
   assert.ok(marker.calls.some(a=>a[0]==="text"&&a[1]==="(5, 6)"));
   assert.equal(marker.depth,0);
+});
+
+test("true boundary axes are drawn above the ruler background",()=>{
+  const camera=createCamera(b,1200,600),ctx=mock();
+  drawCoordinateOverlay(ctx,camera,b,{grid:false,axes:true});
+  const lastBand=ctx.calls.findLastIndex(call=>call[0]==="band");
+  const firstGoldAxis=ctx.calls.findIndex(call=>call[0]==="stroke"&&call[1]==="#ffe4a8");
+  assert.ok(lastBand>=0&&firstGoldAxis>lastBand);
 });

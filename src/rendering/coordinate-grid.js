@@ -59,6 +59,13 @@ export function drawCoordinateOverlay(ctx,camera,bounds,{grid=true,axes=true,poi
     for(const y of plan.majorY)strokeLine(ctx,r.left,yAt(y),r.right,yAt(y));
   }
   if(axes){
+    const showRulers=r.right-r.left>=68&&r.bottom-r.top>=64,band=24;
+    // Paint the rulers first so the true zero axes remain visible even at room boundaries.
+    if(showRulers){
+      ctx.fillStyle="rgba(36,30,48,.84)";
+      ctx.fillRect(r.left,r.bottom-band,r.right-r.left,band);
+      ctx.fillRect(r.left,r.top,band,r.bottom-r.top);
+    }
     // A contrasting under-stroke prevents an axis disappearing against bright water or stone.
     function axis(x1,y1,x2,y2){
       ctx.strokeStyle="#272235";ctx.lineWidth=3.8;strokeLine(ctx,x1,y1,x2,y2);
@@ -70,12 +77,7 @@ export function drawCoordinateOverlay(ctx,camera,bounds,{grid=true,axes=true,poi
     ctx.font="600 11px system-ui, sans-serif";
     // Explicit x/y rulers sit at visible edges so labels remain readable at room boundaries and after panning.
     // They are not drawn as mathematical axes when zero is off-screen.
-    if(r.right-r.left>=68&&r.bottom-r.top>=64){
-      const band=24;
-      ctx.fillStyle="rgba(36,30,48,.84)";
-      ctx.fillRect(r.left,r.bottom-band,r.right-r.left,band);
-      ctx.fillRect(r.left,r.top,band,r.bottom-r.top);
-      ctx.font="600 11px system-ui, sans-serif";
+    if(showRulers){
       for(const x of plan.majorX){
         const px=xAt(x);
         if(px<r.left+band+10||px>r.right-18)continue;

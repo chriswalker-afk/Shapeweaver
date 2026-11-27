@@ -30,13 +30,14 @@ function screenBounds(camera,vertices) {
   const p=worldToScreen(camera,{x:b.minX,y:b.maxY});
   return {x:p.x,y:p.y,w:(b.maxX-b.minX)*camera.scale,h:(b.maxY-b.minY)*camera.scale};
 }
-function backdrop(ctx,image,camera,factor) {
+function backdrop(ctx,image,camera,bounds,factor) {
   if (!image)return;
   const {width,height}=camera;
   const scale=Math.max(width/image.naturalWidth,height/image.naturalHeight);
   // Overscan allows gentle parallax without exposing empty edges.
   const w=image.naturalWidth*scale*1.24,h=image.naturalHeight*scale*1.24;
-  const offset=Math.max(-1,Math.min(1,(camera.cx-16)/16));
+  const half=(bounds.maxX-bounds.minX)/2, centre=bounds.minX+half;
+  const offset=Math.max(-1,Math.min(1,(camera.cx-centre)/half));
   ctx.drawImage(image,(width-w)/2-offset*(w-width)*factor,(height-h)/2,w,h);
 }
 function tilePolygon(ctx,camera,vertices,image,colour,tileW,tileH) {
@@ -143,7 +144,7 @@ function apprentice(ctx,camera,spawn,art) {
 export function renderWorld(ctx,metrics,camera,room,art={}) {
   ctx.setTransform(metrics.scaleX,0,0,metrics.scaleY,0,0);
   const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,"#514963");sky.addColorStop(1,"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
-  backdrop(ctx,art.distant,camera,.28);backdrop(ctx,art.ruins,camera,.48);
+  backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);
   ctx.save();
   const b=room.bounds,tl=worldToScreen(camera,{x:b.minX,y:b.maxY}),br=worldToScreen(camera,{x:b.maxX,y:b.minY});
   ctx.beginPath();ctx.rect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.clip();

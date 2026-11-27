@@ -108,3 +108,23 @@ test("production build includes only public app files and serves under a subpath
     await withServer({ root: dist, basePath: "/Shapeweaver/" }, origin => smoke(origin, "/Shapeweaver/"));
   } finally { await rm(fixture, { recursive: true, force: true }); }
 });
+
+test("workshop is opt-in locally, never part of the normal static site or production build", async ()=>{
+ await withServer({root},async origin=>{
+  assert.equal((await fetch(origin+"/workshop/index.html")).status,404);
+  assert.equal((await fetch(origin+"/workshop/model.js")).status,404);
+ });
+ await withServer({root,basePath:"/Shapeweaver/",workshop:true},async origin=>{
+  const page=await fetch(origin+"/Shapeweaver/workshop/index.html");
+  assert.equal(page.status,200);assert.match(await page.text(),/Internal Level Workshop/);
+  for(const path of ["main.js","model.js","replay.js","workshop.css"])assert.equal((await fetch(origin+"/Shapeweaver/workshop/"+path)).status,200);
+  assert.equal((await fetch(origin+"/Shapeweaver/docs/roadmap.md")).status,404);
+  assert.equal((await fetch(origin+"/Shapeweaver/workshop/%2e%2e%2fREADME.md")).status,404);
+ });
+ const fixture=await mkdtemp(join(tmpdir(),"shapeweaver-workshop-"));
+ try{
+  for(const path of ["index.html","src","assets","workshop"])await cp(join(root,path),join(fixture,path),{recursive:true});
+  const dist=await build(fixture);assert.deepEqual((await readdir(dist)).sort(),["assets","index.html","src"]);
+  await withServer({root:dist,workshop:true},async origin=>assert.equal((await fetch(origin+"/workshop/index.html")).status,404));
+ }finally{await rm(fixture,{recursive:true,force:true});}
+});

@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR20 — First campaign audit. Twelve-level replay and mathematical audit, bounded shortcut probes, faded guidance, clearer lock references and chapter filters. Next: PR21 internal level workshop.
+PR21 — Internal level workshop. Developer-only coordinate editor, exact properties, local import, real-engine playtesting, interleaved replay recording and verified export. Next: PR22 The Riverworks, Levels 13–14.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR20 — First campaign audit. Twelve-level replay and mathematical audit, bound
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Internal level workshop](docs/internal-workshop.md) — authoring, validation and replay workflow.
 - [First campaign audit](docs/first-campaign-audit.md) — replay evidence, difficulty review and remaining classroom QA.
 - [Clockwork finale](docs/clockwork-finale.md) — Levels 11–12, shape-socket geometry and external centres.
 - [Clockwork Gallery](docs/clockwork-gallery.md) — Levels 9–10, sequential spells and hinge socket rules.
@@ -68,3 +69,7 @@ CI tests and builds on pull requests and main pushes. To publish the static site
 ## Scaffold scope
 
 The entry module mounts a responsive high-DPI canvas beneath an illustrated title and accessible spellbook. Title artwork and the reference apprentice are original SVG files, not playable collision geometry. PR03 adds the separate world renderer and camera; PR04 adds the mathematical overlay and coordinate picker; PR05 implements deterministic player movement; PR06 introduces interactive objects.
+
+### Internal developer workshop
+
+Run `npm run workshop` and open http://127.0.0.1:4173/workshop/index.html. Load a copy of any released puzzle or create a blank draft, place and drag items on the grid, edit exact properties, validate, playtest, and export a verified JSON bundle. Run `npm run verify:level -- path/to/level.verified.json` to independently replay an exported proof. The workshop directory is excluded from the public build and is served only by explicit opt-in. No level is automatically registered in the campaign.

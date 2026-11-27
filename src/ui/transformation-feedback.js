@@ -8,6 +8,7 @@ const ADVICE={
   "not-selectable":"Select an outlined object or choose one from the object list.",
   permission:"Choose a transformation from this object's allowed list.",
   hinge:"Read the labelled hinge coordinates and use them as the centre.",
+  "bearing-unsupported":"Check both marked bearing ends. A platform must retain its support when another piece moves.",
   "not-docked":"Compare the current hinge and the labelled socket coordinates; translate by their difference.",
   "scale-limit":"Use a factor within the listed per-cast range.",
   identity:"Choose a transformation that changes at least one reference point.",

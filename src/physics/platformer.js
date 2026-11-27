@@ -1,9 +1,10 @@
 import {blocked,inHazard,supported,sweepAxis,walkHorizontal,PLAYER_SIZE} from "./collision.js";
+import {isSafePosition,returnToSafety} from "./recovery.js";
 export const FIXED_DT=1/120;
 export const MOTION=Object.freeze({speed:7.2,groundAcceleration:65,airAcceleration:34,gravity:25,jumpSpeed:12.2,terminalSpeed:18,climbSpeed:3.8,coyote:.11,buffer:.12});
 const approach=(a,b,d)=>a<b?Math.min(a+d,b):Math.max(a-d,b);
 const axis=n=>Number.isFinite(n)?Math.max(-1,Math.min(1,n)):0;
-function safe(world,p){return p&&!blocked(world,p)&&!inHazard(world,p)&&supported(world,p);}
+const safe=isSafePosition;
 export function createPlayer(world){
   const {spawn}=world.room;
   if(!safe(world,spawn))throw new Error("Spawn must be clear, dry and supported");
@@ -13,13 +14,7 @@ export function createPlayer(world){
 function reachableLadder(world,p){
   return world.ladders.find(l=>Math.abs(p.x-l.x)<=l.width/2+PLAYER_SIZE.width/2+.06&&p.y<=l.top+.025&&p.y>=l.bottom-.06&&p.y+PLAYER_SIZE.height>l.bottom+.025)??null;
 }
-function respawn(world,p){
-  const cp=world.checkpoints.find(c=>c.id===p.checkpoint);
-  const destination=[cp,world.room.spawn].find(q=>safe(world,q));
-  if(!destination)return {...p,vx:0,vy:0,climbing:false,blockedRespawn:true,event:"reset-required"};
-  return {...p,x:destination.x,y:destination.y,vx:0,vy:0,grounded:true,climbing:false,coyote:MOTION.coyote,buffer:0,
-    pose:"idle",phase:0,checkpoint:destination===cp?cp.id:null,respawns:p.respawns+1,event:"respawn"};
-}
+function respawn(world,p){return returnToSafety(world,p,MOTION.coyote).player;}
 function finishStep(world,p,previous){
   if(inHazard(world,p))return respawn(world,p);
   if(p.grounded&&!p.climbing){

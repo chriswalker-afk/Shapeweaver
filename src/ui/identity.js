@@ -16,6 +16,7 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
   const book = document.getElementById("spellbook-view");
   const room = document.getElementById("room-view");
   const results = document.getElementById("results-view");
+  const campaign = document.getElementById("campaign-view");
   const art = document.getElementById("title-art");
   const name = document.getElementById("spell-name");
   const description = document.getElementById("spell-description");
@@ -46,18 +47,21 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
   }
   function show(view) {
     const isRoom = ["room","level1","level2","level3","level4"].includes(view);
-    if (view !== "title" && view !== "spellbook" && !(isRoom && room) && !(view === "results" && results)) return false;
+    if (view !== "title" && view !== "spellbook" && !(isRoom && room) && !(view === "results" && results) && !(view === "campaign" && campaign)) return false;
     state.view = view;
     title.hidden = view !== "title";
     book.hidden = view !== "spellbook";
     if (room) room.hidden = !isRoom;
     if (results) results.hidden = view !== "results";
+    if (campaign) campaign.hidden = view !== "campaign";
     if (art) art.hidden = isRoom;
     onViewChange(view);
-    document.getElementById(view === "title" ? "open-spellbook" : isRoom ? "room-heading" : view === "results" ? "results-heading" : "spellbook-heading")?.focus();
+    document.getElementById(view === "title" ? "open-spellbook" : isRoom ? "room-heading" : view === "results" ? "results-heading" : view === "campaign" ? "campaign-heading" : "spellbook-heading")?.focus();
     return true;
   }
   for (const button of buttons) on(button, () => select(button.dataset.spell));
+  on(document.getElementById("open-campaign"), () => show("campaign"));
+  on(document.getElementById("close-campaign"), () => show("title"));
   on(document.getElementById("open-spellbook"), () => show("spellbook"));
   on(document.getElementById("close-spellbook"), () => show("title"));
   on(document.getElementById("open-room"), () => show("room"));

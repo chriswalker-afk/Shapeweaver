@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR14 — Gatehouse polish. Gameplay-first layout, collapsible view tools, compact movement controls, improved mathematical labels, scene details and eased cast effects. The four original puzzle geometries and scoring rules are retained. Next: PR15 campaign and level library.
+PR15 — Campaign and level library. Seven planned chapters, four released tutorials, direct access, filters, sequential continuation and locally saved best results. Next: PR16 Levels 5–6.
 
 ## Design documents
 

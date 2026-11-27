@@ -320,3 +320,12 @@ body:has(#room-view:not([hidden])) .game-viewport{border:0;border-radius:0;min-h
 }
 
 body:has(#room-view:not([hidden])) .game-viewport{overflow:visible}
+
+.campaign-view{padding:clamp(.8rem,3vw,2rem);background:#211c31eF;min-width:0;color:#f3e4c7}
+.campaign-header,.library-filters{display:flex;align-items:center;flex-wrap:wrap;gap:.6rem}
+.campaign-header>div{flex:1 1 18rem}.campaign-header h2{margin:0;color:#f5dca9}
+.campaign-map,.campaign-levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:.65rem}
+.chapter-card,.library-level{display:grid;gap:.35rem;text-align:left;border:1px solid #9c805b;border-radius:.4rem;padding:.85rem;background:#382b46;color:#f3e4c7}
+.chapter-card:disabled{opacity:.65;cursor:default;border-style:dashed}.chapter-card:not(:disabled):hover,.library-level:hover{background:#514064}
+.chapter-card small,.library-level small{color:#d5c5c6}.level-number,.library-score{color:#efc474;font-weight:700}
+.library-filters{margin-bottom:.8rem}.library-filters label{display:grid;gap:.2rem;font-size:.8rem}.library-filters select{min-height:36px;background:#302438;color:#f3e4c7;border:1px solid #9c805b;padding:.3rem}

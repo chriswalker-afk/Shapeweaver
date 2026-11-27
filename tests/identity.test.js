@@ -115,3 +115,11 @@ test("title can open Level 3 directly",()=>{
  els["open-level3"].click();assert.equal(state.view,"level3");assert.equal(els["room-view"].hidden,false);assert.equal(els["room-heading"].focused,true);
  els["close-room"].click();els["open-level2"].click();assert.deepEqual(changes,["level3","title","level2"]);ui.destroy();
 });
+
+test("title can open Level 4 directly",()=>{
+ const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","translation-vector","room-view","title-art","open-room","open-level1","open-level2","open-level3","open-level4","close-room","room-heading","open-spellbook"];
+ const els=Object.fromEntries(ids.map(id=>[id,element()]));
+ const state=createAppState(),changes=[],ui=mountIdentity({getElementById:id=>els[id],querySelectorAll:()=>[]},state,v=>changes.push(v));
+ els["open-level4"].click();assert.equal(state.view,"level4");assert.equal(els["room-view"].hidden,false);assert.equal(els["room-heading"].focused,true);
+ els["close-room"].click();els["open-level3"].click();assert.deepEqual(changes,["level4","title","level3"]);ui.destroy();
+});

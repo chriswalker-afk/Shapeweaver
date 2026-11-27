@@ -97,7 +97,7 @@ function object(ctx,camera,item,art) {
       ctx.fillStyle="#b77b4d";ctx.fill();
     }
     ctx.restore();outline(ctx,camera,item.vertices,"#8e5b42",2);
-  }else if(item.kind==="barrel"&&item.vertices.length===4){
+  }else if(item.kind==="barrel"&&item.vertices.length===4&&(!item.vertexIds||["A","B","C","D"].every(id=>item.vertexIds.includes(id)))){
     const ids=item.vertexIds??["A","B","C","D"];
     const a=xy(camera,item.vertices[ids.indexOf("A")]),b=xy(camera,item.vertices[ids.indexOf("B")]),d=xy(camera,item.vertices[ids.indexOf("D")]);
     const ux=b.x-a.x,uy=b.y-a.y,vx=d.x-a.x,vy=d.y-a.y,w=Math.hypot(ux,uy),h=Math.hypot(vx,vy);

@@ -13,3 +13,5 @@ PR18 releases the first two Clockwork Gallery puzzles. Ten released levels, 30 a
 PR19 completes Chapter III. Twelve released puzzles, 36 possible stars and three fully available chapters. PR20 audits the first twelve before further levels.
 
 PR22 introduces Chapter IV, The Riverworks, with two of six planned puzzles released. Fourteen released levels and 42 available stars; chapter filters include Riverworks.
+
+PR23 adds Double Trouble and Diagonal Dock to Chapter IV. Sixteen released levels, 48 possible stars, four of six Riverworks puzzles available.

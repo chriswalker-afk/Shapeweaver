@@ -184,3 +184,21 @@ h1,h2,h3 { font-family: var(--display); }
 #room-canvas:focus-visible { outline-offset:-3px; }
 @media(max-height:520px) and (orientation:landscape){.movement-controls button{min-height:32px;min-width:36px;padding:.2rem .4rem}.room-footer{align-items:center}.play-info{font-size:.68rem}}
 @media(max-width:650px) and (orientation:portrait){.room-footer{justify-content:center}.play-info{flex-basis:100%;text-align:center}.movement-controls button{min-height:44px;min-width:44px}}
+
+/* PR06: compact context-sensitive inspector; coordinate and object tools share a row. */
+.object-panel { grid-row:3; display:grid; gap:.3rem; min-width:0; padding:.4rem .65rem; background:#2c2439; border-top:1px solid #9c805b; color:#f3e4c7; font-size:.76rem; }
+.object-top,.object-form,.object-fields,.object-panel label { display:flex; align-items:center; flex-wrap:wrap; gap:.3rem .5rem; }
+.object-top { justify-content:flex-start; }
+#object-permissions { flex:1 1 12rem; line-height:1.35; color:#e6cfa9; }
+.object-panel button,.object-panel input,.object-panel select { font:inherit; color:#f3e4c7; background:#211c31; min-height:34px; padding:.3rem .45rem; border:1px solid #8c725e; border-radius:.22rem; }
+.object-panel select { max-width:100%; }
+.object-panel button:hover { border-color:#f6d9a2; }
+.object-panel input { width:6rem; font-variant-numeric:tabular-nums; }
+.object-panel input[name="line"] { width:8rem; }
+.object-panel .preview-action { color:#302438;background:#e6c18c;border-color:#f6d9a2;font-weight:700; }
+.object-references,#object-result { margin:0; line-height:1.35; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
+#object-result[data-state="clear"] { color:#b7e5bc; }
+#object-result[data-state="invalid"] { color:#ffb8af; }
+.object-preview-note { color:#d4c1d0; }
+@media(max-height:520px) and (orientation:landscape){.object-panel{gap:.2rem;padding:.25rem .45rem}.object-panel button,.object-panel input,.object-panel select{min-height:29px;padding:.2rem .35rem}.object-panel input{width:5rem}}
+@media(max-width:650px) and (orientation:portrait){.object-top label{flex:1 1 9rem}.object-top select{width:100%}.object-panel{padding:.35rem .45rem}.object-preview-note{flex-basis:100%}}

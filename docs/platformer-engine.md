@@ -18,3 +18,6 @@ Artwork uses live pose and foot anchoring, facing flip and subtle procedural lea
 
 ## Test expectations
 Pure geometry and physics tests cover contacts/concave geometry, walls, ceiling, slopes, jumps, ladder, hazard/checkpoint, exit, deterministic replays, fixed-step loop and independent input sources. Record actual CI results. Browser review still needed for movement feel, art alignment, control focus/touch ergonomics and viewport size. PR06 adds remote object selection and transformation permissions/previews; keep physics independent of UI.
+
+## PR06 update
+Object inspection pauses movement and clears held controls. The gate is now behind the exit on the east ledge with a corner hinge, to provide a valid rotation preview without obstructing the existing movement replay. Object geometry remains unchanged by previews; the practice route is still a movement test, not a campaign puzzle.

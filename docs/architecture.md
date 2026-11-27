@@ -49,3 +49,6 @@ Prefer fast unit tests for every PR with targeted browser/replay checks. Full ca
 
 ## Asset policy
 Use original assets or assets with documented rights/attribution. Keep artwork source/provenance and licences in an asset manifest when introduced. Do not add real student data or private school resources. Concept art is reference only; generated or drawn sprites need independent layers and measured collision alignment. PR02 establishes the style guide and reusable initial assets.
+
+## PR06 update
+See [interactive object engine](object-engine.md) for the initial capability, reference geometry and preview contracts. Final-pose validation is separate from future swept-path validation and commit transactions. No mutation is allowed through the inspection UI.

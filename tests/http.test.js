@@ -36,14 +36,16 @@ async function smoke(origin, base) {
   assert.match(html, /id="world"/);
   assert.match(html, /id="spellbook-view"/);
   assert.match(html, /id="open-spellbook"/);
+  assert.match(html, /id="room-canvas"/);
+  assert.match(html, /id="open-room"/);
   assert.match(html, /src="\.\/src\/main\.js"/);
   const entry = await fetch(origin + base + "src/main.js");
   assert.match(entry.headers.get("content-type"), /javascript/);
   assert.match(await entry.text(), /startApp/);
-  for (const path of ["src/core/app-state.js", "src/rendering/viewport.js", "src/styles.css", "src/ui/identity.js"]) {
+  for (const path of ["src/core/app-state.js", "src/rendering/viewport.js", "src/styles.css", "src/ui/identity.js", "src/geometry/world.js", "src/levels/gatehouse-preview.js", "src/rendering/camera.js", "src/rendering/world-art.js", "src/ui/room-preview.js"]) {
     assert.equal((await fetch(origin + base + path)).status, 200);
   }
-  for (const path of ["ui/crest.svg", "ui/translate.svg", "ui/rotate.svg", "ui/enlarge.svg", "ui/reflect.svg", "characters/apprentice.svg", "environments/gatehouse-title.svg"]) {
+  for (const path of ["ui/crest.svg", "ui/translate.svg", "ui/rotate.svg", "ui/enlarge.svg", "ui/reflect.svg", "characters/apprentice.svg", "environments/gatehouse-title.svg", "environments/gatehouse-distant.svg", "environments/gatehouse-ruins.svg", "terrain/stone.svg", "terrain/grass.svg", "terrain/timber.svg", "terrain/water.svg", "objects/portal.svg"]) {
     const response = await fetch(origin + base + "assets/" + path);
     assert.equal(response.status, 200);
     assert.match(response.headers.get("content-type"), /image\/svg\+xml/);

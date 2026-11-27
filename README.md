@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR02 — visual identity. The title and interactive spellbook preview establish original vector art, branding and spell symbols. Not yet playable. Next: PR03 world renderer.
+PR03 — world renderer. Open Explore the Gatehouse from the title to inspect a static world-space test room with layered scenery, terrain, props and camera controls. Not yet playable. Next: PR04 coordinate grid and axes.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR02 — visual identity. The title and interactive spellbook preview establish 
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [World renderer](docs/world-renderer.md) — room fixture, camera, layer ordering and geometry contract.
 - [Architecture and quality](docs/architecture.md) — technical boundaries, geometry, level data and test strategy.
 - [Contribution guide](CONTRIBUTING.md) — PR workflow and acceptance criteria.
 
@@ -49,4 +50,4 @@ CI tests and builds on pull requests and main pushes. To publish the static site
 
 ## Scaffold scope
 
-The entry module mounts a responsive high-DPI canvas beneath an illustrated title and accessible spellbook. Title artwork and the reference apprentice are original SVG files, not playable collision geometry. PR03–06 implement the renderer, grid, player and object engine.
+The entry module mounts a responsive high-DPI canvas beneath an illustrated title and accessible spellbook. Title artwork and the reference apprentice are original SVG files, not playable collision geometry. PR03 adds the separate world renderer and camera; PR04–06 implement the grid, player and object engine.

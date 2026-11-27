@@ -42,6 +42,48 @@
       "role": "Reflection symbol",
       "provenance": "Original vector artwork authored for Shapeweaver in PR02; no third-party assets",
       "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "environments/gatehouse-distant.svg",
+      "role": "Distant mountains and sky parallax",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR03; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "environments/gatehouse-ruins.svg",
+      "role": "Transparent midground arcade and trees",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR03; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "terrain/stone.svg",
+      "role": "Reusable stone masonry tile",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR03; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "terrain/timber.svg",
+      "role": "Reusable wood grain tile",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR03; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "terrain/grass.svg",
+      "role": "Decorative terrain edge trim",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR03; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "terrain/water.svg",
+      "role": "Water hazard texture",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR03; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "objects/portal.svg",
+      "role": "Static portal illustration",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR03; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
     }
   ]
 }

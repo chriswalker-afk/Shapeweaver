@@ -11,10 +11,12 @@ export function commitValidated(room,player,id,preview,message,transition,record
   const before=room.objects.find(o=>o.id===id);
   const moved={...before,vertices:preview.geometry.vertices.map(p=>[...p])};
   if(before.hinge)moved.hinge=[...preview.geometry.hinge];
+  // Keep vertex correspondence through winding reversal and subsequent transformations.
+  if(preview.request.type==="reflect"||before.vertexIds)moved.vertexIds=[...preview.geometry.vertexIds];
   const nextRoom=deepFreeze(cloneData({...room,objects:room.objects.map(o=>o.id===id?moved:o)}));
   const physics=createPhysicsWorld(nextRoom);
   if(player&&(blocked(physics,player)||inHazard(physics,player)))return {...preview,ok:false,code:"player-unsafe",message:"The apprentice would not be safe after this move."};
   return {ok:true,code:"applied",message,room:nextRoom,physics,
-    transition:deepFreeze({id,from:before.vertices.map(p=>[...p]),...transition}),
+    transition:deepFreeze({id,from:before.vertices.map(p=>[...p]),...(preview.request.type==="reflect"?{fromIds:before.vertexIds?[...before.vertexIds]:undefined}:{}),...transition}),
     record:deepFreeze({objectId:id,...record})};
 }

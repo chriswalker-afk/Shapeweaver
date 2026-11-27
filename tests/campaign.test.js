@@ -41,6 +41,7 @@ test("library shows only playable puzzles, filters, resumes and refreshes progre
  assert.deepEqual(routes,["level4"]);
  els["filter-math"].value="5";els["filter-math"].fire("change");
  assert.match(els["campaign-levels"].children[0].textContent,/No released puzzles/);
+ els["campaign-map"].children[1].fire("click");assert.equal(els["filter-spell"].value,"");assert.equal(els["filter-math"].value,"");assert.equal(els["filter-chapter"].value,"2");assert.equal(els["campaign-levels"].children.length,4);
  els["campaign-clear"].fire("click");assert.equal(els["campaign-levels"].children.length,12);
  best.record({levelId:"gatehouse-01",moves:2,stars:2});
  ui.render();assert.match(els["campaign-progress"].textContent,/1 \/ 12 released puzzles complete · 2 \/ 36 stars/);

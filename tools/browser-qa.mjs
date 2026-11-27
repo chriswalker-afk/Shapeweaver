@@ -72,6 +72,10 @@ try{
    await page.locator("#room-canvas").waitFor();
    const initial=await page.locator("#room-stage").boundingBox();
    assert.ok(initial.height>=138);
+   await page.locator("#tutorial-guidance-toggle").click();assert.equal(await page.locator("#tutorial-guide").isHidden(),true);
+   await page.locator("#tutorial-guidance-toggle").click();
+   await page.locator("#grid-toggle").click();assert.equal(await page.locator("#grid-toggle").getAttribute("aria-pressed"),"false");
+   await page.locator("#grid-toggle").click();assert.equal(await page.locator("#grid-toggle").getAttribute("aria-pressed"),"true");
    await page.screenshot({path:out+"/"+name+"-level"+(index+5)+"-initial.png",fullPage:true});
    for(const [move,[id,type,fields]] of spells.entries()){
     await page.locator("#object-toggle").click();
@@ -87,6 +91,7 @@ try{
     if(id==="socket-beam"&&type==="translate")assert.match(await page.locator("#object-result").innerText(),/Hinge will dock/);
     if(id==="socket-beam"&&type==="rotate")assert.match(await page.locator("#object-permissions").innerText(),/\(docked\)/);
     if(id==="brass-key"&&type==="rotate")assert.match(await page.locator("#object-result").innerText(),/Key will fit.*gate will open/);
+    if(id==="brass-key")assert.match(await page.locator("#object-references").innerText(),/Lock outline: S1/);
     await page.screenshot({path:out+"/"+name+"-level"+(index+5)+"-cast"+(move+1)+".png",fullPage:true});
     await page.locator("#object-apply").click();
     assert.match(await page.locator("#tutorial-moves").innerText(),new RegExp("Moves: "+(move+1)));

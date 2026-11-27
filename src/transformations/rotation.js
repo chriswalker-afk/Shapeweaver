@@ -12,6 +12,7 @@ export function previewRotation(room,player,id,raw){
   if(!final.ok)return result(false,final.code,final.message);
   const object=room.objects.find(o=>o.id===id),request=final.request,theta=signedRadians(request),centre=request.centre;
   if(object.support==="hinged"&&(centre[0]!==object.hinge[0]||centre[1]!==object.hinge[1]))return result(false,"hinge","Enter the exact fixed hinge coordinates.");
+  if(object.fixedCentre&&(centre[0]!==object.fixedCentre[0]||centre[1]!==object.fixedCentre[1]))return result(false,"external-centre","Enter the exact marked external centre coordinates.");
   if(!rotationSweepWithinBounds(object.vertices,centre,theta,room.bounds))return result(false,"path-bounds","The rotation arc leaves the room.");
   const crosses=vertices=>rotationSweepOverlaps(object.vertices,vertices,centre,theta);
   for(const s of [...room.terrain,...room.objects.filter(o=>o.id!==id&&!o.decorative)]){

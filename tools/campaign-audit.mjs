@@ -11,6 +11,7 @@ import {HINGE_SOLUTION,SQUEEZE_SOLUTION} from "../src/levels/clockwork-gallery.j
 import {WEDGE_SOLUTION,KEY_SOLUTION} from "../src/levels/clockwork-finale.js";
 import {BRIDGE_BUILDERS_SOLUTION,BROKEN_STAIRCASE_SOLUTION} from "../src/levels/riverworks.js";
 import {DOUBLE_TROUBLE_SOLUTION,DIAGONAL_DOCK_SOLUTION} from "../src/levels/riverworks-mechanisms.js";
+import {WATERMILL_SOLUTION,AROUND_THE_TOWER_SOLUTION} from "../src/levels/riverworks-finale.js";
 import {createPhysicsWorld} from "../src/physics/collision.js";
 import {createPlayer,stepPlayer} from "../src/physics/platformer.js";
 import {commitTranslation} from "../src/transformations/translation.js";
@@ -42,7 +43,9 @@ export const RECORDED_ROUTES=deepFreeze([
  [13,BRIDGE_BUILDERS_SOLUTION,[[455,1,0],[120,1,1],[800,1,0]]],
  [14,BROKEN_STAIRCASE_SOLUTION,[[410,1,0],[60,1,1],[75,0,0],[75,1,1],[55,1,0],[1,0,1],[290,0,0,1],[1,1,1],[350,1,0]]],
  [15,DOUBLE_TROUBLE_SOLUTION,[[100,1,0],[125,1,1],[150,1,0],[125,1,1],[450,1,0]]],
- [16,DIAGONAL_DOCK_SOLUTION,[[125,1,0],[120,1,1],[100,1,0],[125,1,1],[600,1,0]]]
+ [16,DIAGONAL_DOCK_SOLUTION,[[125,1,0],[120,1,1],[100,1,0],[125,1,1],[600,1,0]]],
+ [17,WATERMILL_SOLUTION,[[365,1,0],[120,1,1],[125,1,0],[120,1,1],[400,1,0]]],
+ [18,AROUND_THE_TOWER_SOLUTION,[[250,1,0],[120,1,1],[150,1,0],[120,1,1],[550,1,0]]]
 ].map(([number,casts,route])=>({number,casts,route})));
 export function replayRoute(world,route){
  let player=createPlayer(world),ticks=0;

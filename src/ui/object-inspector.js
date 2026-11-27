@@ -1,6 +1,7 @@
 import {createObjectEngine} from "../core/object-engine.js";
 import {getSpell} from "./identity.js";
 import {screenToWorld} from "../rendering/camera.js";
+import {parsePreviewRequest} from "../transformations/preview-math.js";
 const format=p=>"("+p[0]+", "+p[1]+")";
 const refsText=refs=>refs.map(r=>r.id+" "+format(r.point)).join(" · ");
 export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,actions={}){
@@ -83,7 +84,10 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   on(form,"submit",event=>{event.preventDefault();showPreview(readRaw());});
   on(apply,"click",()=>{
     if(!canApply()||!preview?.ok||preview.scope!=="translation-path")return;
-    const r=actions.apply(selected,readRaw());
+    const raw=readRaw();
+    // An autofill/programmatic edit must not silently apply a different vector than the ghost.
+    if(JSON.stringify(parsePreviewRequest(type,raw))!==JSON.stringify(preview.request)){showPreview(raw);return;}
+    const r=actions.apply(selected,raw);
     if(!r.ok){preview=r;result.textContent=r.message;result.dataset.state="invalid";syncApply();onChange();}
   });
   function replaceRoom(next){engine=createObjectEngine(next);selected=null;type=null;preview=null;populate();updateObject();}

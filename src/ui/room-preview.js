@@ -30,7 +30,7 @@ export function mountRoomPreview(document,view) {
   const input=mountMovementInput(document,view,()=>active&&!animation&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
   const loop=createFixedLoop(view,()=>{
     if(!active||document.hidden)return;
-    if(animation){animation.elapsed+=FIXED_DT;if(animation.elapsed>=animation.duration){animation=null;updateGuide();}return;}
+    if(animation){animation.elapsed+=FIXED_DT;if(animation.elapsed>=animation.duration){animation=null;if(playStatus)playStatus.textContent="Translation applied. Walk towards the brook and jump onto the beam.";updateGuide();}return;}
     if(picking||objectMode)return;
     const next=stepPlayer(physics,player,input.sample());
     player=next;
@@ -80,7 +80,7 @@ export function mountRoomPreview(document,view) {
     if($("object-toggle"))$("object-toggle").disabled=Boolean(animation);
   }
   viewport=mountViewport(canvas,host,view,(ctx,metrics)=>{
-    const target=active&&follow&&!picking&&!objectMode&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
+    const target=active&&follow&&!animation&&!picking&&!objectMode&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
     camera=createCamera(room.bounds,metrics.width,metrics.height,mode,target,zoom);
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
     const frame=animation?translatedFrame(room,animation.transition,animation.elapsed/animation.duration):room;
@@ -175,7 +175,7 @@ export function mountRoomPreview(document,view) {
     room=tx.room;physics=tx.physics;records=[...records,tx.record];hintStage=0;
     objectMode=false;inspector?.setActive(false);inspector?.replaceRoom(room);input.clear();
     if(!reducedMotion())animation={transition:tx.transition,elapsed:0,duration:.65};
-    if(playStatus)playStatus.textContent="Translation applied. Move and jump when the beam is ready.";
+    if(playStatus)playStatus.textContent=animation?"Translation applied. Move and jump when the beam is ready.":"Translation applied. Walk towards the brook and jump onto the beam.";
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return tx;
   }
   function resetPlayer(){

@@ -89,3 +89,13 @@ test("title opens the room, refreshes the renderer and returns to the title", ()
   ui.destroy();
   assert.equal(elements["open-room"].listeners.size,0);
 });
+
+test("title can open the first official tutorial separately from practice",()=>{
+  const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","translation-vector","room-view","title-art","open-room","open-level1","close-room","room-heading","open-spellbook"];
+  const els=Object.fromEntries(ids.map(id=>[id,element()]));
+  const state=createAppState(),changes=[];
+  const ui=mountIdentity({getElementById:id=>els[id],querySelectorAll:()=>[]},state,v=>changes.push(v));
+  els["open-level1"].click();assert.equal(state.view,"level1");assert.equal(els["room-view"].hidden,false);assert.equal(els["title-art"].hidden,true);
+  els["close-room"].click();els["open-room"].click();assert.equal(state.view,"room");
+  assert.deepEqual(changes,["level1","title","room"]);ui.destroy();
+});

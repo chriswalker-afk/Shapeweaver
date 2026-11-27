@@ -31,7 +31,9 @@ export function commitTranslation(room,player,id,raw){
   const before=room.objects.find(o=>o.id===id);
   const moved={...before,vertices:preview.geometry.vertices.map(p=>[...p])};
   if(before.hinge)moved.hinge=[...preview.geometry.hinge];
-  const nextRoom=deepFreeze({...room,objects:room.objects.map(o=>o.id===id?moved:o)});
+  // Level data is plain serializable data. Clone before freezing to avoid freezing a mutable caller\x27s nested objects.
+  const cloneData=value=>Array.isArray(value)?value.map(cloneData):value&&typeof value==="object"?Object.fromEntries(Object.entries(value).map(([k,v])=>[k,cloneData(v)])):value;
+  const nextRoom=deepFreeze(cloneData({...room,objects:room.objects.map(o=>o.id===id?moved:o)}));
   const physics=createPhysicsWorld(nextRoom);
   if(player&&(blocked(physics,player)||inHazard(physics,player)))return {...preview,ok:false,code:"player-unsafe",message:"The apprentice would not be safe after this move."};
   return {ok:true,code:"applied",message:"Translation applied.",room:nextRoom,physics,

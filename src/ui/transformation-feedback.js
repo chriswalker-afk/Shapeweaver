@@ -20,6 +20,7 @@ const ADVICE={
   "player-overlap":"Close Objects and move the apprentice away from the intended image.",
   "path-player":"Close Objects and move the apprentice away from the spell's path.",
   "player-unsafe":"Return to safety or reposition the apprentice before trying again.",
+  "gate-obstructed":"Move clear of the linked gate or reposition the object blocking it before releasing the plate.",
   "path-solid":"Change the parameters so the complete travel path is clear.",
   "path-hazard":"Choose a path that avoids hazards.",
   "attempt-ended":"Use Undo if available or Reset for a fresh attempt.",

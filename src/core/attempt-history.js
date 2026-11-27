@@ -6,7 +6,7 @@ export function createAttemptHistory(){
   return deepFreeze({entries:[],stack:[]});
 }
 export function rememberSafePosition(world,player,last=null){
-  if(!player.completed&&!player.blockedRespawn&&!player.climbing&&isSafePosition(world,player))return Object.freeze({x:player.x,y:player.y});
+  if(!player.completed&&!player.blockedRespawn&&!player.climbing&&player.grounded&&isSafePosition(world,player))return Object.freeze({x:player.x,y:player.y});
   return last&&isSafePosition(world,last)?last:null;
 }
 /** Record only a successful commit. Room snapshots are immutable authored/committed rooms.

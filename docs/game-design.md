@@ -63,3 +63,6 @@ Original concept: richly illustrated 2D storybook fantasy, enchanted stone ruins
 
 ## Release gate
 Four polished tutorial levels form the first classroom-ready milestone. Review game feel and composition before expanding. Each official level must have a verified replay, tested collision and traversal, hints, recoverability, new-element cadence and calibrated scoring. Visual QA in actual browser at multiple viewport sizes; do not equate a successful unit test with an in-game visual review.
+
+## PR11 implementation note
+Undo restores the exact previous immutable room and a safe pre-cast player position (or validated prior safe point). The original committed move remains counted, with an undone marker in attempt history. Return to safety preserves current world and moves. Reset clears the whole attempt. See [mistake recovery](mistake-recovery.md).

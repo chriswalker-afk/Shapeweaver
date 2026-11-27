@@ -211,3 +211,10 @@ h1,h2,h3 { font-family: var(--display); }
 .vector-entry input { width:5rem;text-align:center; }
 #object-apply:disabled { opacity:.45;cursor:default; }
 @media(max-height:520px) and (orientation:landscape){.vector-entry{gap:.1rem;padding:.1rem .35rem}.vector-entry label{grid-template-columns:6rem 4.2rem}.vector-entry input{width:4.2rem}}
+
+/* PR11: grouped recovery actions remain compact, without adding a persistent panel. */
+.recovery-controls { display:flex;align-items:center;flex-wrap:wrap;gap:.25rem; }
+.recovery-controls button { white-space:nowrap; }
+.recovery-controls button:disabled { opacity:.45;cursor:default; }
+#recovery-count { color:#d8c5e4;font-variant-numeric:tabular-nums; }
+@media(max-height:520px) and (orientation:landscape){.recovery-controls{gap:.15rem}.recovery-controls button{padding:.2rem .35rem}}

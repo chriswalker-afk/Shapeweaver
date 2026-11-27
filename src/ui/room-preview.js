@@ -7,7 +7,9 @@ import { previewReflection, commitReflection, reflectedFrame } from "../transfor
 import { previewEnlargement, commitEnlargement, enlargedFrame } from "../transformations/enlargement.js";
 import { previewRotation, commitRotation, rotatedFrame } from "../transformations/rotation.js";
 import { previewTranslation, commitTranslation, translatedFrame } from "../transformations/translation.js";
-import { FIXED_DT } from "../physics/platformer.js";
+import { FIXED_DT, MOTION } from "../physics/platformer.js";
+import {returnToSafety} from "../physics/recovery.js";
+import {createAttemptHistory,rememberSafePosition,recordCast,undoLastCast,attemptSummary} from "../core/attempt-history.js";
 import { createCamera, panCamera, zoomCamera, MAX_ZOOM, ZOOM_STEP } from "../rendering/camera.js";
 import { loadWorldArt, renderWorld } from "../rendering/world-art.js";
 import { mountViewport } from "../rendering/viewport.js";
@@ -49,10 +51,13 @@ export function mountRoomPreview(document,view) {
   if(!canvas||!host||!status)return null;
   let initialRoom=validateRoom(GATEHOUSE_PREVIEW),room=initialRoom;
   const $=id=>document.getElementById(id);
-  let physics=createPhysicsWorld(room),animation=null,records=[],hintStage=0;
+  let physics=createPhysicsWorld(room),animation=null,history=createAttemptHistory(),hintStage=0;
   let player=createPlayer(physics),active=false,lastEvent=null,objectMode=false,inspector=null;
+  let lastSafe=rememberSafePosition(physics,player);
   const playStatus=$("play-status"),followButton=$("follow-toggle"),movementPanel=$("movement-controls");
   const guide=$("tutorial-guide"),hintButton=$("tutorial-hint"),moves=$("tutorial-moves"),tutorialTools=$("tutorial-tools");
+  const undoButton=$("undo-cast"),returnButton=$("return-safety"),recoveryCount=$("recovery-count");
+  const canUndo=()=>active&&!animation&&!player.completed&&history.stack.length>0;
   const spellType=()=>tutorialType(room);
   const tutorial=()=>TUTORIALS[spellType()];
   const actionLabel=()=>tutorial()?.label??"Transformation";
@@ -65,13 +70,13 @@ export function mountRoomPreview(document,view) {
     if(animation){animation.elapsed+=FIXED_DT;if(animation.elapsed>=animation.duration){animation=null;if(playStatus)playStatus.textContent=readyMessage();updateGuide();}return;}
     if(picking||objectMode)return;
     const next=stepPlayer(physics,player,input.sample());
-    player=next;
+    player=next;lastSafe=rememberSafePosition(physics,player,lastSafe);
     if(next.event&&next.event!==lastEvent){
       if(next.event==="respawn"||next.event==="exit"||next.event==="reset-required")input.clear();
-      if(playStatus)playStatus.textContent=next.event==="respawn"?"Returned to a safe checkpoint.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?(room.tutorial?"Level "+room.number+" complete! "+tutorial().finished+" Reset to try again.":"Gatehouse practice complete! Reset to play again."):"No safe respawn. Reset the room.";
+      if(playStatus)playStatus.textContent=next.event==="respawn"?(player.checkpoint?"Returned to the last safe checkpoint.":"Returned to the start.")+" Your transformations are kept.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?(room.tutorial?"Level "+room.number+" complete! "+tutorial().finished+" Reset to try again.":"Gatehouse practice complete! Reset to play again."):"No safe return point. "+(canUndo()?"Undo a transformation or reset.":"Reset to start a fresh attempt.");
     }
     lastEvent=next.event;
-    if(next.event==="exit")updateGuide();
+    if(["exit","respawn","reset-required"].includes(next.event))updateGuide();
   },()=>viewport?.resize());
   const controls=Object.fromEntries(["overview","inspect","left","right","up","down","zoom-in","zoom-out"].map(id=>[id,$("camera-"+id)]));
   const gridButton=$("grid-toggle"),axesButton=$("axes-toggle"),pickButton=$("pick-toggle"),panel=$("coordinate-panel");
@@ -95,6 +100,7 @@ export function mountRoomPreview(document,view) {
     if(pickButton)pickButton.textContent=picking?"Picking point":"Pick point";
     if(panel)panel.hidden=!picking;
     if(canvas.style)canvas.style.cursor=picking||objectMode?"crosshair":"default";
+    updateRecoveryControls();
     if(!camera)return;
     const b=room.bounds,e=.0001;
     for(const [id,allowed] of Object.entries({left:camera.left>b.minX+e,right:camera.right<b.maxX-e,up:camera.top<b.maxY-e,down:camera.bottom>b.minY+e})){
@@ -107,7 +113,7 @@ export function mountRoomPreview(document,view) {
     const label=(mode==="overview"?"Full room":"Inspect · "+zoomLabel+"× fit")+gridStatus+" · "+(animation?"Casting "+actionLabel().toLowerCase():picking||objectMode?"Movement paused":room.tutorial?"Level "+room.number:"Practice room");
     if(status.textContent!==label)status.textContent=label;
     followButton?.setAttribute("aria-pressed",String(follow));
-    if(movementPanel)movementPanel.hidden=picking||objectMode||Boolean(animation);
+    if(movementPanel)movementPanel.hidden=picking||objectMode||Boolean(animation)||player.blockedRespawn;
     if(pickButton)pickButton.disabled=Boolean(animation);
     if($("object-toggle"))$("object-toggle").disabled=Boolean(animation);
   }
@@ -187,6 +193,22 @@ export function mountRoomPreview(document,view) {
   function setActive(value){
     active=Boolean(value);input.clear();
     if(active){viewport?.resize();loop.start();}else{loop.stop();animation=null;objectMode=false;inspector?.setActive(false);}
+    updateRecoveryControls();
+  }
+  function updateRecoveryControls(){
+    if(undoButton){
+      undoButton.disabled=!canUndo();
+      const text=history.stack.length?"Undo ("+history.stack.length+")":"Undo";
+      if(undoButton.textContent!==text)undoButton.textContent=text;
+      undoButton.setAttribute("aria-label","Undo last applied transformation; "+history.stack.length+" available. Committed moves still count.");
+    }
+    if(returnButton)returnButton.disabled=!active||Boolean(animation)||player.completed||player.blockedRespawn;
+    if(recoveryCount){
+      const stats=attemptSummary(history,player);
+      const text=stats.undos||stats.respawns?"Undos: "+stats.undos+" · Returns: "+stats.respawns:"";
+      if(recoveryCount.textContent!==text)recoveryCount.textContent=text;
+      recoveryCount.hidden=!text;
+    }
   }
   function updateGuide(){
     const config=tutorial();
@@ -194,29 +216,51 @@ export function mountRoomPreview(document,view) {
     if(guide){
       guide.hidden=!config;
       if(config){
-        guide.textContent=player.completed?"Well done! You reached the portal using "+records.length+" "+config.label.toLowerCase()+(records.length===1?"":"s")+".":animation?config.casting:hintStage?config.hint(room,hintStage):records.length?config.after:config.objective;
+        guide.textContent=player.blockedRespawn?"You need to recover before moving. "+(canUndo()?"Use Undo to restore an earlier safe state, or Reset.":"Use Reset to start again.") : player.completed?"Well done! You reached the portal using "+history.entries.length+" "+config.label.toLowerCase()+(history.entries.length===1?"":"s")+".":animation?config.casting:hintStage?config.hint(room,hintStage):history.stack.length?config.after:config.objective;
       }
     }
-    if(moves)moves.textContent="Moves: "+records.length;
-    if(hintButton){hintButton.textContent=hintStage===3?"Hide hint":hintStage?"Next hint":"Hint";hintButton.disabled=Boolean(animation)||player.completed;}
+    if(moves)moves.textContent="Moves: "+history.entries.length;
+    if(hintButton){hintButton.textContent=hintStage===3?"Hide hint":hintStage?"Next hint":"Hint";hintButton.disabled=Boolean(animation)||player.completed||player.blockedRespawn;}
+    updateRecoveryControls();
   }
   function applySpell(type,id,raw){
     if(type!==spellType()||!room.tutorial||!objectMode||animation)return {ok:false,code:"unavailable",message:"That spell is not available now."};
     const tx=TUTORIALS[type].commit(room,player,id,raw);
     if(!tx.ok)return tx;
     // Commit geometry + collision index together; animation is presentation only.
-    room=tx.room;physics=tx.physics;records=[...records,tx.record];hintStage=0;
+    history=recordCast(history,physics,player,lastSafe,tx.record);
+    room=tx.room;physics=tx.physics;lastSafe=rememberSafePosition(physics,player,lastSafe);hintStage=0;
     objectMode=false;inspector?.setActive(false);inspector?.replaceRoom(room);input.clear();
     if(!reducedMotion())animation={type,transition:tx.transition,elapsed:0,duration:TUTORIALS[type].duration};
     if(playStatus)playStatus.textContent=animation?actionLabel()+" applied. Wait for the object to settle.":readyMessage();
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return tx;
   }
-  function resetPlayer(){
-    room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);
-    animation=null;records=[];hintStage=0;lastEvent=null;input.clear();follow=true;objectMode=false;picking=false;point=null;
+  function clearRecoveryInteraction(){
+    animation=null;hintStage=0;lastEvent=null;input.clear();follow=true;objectMode=false;picking=false;point=null;
     inspector?.setActive(false);inspector?.replaceRoom(room);
     if(xInput)xInput.value="";if(yInput)yInput.value="";
     if(message)message.textContent="No point selected";
+  }
+  function undoCast(){
+    if(!canUndo())return false;
+    const tx=undoLastCast(history,player);
+    if(!tx.ok){if(playStatus)playStatus.textContent=tx.message;return false;}
+    history=tx.history;room=tx.room;physics=tx.physics;player=tx.player;
+    lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
+    if(playStatus)playStatus.textContent="Last transformation undone. Restored a safe earlier position. The original move still counts.";
+    updateGuide();redraw();canvas.focus?.({preventScroll:true});return true;
+  }
+  function recoverPlayer(){
+    if(!active||animation||player.completed||player.blockedRespawn)return false;
+    const tx=returnToSafety(physics,player,MOTION.coyote);
+    if(!tx.ok){if(playStatus)playStatus.textContent="No safe checkpoint or start in the current world. "+(canUndo()?"Try Undo or Reset.":"Try Reset.");return false;}
+    player={...tx.player,event:null};lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
+    if(playStatus)playStatus.textContent=(tx.code==="checkpoint"?"Returned to the last safe checkpoint.":"Returned to the start.")+" Your transformations and moves are kept.";
+    updateGuide();redraw();canvas.focus?.({preventScroll:true});return true;
+  }
+  function resetPlayer(){
+    room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);history=createAttemptHistory();
+    lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
     if(playStatus)playStatus.textContent=room.tutorial?"Arrows / WASD · Space to jump":"Practice restarted.";
     updateGuide();redraw();
   }
@@ -228,13 +272,14 @@ export function mountRoomPreview(document,view) {
     if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter I · Level "+initialRoom.number+" · "+TUTORIALS[tutorialType(initialRoom)].label:"Chapter I · Interactive object practice";
     resetPlayer();
   }
-  on(hintButton,"click",()=>{hintStage=(hintStage+1)%4;updateGuide();});
+  on(hintButton,"click",()=>{if(!animation&&!player.completed&&!player.blockedRespawn){hintStage=(hintStage+1)%4;updateGuide();}});
+  on(undoButton,"click",undoCast);on(returnButton,"click",recoverPlayer);
   on(followButton,"click",()=>{follow=!follow;redraw();});
   on($("reset-practice"),"click",()=>{resetPlayer();canvas.focus?.({preventScroll:true});});
   // Click the stage to return keyboard focus to gameplay after inspecting controls.
   on(host,"click",()=>{if(!picking&&!objectMode)canvas.focus?.({preventScroll:true});});
   updateControls();updateGuide();
-  return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,getRecords:()=>records.slice(),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
+  return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
     getCamera:()=>camera,getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),
     refresh:()=>viewport?.resize(),
     destroy(){loop.stop();input.destroy();inspector?.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};

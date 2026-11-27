@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR10 — Reflection and Level 4: The Missing Barrel. All four core spells are playable in their respective Gatehouse tutorials. Reflection transfers objects magically across barriers with a safe reflected destination. The practice room remains preview-only. Next: PR11 mistake recovery.
+PR11 — Mistake recovery. All four tutorials support undo, safe return, reset, actionable validation feedback and retained move history. Practice remains preview-only with safe return/reset. Next: PR12 stars and results.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR10 — Reflection and Level 4: The Missing Barrel. All four core spells are pl
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Mistake recovery](docs/mistake-recovery.md) — safe snapshots, recovery controls and attempt accounting.
 - [Reflection tutorial](docs/reflection-tutorial.md) — mirror equations, stable vertices, magical transfer and verified traversal.
 - [Enlargement tutorial](docs/enlargement-tutorial.md) — positive homothety sweep, scale animation and verified ramp traversal.
 - [Rotation tutorial](docs/rotation-tutorial.md) — signed arc validation, shared commit boundary and verified Level 2 replay.

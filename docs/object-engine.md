@@ -25,3 +25,6 @@ Actual translation is available in Level 1 through a separate full-path validato
 
 ## PR08 update
 Actual rotation is available in Level 2, with complete signed-arc validation and the shared atomic spell transaction. Translation remains playable in Level 1. Practice continues to offer preview-only inspection for all four transformations. See [rotation tutorial](rotation-tutorial.md).
+
+## PR09 update
+Actual positive enlargement is available in Level 3, with a full homothetic swept-volume check and the shared atomic transaction. Fractions and positive decimals are supported within each object's per-cast range. Reflection remains preview-only. See [enlargement tutorial](enlargement-tutorial.md).

@@ -54,6 +54,14 @@ export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview){
       refs.forEach((r,i)=>{const d=Math.hypot(r.point[0]-request.centre[0],r.point[1]-request.centre[1]);if(d>max){max=d;index=i;}});
       const from=screen(camera,refs[index].point),to=screen(camera,geometry.points[index].point);
       ctx.strokeStyle=c;line(ctx,p,from);line(ctx,p,to);
+      if(request.type==="enlarge"){
+        // All original vertices and their images lie on rays through the centre.
+        for(let i=0;i<o.vertices.length;i++){
+          const a=screen(camera,refs[i].point),b=screen(camera,geometry.points[i].point);
+          line(ctx,p,request.factor>=1?b:a);
+        }
+        label(ctx,"Scale factor "+request.factor,Math.max(8,Math.min(camera.width-115,to.x+8)),Math.max(12,Math.min(camera.height-12,to.y-22)),c);
+      }
       if(request.type==="rotate"&&max>0){
         const radius=Math.min(max*camera.scale*.62,120),start=Math.atan2(from.y-p.y,from.x-p.x),delta=-signedRadians(request),end=start+delta;
         ctx.beginPath();ctx.arc(p.x,p.y,radius,start,end,delta<0);ctx.stroke();

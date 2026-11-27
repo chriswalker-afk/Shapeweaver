@@ -44,7 +44,7 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
     return true;
   }
   function show(view) {
-    const isRoom = view === "room" || view === "level1" || view === "level2";
+    const isRoom = ["room","level1","level2","level3"].includes(view);
     if (view !== "title" && view !== "spellbook" && !(isRoom && room)) return false;
     state.view = view;
     title.hidden = view !== "title";
@@ -61,6 +61,7 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
   on(document.getElementById("open-room"), () => show("room"));
   on(document.getElementById("open-level1"), () => show("level1"));
   on(document.getElementById("open-level2"), () => show("level2"));
+  on(document.getElementById("open-level3"), () => show("level3"));
   on(document.getElementById("close-room"), () => show("title"));
   select(state.selectedSpell);
   return { select, show, destroy() { for (const [element, fn] of listeners) element.removeEventListener("click", fn); } };

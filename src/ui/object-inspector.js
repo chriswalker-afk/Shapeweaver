@@ -19,14 +19,14 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   function populate(){select.replaceChildren(option("","Choose an object…"),...engine.objects().map(o=>option(o.id,o.label??o.id)));}
   populate();
   function canApply(){return Boolean(active&&type&&actions.canApply?.(type));}
-  function pathScope(){return type==="rotate"?"rotation-path":"translation-path";}
+  function pathScope(){return {translate:"translation-path",rotate:"rotation-path",enlarge:"enlargement-path"}[type];}
   function syncApply(){
-    if(apply){apply.hidden=!canApply();apply.disabled=!canApply()||!preview?.ok||preview.scope!==pathScope();apply.textContent=type==="rotate"?"Apply rotation":"Apply translation";}
+    if(apply){apply.hidden=!canApply();apply.disabled=!canApply()||!preview?.ok||preview.scope!==pathScope();apply.textContent=type?"Apply "+getSpell(type).label.toLowerCase():"Apply";}
     if(note)note.textContent=canApply()?"Preview, then apply when clear.":"Preview only for this spell/room.";
   }
   function makeField(id,label,placeholder="",parent=fields){
     const wrap=document.createElement("label"),input=document.createElement("input");
-    wrap.textContent=label+" ";input.name=id;input.type="text";input.inputMode=id==="line"?"text":"decimal";input.autocomplete="off";input.placeholder=placeholder;input.setAttribute("aria-label",label);wrap.append(input);parent.append(wrap);
+    wrap.textContent=label+" ";input.name=id;input.type="text";input.inputMode=id==="line"||id==="factor"?"text":"decimal";input.autocomplete="off";input.placeholder=placeholder;input.setAttribute("aria-label",label);wrap.append(input);parent.append(wrap);
     return input;
   }
   function choice(id,label,items){
@@ -52,7 +52,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
     spell.replaceChildren(option("","Choose a transformation…"),...(object?.permissions??[]).map(t=>option(t,getSpell(t).label)));
     spell.disabled=!object;spell.value=type??"";
     refs.textContent=object?refsText(engine.references(object.id)):"Select a highlighted object in the room or from the list.";
-    permissions.textContent=object?"Allowed: "+object.permissions.map(t=>getSpell(t).label).join(", ")+(object.hinge?" · Fixed hinge H "+format(object.hinge):"")+(object.scaleRange?" · Scale "+object.scaleRange.join("–"):""):"";
+    permissions.textContent=object?"Allowed: "+object.permissions.map(t=>getSpell(t).label).join(", ")+(object.hinge?" · Fixed hinge H "+format(object.hinge):"")+(object.scaleRange?" · Scale factor per cast: "+object.scaleRange.join("–"):""):"";
     buildFields();result.textContent=object?"Choose a transformation and enter its parameters.":"No object selected.";
   }
   function selectObject(id){
@@ -86,7 +86,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   on(apply,"click",()=>{
     if(!canApply()||!preview?.ok||preview.scope!==pathScope())return;
     const raw=readRaw();
-    // An autofill/programmatic edit must not silently apply a different vector than the ghost.
+    // An autofill/programmatic edit must not silently apply different parameters than the ghost.
     if(JSON.stringify(parsePreviewRequest(type,raw))!==JSON.stringify(preview.request)){showPreview(raw);return;}
     const r=actions.apply(type,selected,raw);
     if(!r.ok){preview=r;result.textContent=r.message;result.dataset.state="invalid";syncApply();onChange();}

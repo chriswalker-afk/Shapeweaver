@@ -13,3 +13,6 @@ Choose Level 2 directly from the title (Level 1 and practice remain separately a
 Recorded solution: from spawn (2,3), apply 90 degrees anticlockwise about (14,8), then hold right for 550 simulation ticks or until exit. Direct replay reaches the portal grounded with no respawns. An attempted walk and repeated jumps against the closed gate stop at its collision boundary. Tests cover intermediate-only arc collisions, thin obstacles, legal contact, signed long arcs, external centres, bounds extrema, player/hazard protection, exact geometry, inverse casts, reduced-motion and normal animation UI, reset and actual traversal. The prior translation tests must still pass. Actual browser appearance and touch ergonomics require separate review.
 
 Next PR09: enlargement and Level 3, A Little Cheesy.
+
+## PR09 update
+Spell dispatch and tutorial messages now use a shared configuration in the room controller; Level 2 and its replay remain regression-tested alongside Level 3.

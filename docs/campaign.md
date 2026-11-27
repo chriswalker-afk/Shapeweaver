@@ -83,3 +83,6 @@ Across the Brook now has data in `src/levels/across-the-brook.js`, with a record
 
 ## Level 2 implementation (PR08)
 The Stubborn Gate now has a playable room in `src/levels/stubborn-gate.js`. Its overhead hinge is at (14,8); a 90-degree anticlockwise rotation opens the passage. The opposite direction and longer equivalent-final-pose turns are unsafe. The recorded route walks through the physically open passage. See [rotation tutorial](rotation-tutorial.md).
+
+## Level 3 implementation (PR09)
+A Little Cheesy is implemented in `src/levels/little-cheesy.js`. The initial wedge is 6 units wide and 3 units high; the ledge is 9 units above the floor. A factor of 3 about (25,3) produces a walkable ramp. Smaller valid enlargements and fractional corrective casts are accepted. See [enlargement tutorial](enlargement-tutorial.md).

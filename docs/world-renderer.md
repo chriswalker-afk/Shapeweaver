@@ -1,10 +1,10 @@
 # PR03 — World renderer
 
-The title's Explore the Gatehouse button opens the first real world-space room. This is a static renderer test fixture, not a released campaign level or verified puzzle. The character cannot walk or jump yet, and props cannot transform. PR04 will add grid/axes and coordinate interaction; PR05 adds actual movement/collision; PR06 adds interactive objects.
+The title's Explore the Gatehouse button opens the first real world-space room. This is a static renderer test fixture, not a released campaign level or verified puzzle. The character cannot walk or jump yet, and props cannot transform. PR04 adds grid/axes and coordinate interaction; see [coordinate system](coordinate-system.md). PR05 adds actual movement/collision; PR06 adds interactive objects.
 
 ## World and camera
 - Room bounds [0,32] by [0,14], mathematical y increases upward; fixture vertices are authoritative geometric data. CCW polygons for terrain, hazards and props. Static spawn is feet at (2.5,3), portal is bottom centre (30,6). Asset foot baseline at 157/168 of image height. All rendering uses CSS pixel coordinates, then viewport sets device-pixel scaling.
-- Overview fits both room dimensions at uniform scale (letterbox with scenery where appropriate); Inspect zooms into the room, with directional pan controls and clamping. No independent x/y stretching. Both worldToScreen and screenToWorld are pure and inverse. Camera pan/resize changes only presentation; never mutate level data. PR04 can reuse this camera for grid and zoom.
+- Overview fits both room dimensions at uniform scale (letterbox with scenery where appropriate); Inspect zooms into the room, with directional pan controls and clamping. No independent x/y stretching. Both worldToScreen and screenToWorld are pure and inverse. Camera pan/resize changes only presentation; never mutate level data. PR04 extends this camera with fit-relative zoom and reuses both conversions for its grid and picking.
 - Layer order: sky/distant mountains, transparent arcade/trees with independent parallax, hazards, terrain, props, decoration, portal, apprentice, gentle vignette. Tile phase is anchored to geometry. Terrain fills clipped to polygon; grass trim and glow are decorative. Image failure falls back to simple shapes and colours.
 - Original vector assets are local, reusable and documented. Title artwork is not reused as level geometry. Layered style is an initial vector baseline, not final hand-painted textures.
 

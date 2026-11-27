@@ -412,7 +412,7 @@ test("ladder orientation controls climbing availability and reset/undo rebuilds 
  c.resetPlayer();assert.equal(els["climb-controls"].hidden,true);assert.equal(c.getAttemptSummary().moves,0);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });
-test("horizontal mirror and enlargement complete chapter II, with no nonexistent next level",()=>{
+test("horizontal mirror and enlargement complete chapter II and continue into the Clockwork Gallery",()=>{
  const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
  app.identity.show("level8");assert.equal(c.room.id,"gardens-08");
  assert.equal(cast(f,"mirror-platform","reflect",{line:"y=3"}).ok,true);
@@ -424,7 +424,42 @@ test("horizontal mirror and enlargement complete chapter II, with no nonexistent
  assert.equal(app.state.view,"results");assert.equal(c.getResult().moves,2);assert.equal(c.getResult().stars,3);
  assert.equal(c.getResult().returns,0);
  assert.deepEqual(c.getResult().entries.map(e=>e.type),["reflect","enlarge"]);
+ assert.equal(els["results-next"].hidden,false);assert.equal(els["results-next"].disabled,false);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level9");assert.equal(c.room.id,"clockwork-09");assert.equal(c.getAttemptSummary().moves,0);
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+
+test("mobile hinge updates on translation; early rotation is free and undo removes docking",()=>{
+ const f=fixture(true,true),{controller:c,els,app}=f;
+ app.identity.show("level9");assert.match(els["room-chapter"].textContent,/Chapter III.*Translation \+ Rotation/);
+ const rotate={angle:90,direction:"clockwise",cx:17,cy:3};
+ assert.equal(cast(f,"socket-beam","rotate",{...rotate,cx:6}).code,"not-docked");
+ assert.equal(c.getAttemptSummary().moves,0);
+ assert.equal(cast(f,"socket-beam","translate",{dx:11,dy:0}).ok,true);
+ assert.deepEqual(c.room.objects[0].hinge,[17,3]);
+ c.setObjectMode(true);c.inspector.selectObject("socket-beam");
+ assert.match(els["object-permissions"].textContent,/Mobile hinge H \(17, 3\) \(docked\)/);
+ assert.equal(cast(f,"socket-beam","rotate",rotate).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");assert.equal(c.getAttemptSummary().moves,2);
+ assert.equal(c.undoCast(),true);assert.deepEqual(c.room.objects[0].hinge,[17,3]);
+ assert.equal(c.undoCast(),true);assert.deepEqual(c.room.objects[0].hinge,[6,3]);
+ assert.equal(cast(f,"socket-beam","rotate",{...rotate,cx:6}).code,"not-docked");
+ assert.equal(c.getAttemptSummary().moves,2);assert.equal(c.getAttemptSummary().undos,2);
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+test("clockwork clearance puzzle completes with two casts on one object and no phantom next level",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level10");assert.equal(c.room.id,"clockwork-10");
+ const blocked=cast(f,"clearance-plank","translate",{dx:17,dy:0});
+ assert.equal(blocked.ok,false);assert.equal(c.getAttemptSummary().moves,0);
+ assert.equal(cast(f,"clearance-plank","rotate",{angle:90,direction:"clockwise",cx:6,cy:3}).ok,true);
+ assert.equal(cast(f,"clearance-plank","translate",{dx:17,dy:0}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ frame(2);view.fire("keydown",{code:"ArrowRight"});frame(172);
+ view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(300);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,2);assert.equal(c.getResult().returns,0);
+ assert.deepEqual(c.getRecords().map(e=>e.objectId),["clearance-plank","clearance-plank"]);
+ assert.deepEqual(c.getResult().entries.map(e=>e.type),["rotate","translate"]);
  assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
- els["results-title"].fire("click");assert.equal(app.state.view,"title");
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });

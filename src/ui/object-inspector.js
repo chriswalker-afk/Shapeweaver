@@ -93,7 +93,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
     const r=actions.apply(type,selected,raw);
     if(!r.ok){preview=r;result.textContent=transformationFeedback(r,type);result.dataset.state="invalid";syncApply();onChange();}
   });
-  function replaceRoom(next){engine=createObjectEngine(next);selected=null;type=null;preview=null;populate();updateObject();}
+  function replaceRoom(next){engine=createObjectEngine(next);room=next;selected=null;type=null;preview=null;populate();updateObject();}
   on(fields,"input",()=>{if(preview)clearPreview();});on(fields,"change",()=>{if(preview)clearPreview();});
   on($("object-clear"),"click",clearPreview);
   updateObject();setActive(false);

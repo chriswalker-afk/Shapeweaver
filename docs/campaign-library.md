@@ -7,3 +7,5 @@ The Node suite covers chapter metadata, combined filters, saved progress and lib
 PR16 releases Levels 5–6 in Chapter II. The library lists both permitted spells, filters against either spell, and shows partial chapter availability. The campaign now has six released puzzles and 18 possible stars.
 
 PR17 completes Chapter II with Levels 7–8, bringing the library to eight released puzzles and 24 possible stars. Chapter II is fully available; Chapter III remains planned.
+
+PR18 releases the first two Clockwork Gallery puzzles. Ten released levels, 30 available stars and a Chapter III filter. Levels 9–10 both combine two spells on the same object; chapter III remains partially available.

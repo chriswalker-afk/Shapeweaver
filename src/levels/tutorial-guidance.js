@@ -141,7 +141,7 @@ export function contextualGuide(room,player,inspection,{casting=false,picking=fa
   if(casting)return {step:"Cast",text:"The transformation is being applied. Movement resumes when the animation finishes."};
   if(picking)return {step:"Read coordinates",text:"Use the grid to inspect coordinates. Close Pick point before selecting an object or moving."};
   if(inspection?.active){
-    if(situation.ready)return {step:"Traverse",text:"The route appears ready. Close Objects, then "+c.traverse.charAt(0).toLowerCase()+c.traverse.slice(1)};
+    if(situation.ready)return {step:"Traverse",text:(room.chapter===1?"The object is in a useful position. Close Objects, then ":"The route appears ready. Close Objects, then ")+c.traverse.charAt(0).toLowerCase()+c.traverse.slice(1)};
     if(!inspection.selected)return {step:"Select object",text:"Select an outlined object on the map or choose one from the list. The apprentice does not need to stand beside it."};
     if(!inspection.type)return {step:"Choose transformation",text:"Read the selected object's allowed transformations and choose one."};
     if(inspection.preview?.ok)return {step:"Apply or revise",text:"Compare the ghost image with the obstacle. If it helps, select Apply. A clear preview is not necessarily a useful solution."};

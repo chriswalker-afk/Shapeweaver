@@ -512,7 +512,7 @@ test("bridge construction allows two translations, rejects obstructed order and 
  els["results-next"].fire("click");assert.equal(app.state.view,"level14");assert.equal(c.room.id,"riverworks-14");
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });
-test("staircase retains support, undo rebuilds climb geometry and three-cast route completes",()=>{
+test("staircase retains support, undo rebuilds climb geometry and three casts prepare the route",()=>{
  const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
  app.identity.show("level14");assert.equal(els["climb-controls"].hidden,true);
  assert.equal(cast(f,"upper-step","translate",{dx:26,dy:0}).ok,false);

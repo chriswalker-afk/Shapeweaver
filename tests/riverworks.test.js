@@ -30,7 +30,7 @@ test("both bearing regions require actual support, not just centre contact or a 
 test("far span clears the near span's path; unsupported cantilevers are rejected",()=>{
  const r=BRIDGE_BUILDERS,p=createPlayer(createPhysicsWorld(r));
  validateRoom(r);assert.ok(validateDraft(r));
- assert.equal(previewTranslation(r,p,"west-span",BRIDGE_BUILDERS_SOLUTION[1]).code,"path-solid");
+ assert.equal(previewTranslation(r,p,"west-span",BRIDGE_BUILDERS_SOLUTION[1]).code,"solid-overlap");
  const invalid=previewTranslation(r,p,"east-span",{dx:7,dy:0});
  assert.equal(invalid.code,"bearing-unsupported");
  const t=cast(r,BRIDGE_BUILDERS_SOLUTION[0]);const s=cast(t.room,BRIDGE_BUILDERS_SOLUTION[1]);

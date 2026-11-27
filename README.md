@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR07 — Translation and Level 1: Across the Brook. Play the first tutorial using a signed column vector, preview the complete travel path, apply a legal translation and traverse the resulting bridge. The separate practice room still supports preview-only inspection. Next: PR08 rotation and Level 2.
+PR08 — Rotation and Level 2: The Stubborn Gate. Play the first two tutorials with explicit mathematical parameters, full-path previews and actual transformations. The separate practice room remains preview-only. Next: PR09 enlargement and Level 3.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR07 — Translation and Level 1: Across the Brook. Play the first tutorial usin
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Rotation tutorial](docs/rotation-tutorial.md) — signed arc validation, shared commit boundary and verified Level 2 replay.
 - [Translation tutorial](docs/translation-tutorial.md) — sweep, apply transaction, animation and verified Level 1 replay.
 - [Interactive object engine](docs/object-engine.md) — permissions, selection, reference geometry, previews and final-pose validation.
 - [Platformer engine](docs/platformer-engine.md) — movement, collision, ladder, checkpoint and replay contract.

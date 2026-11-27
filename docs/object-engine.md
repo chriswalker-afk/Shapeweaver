@@ -22,3 +22,6 @@ Tests cover selection, permissions, geometry/vertex correspondence, exact quarte
 
 ## PR07 update
 Actual translation is available in Level 1 through a separate full-path validator and atomic transaction; the original preview-only practice room is retained. See [translation tutorial](translation-tutorial.md). Other spells still preview only.
+
+## PR08 update
+Actual rotation is available in Level 2, with complete signed-arc validation and the shared atomic spell transaction. Translation remains playable in Level 1. Practice continues to offer preview-only inspection for all four transformations. See [rotation tutorial](rotation-tutorial.md).

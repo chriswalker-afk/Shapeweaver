@@ -52,3 +52,40 @@ test("first tutorial selection, actual Apply, animation locks, reset, and separa
   assert.equal(els["object-apply"].hidden,true);c.destroy();
  }
 });
+
+test("second tutorial validates angle, direction and exact centre; applies, animates and traverses",()=>{
+ for(const reduce of [false,true]){
+  const {els,view,controller:c,frame}=fixture(reduce),click=id=>els[id].fire("click");
+  c.setLevel("level2");c.setActive(true);assert.equal(c.room.id,"gatehouse-02");
+  assert.match(els["room-chapter"].textContent,/Level 2.*Rotation/);
+  assert.match(els["tutorial-guide"].textContent,/open the gate/);
+  click("tutorial-hint");click("tutorial-hint");assert.match(els["tutorial-guide"].textContent,/14, 8/);
+  click("object-toggle");const p=worldToScreen(c.getCamera(),{x:14.25,y:5});
+  els["room-canvas"].fire("click",{clientX:p.x,clientY:p.y});
+  assert.equal(c.inspector.getState().selected,"stubborn-gate");assert.equal(c.inspector.selectType("translate"),false);
+  els["object-spell"].value="rotate";els["object-spell"].fire("change");
+  const fields=Object.fromEntries(els["object-fields"].querySelectorAll().map(x=>[x.name,x]));
+  fields.angle.value="90";fields.direction.value="anticlockwise";fields.cx.value="14";fields.cy.value="7";
+  els["object-form"].fire("submit");assert.equal(c.inspector.getState().preview.code,"hinge");assert.equal(els["object-apply"].disabled,true);
+  fields.cy.value="8";fields.direction.value="clockwise";els["object-form"].fire("submit");
+  assert.equal(c.inspector.getState().preview.code,"path-solid");assert.equal(els["object-apply"].disabled,true);
+  click("object-apply");assert.equal(c.getRecords().length,0);
+  fields.direction.value="anticlockwise";els["object-form"].fire("submit");assert.equal(els["object-apply"].disabled,false);
+  assert.equal(els["object-apply"].textContent,"Apply rotation");
+  fields.angle.value="270";click("object-apply");assert.equal(c.getRecords().length,0);assert.equal(els["object-apply"].disabled,true);
+  fields.angle.value="90";els["object-form"].fire("submit");click("object-apply");
+  assert.equal(c.getRecords().length,1);assert.deepEqual(c.getRecords()[0],{objectId:"stubborn-gate",type:"rotate",angle:90,direction:"anticlockwise",centre:[14,8]});
+  assert.deepEqual(c.room.objects[0].vertices[0],[19,8]);assert.equal(els["object-panel"].hidden,true);
+  assert.equal(els["object-toggle"].disabled,!reduce);
+  if(!reduce){assert.equal(c.setObjectMode(true),false);assert.equal(c.setPicking(true),false);}
+  frame(50);assert.equal(els["object-toggle"].disabled,false);assert.equal(c.getPlayer().x,2);
+  view.fire("keydown",{code:"ArrowRight"});frame(300);view.fire("keyup",{code:"ArrowRight"});
+  assert.equal(c.getPlayer().completed,true);assert.equal(c.getPlayer().respawns,0);
+  assert.match(els["tutorial-guide"].textContent,/using 1 rotation/);
+  click("reset-practice");assert.deepEqual(c.room.objects[0].vertices[0],[14,3]);assert.equal(c.getRecords().length,0);assert.equal(c.getPlayer().completed,false);
+  c.setLevel("level1");assert.equal(c.room.id,"gatehouse-01");assert.match(els["room-chapter"].textContent,/Level 1.*Translation/);
+  c.setLevel("room");assert.equal(els["tutorial-tools"].hidden,true);click("object-toggle");c.inspector.selectObject("gate");c.inspector.selectType("rotate");
+  c.inspector.showPreview({angle:90,direction:"anticlockwise",cx:31.2,cy:6});assert.equal(els["object-apply"].hidden,true);
+  c.destroy();
+ }
+});

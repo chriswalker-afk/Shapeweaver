@@ -50,7 +50,7 @@ test("validate parameters, no-op, bounds, support, collision and player protecti
  assert.equal(previewEnlargement(room,player,id,{...CHEESY_SOLUTION,cx:0}).code,"bounds");
  assert.equal(previewEnlargement(room,player,id,{...CHEESY_SOLUTION,cx:24}).code,"solid-overlap");
  assert.equal(previewEnlargement(room,player,id,{...CHEESY_SOLUTION,cy:2}).code,"unsupported");
- assert.equal(previewEnlargement(room,{x:24.5,y:6},id,CHEESY_SOLUTION).code,"player-supported");
+ assert.equal(previewEnlargement(room,{x:24.67,y:6},id,CHEESY_SOLUTION).code,"player-supported");
  assert.equal(previewEnlargement(room,{x:12,y:3},id,CHEESY_SOLUTION).code,"player-overlap");
  assert.equal(previewEnlargement(room,player,id,{factor:3,cx:25,cy:""}).code,"parameters");
 });

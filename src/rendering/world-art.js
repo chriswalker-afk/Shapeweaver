@@ -97,6 +97,16 @@ function object(ctx,camera,item,art) {
       ctx.fillStyle="#b77b4d";ctx.fill();
     }
     ctx.restore();outline(ctx,camera,item.vertices,"#8e5b42",2);
+  }else if(item.kind==="gate"&&item.vertices.length===4){
+    // Align timber grain and metal straps to the gate itself, not the camera-aligned AABB.
+    const a=xy(camera,item.vertices[0]),b=xy(camera,item.vertices[3]),d=xy(camera,item.vertices[1]);
+    const length=Math.hypot(b.x-a.x,b.y-a.y),width=Math.hypot(d.x-a.x,d.y-a.y);
+    ctx.save();polygon(ctx,camera,item.vertices);ctx.clip();
+    ctx.translate(a.x,a.y);ctx.rotate(Math.atan2(b.y-a.y,b.x-a.x));
+    ctx.fillStyle="#ab805b";ctx.fillRect(0,0,length,width);
+    if(art.timber)ctx.drawImage(art.timber,0,0,length,width);
+    ctx.fillStyle="#887c83";for(const fraction of [.18,.82])ctx.fillRect(length*fraction-width*.24,0,width*.48,width);
+    ctx.restore();outline(ctx,camera,item.vertices,"#513d46",2);
   }else{
     tilePolygon(ctx,camera,item.vertices,art.timber,"#ab805b",3,.65);
     outline(ctx,camera,item.vertices,"#513d46",2);

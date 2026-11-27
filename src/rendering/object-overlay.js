@@ -1,5 +1,6 @@
 import {worldToScreen} from "./camera.js";
 import {referencePoints} from "../transformations/preview-math.js";
+import {signedRadians} from "../geometry/rotation-sweep.js";
 const COLOURS={translate:"#72d2e3",rotate:"#f2c477",enlarge:"#9cdaa4",reflect:"#c5a2f2"};
 function screen(camera,[x,y]){return worldToScreen(camera,{x,y});}
 function path(ctx,camera,vertices){
@@ -47,7 +48,20 @@ export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview){
       const seg=mirrorSegment(request.line,bounds);if(seg)line(ctx,screen(camera,seg[0]),screen(camera,seg[1]));
     }
     if(request.centre){
-      const p=screen(camera,request.centre);line(ctx,p,screen(camera,refs[0].point));line(ctx,p,screen(camera,geometry.points[0].point));
+      const p=screen(camera,request.centre);
+      // Use the furthest vertex for a readable ray; the hinge may itself be vertex A.
+      let index=0,max=0;
+      refs.forEach((r,i)=>{const d=Math.hypot(r.point[0]-request.centre[0],r.point[1]-request.centre[1]);if(d>max){max=d;index=i;}});
+      const from=screen(camera,refs[index].point),to=screen(camera,geometry.points[index].point);
+      ctx.strokeStyle=c;line(ctx,p,from);line(ctx,p,to);
+      if(request.type==="rotate"&&max>0){
+        const radius=Math.min(max*camera.scale*.62,120),start=Math.atan2(from.y-p.y,from.x-p.x),delta=-signedRadians(request),end=start+delta;
+        ctx.beginPath();ctx.arc(p.x,p.y,radius,start,end,delta<0);ctx.stroke();
+        const tip={x:p.x+radius*Math.cos(end),y:p.y+radius*Math.sin(end)},tangent=end+Math.sign(delta)*Math.PI/2;
+        ctx.setLineDash?.([]);ctx.beginPath();ctx.moveTo(tip.x-8*Math.cos(tangent-.5),tip.y-8*Math.sin(tangent-.5));ctx.lineTo(tip.x,tip.y);ctx.lineTo(tip.x-8*Math.cos(tangent+.5),tip.y-8*Math.sin(tangent+.5));ctx.stroke();
+        const middle=start+delta/2;label(ctx,request.angle+"° "+(request.direction==="clockwise"?"CW":"ACW"),p.x+(radius+12)*Math.cos(middle),p.y+(radius+12)*Math.sin(middle),c);
+        ctx.setLineDash?.([5,4]);
+      }
       dot(ctx,p,c,4);label(ctx,"Centre",p.x+6,p.y-9,c);
     }
     path(ctx,camera,geometry.vertices);ctx.fillStyle=preview.ok?"rgba(112,210,195,.24)":"rgba(255,110,104,.22)";ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2.2;ctx.stroke();ctx.restore();

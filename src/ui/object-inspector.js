@@ -18,9 +18,10 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   function option(value,label){const el=document.createElement("option");el.value=value;el.textContent=label;return el;}
   function populate(){select.replaceChildren(option("","Choose an object…"),...engine.objects().map(o=>option(o.id,o.label??o.id)));}
   populate();
-  function canApply(){return Boolean(active&&type==="translate"&&actions.canApply?.());}
+  function canApply(){return Boolean(active&&type&&actions.canApply?.(type));}
+  function pathScope(){return type==="rotate"?"rotation-path":"translation-path";}
   function syncApply(){
-    if(apply){apply.hidden=!canApply();apply.disabled=!canApply()||!preview?.ok||preview.scope!=="translation-path";}
+    if(apply){apply.hidden=!canApply();apply.disabled=!canApply()||!preview?.ok||preview.scope!==pathScope();apply.textContent=type==="rotate"?"Apply rotation":"Apply translation";}
     if(note)note.textContent=canApply()?"Preview, then apply when clear.":"Preview only for this spell/room.";
   }
   function makeField(id,label,placeholder="",parent=fields){
@@ -65,7 +66,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   }
   function showPreview(raw){
     if(!active||!selected||!type)return null;
-    preview=canApply()?actions.preview(selected,raw):engine.preview(getPlayer(),selected,type,raw);
+    preview=canApply()?actions.preview(type,selected,raw):engine.preview(getPlayer(),selected,type,raw);
     result.textContent=preview.message+(preview.geometry?" · Image: "+refsText(preview.geometry.points):"");
     result.dataset.state=preview.ok?"clear":"invalid";syncApply();onChange();return preview;
   }
@@ -83,11 +84,11 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   function readRaw(){const raw={};for(const input of fields.querySelectorAll("input, select"))raw[input.name]=input.value.replace(/\u2212/g,"-");return raw;}
   on(form,"submit",event=>{event.preventDefault();showPreview(readRaw());});
   on(apply,"click",()=>{
-    if(!canApply()||!preview?.ok||preview.scope!=="translation-path")return;
+    if(!canApply()||!preview?.ok||preview.scope!==pathScope())return;
     const raw=readRaw();
     // An autofill/programmatic edit must not silently apply a different vector than the ghost.
     if(JSON.stringify(parsePreviewRequest(type,raw))!==JSON.stringify(preview.request)){showPreview(raw);return;}
-    const r=actions.apply(selected,raw);
+    const r=actions.apply(type,selected,raw);
     if(!r.ok){preview=r;result.textContent=r.message;result.dataset.state="invalid";syncApply();onChange();}
   });
   function replaceRoom(next){engine=createObjectEngine(next);selected=null;type=null;preview=null;populate();updateObject();}

@@ -66,6 +66,7 @@ export function previewObject(room,player,id,type,raw){
   }
   if(room.plates?.length){
     const candidate=resolveMechanisms({...room,objects:room.objects.map(o=>o.id===id?{...o,vertices:geometry.vertices}:o)});
+    extra.mechanismEffects=candidate.objects.filter(g=>g.kind==="linked-gate"&&g.open!==room.objects.find(o=>o.id===g.id)?.open).map(g=>g.label+(g.open?" will open.":" will close."));
     if(obstructedGate(candidate))return failure("gate-obstructed","A linked gate would close on an object. Clear the gate first.",extra);
     if(player&&candidate.objects.some(o=>o.kind==="linked-gate"&&!o.open&&polygonIntersectsBox(o.vertices,playerBox(player))))return failure("gate-obstructed","A linked gate would close on the apprentice. Move clear first.",extra);
   }

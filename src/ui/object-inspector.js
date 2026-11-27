@@ -68,7 +68,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   function showPreview(raw){
     if(!active||!selected||!type)return null;
     preview=canApply()?actions.preview(type,selected,raw):engine.preview(getPlayer(),selected,type,raw);
-    result.textContent=transformationFeedback(preview,type)+(preview.geometry?" · Image: "+refsText(preview.geometry.points):"");
+    result.textContent=transformationFeedback(preview,type)+(preview.ok&&preview.mechanismEffects?.length?" · "+preview.mechanismEffects.join(" "):"")+(preview.geometry?" · Image: "+refsText(preview.geometry.points):"");
     result.dataset.state=preview.ok?"clear":"invalid";syncApply();onChange();return preview;
   }
   function clearPreview(){preview=null;result.dataset.state="";result.textContent="Preview cleared. No move used.";syncApply();onChange();}

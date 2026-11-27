@@ -6,6 +6,7 @@ import { previewRotation, commitRotation, rotatedFrame } from "../transformation
 import { previewTranslation, commitTranslation, translatedFrame } from "../transformations/translation.js";
 import { FIXED_DT, MOTION } from "../physics/platformer.js";
 import {returnToSafety} from "../physics/recovery.js";
+import {resolveMechanisms} from "../mechanisms/pressure-plates.js";
 import {createAttemptHistory,rememberSafePosition,recordCast,undoLastCast,attemptSummary} from "../core/attempt-history.js";
 import {completedResult} from "../core/level-results.js";
 import {HINT_STAGES,tutorialSituation,contextualGuide,tutorialHint} from "../levels/tutorial-guidance.js";
@@ -125,7 +126,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     camera=createCamera(room.bounds,metrics.width,metrics.height,mode,target,zoom);
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
     const progress=animation?castProgress(animation.elapsed/animation.duration):0;
-    const frame=animation?TUTORIALS[animation.type].frame(room,animation.transition,progress):room;
+    const frame=animation?resolveMechanisms(TUTORIALS[animation.type].frame(room,animation.transition,progress)):room;
     renderWorld(ctx,metrics,camera,frame,images.art,player,reducedMotion());
     plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});
     if(animation?.type==="reflect")drawReflectionFlash(ctx,camera,room.bounds,animation.transition.line,progress);

@@ -16,7 +16,7 @@ export function startApp(document, view) {
   const state = createAppState();
   const viewport = mountViewport(canvas, host, view);
   status.textContent = viewport
-    ? "Choose a Gatehouse puzzle, practise a spell or explore the spellbook."
+    ? "Choose a puzzle in the adventure library, practise a spell or explore the spellbook."
     : "Canvas is unavailable in this browser. The game requires Canvas 2D.";
   let identity=null;
   const bestResults=createBestResults(view);

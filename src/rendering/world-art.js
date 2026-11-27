@@ -93,7 +93,30 @@ function hazard(ctx,camera,item,art) {
   ctx.stroke();
 }
 function object(ctx,camera,item,art) {
-  if(item.material==="cheese"){
+  if(item.kind==="mushroom"){
+    const b=screenBounds(camera,item.vertices),capHeight=b.h*.48;
+    ctx.save();polygon(ctx,camera,item.vertices);ctx.clip();
+    ctx.fillStyle="#e6cfa5";ctx.fillRect(b.x,b.y,b.w,b.h);
+    ctx.fillStyle="#b86975";ctx.fillRect(b.x,b.y,b.w,capHeight);
+    ctx.fillStyle="#f3bdab";
+    for(const [u,v,r] of [[.2,.53,.075],[.46,.28,.09],[.76,.6,.065],[.87,.22,.04]]){
+      ctx.beginPath();ctx.ellipse(b.x+b.w*u,b.y+capHeight*v,b.w*r,capHeight*.17,0,0,Math.PI*2);ctx.fill();
+    }
+    ctx.fillStyle="#9e5267";ctx.fillRect(b.x,b.y+capHeight*.81,b.w,capHeight*.19);
+    ctx.fillStyle="#fae1c4";ctx.fillRect(b.x,b.y,b.w,Math.max(1.5,camera.scale*.055));
+    ctx.restore();outline(ctx,camera,item.vertices,"#603e50",1.7);
+  }else if(item.kind==="linked-gate"){
+    const b=screenBounds(camera,item.vertices);
+    if(item.open){
+      ctx.fillStyle="#c7e5a966";ctx.fillRect(b.x,b.y,Math.max(2,b.w*.11),b.h);ctx.fillRect(b.x+b.w*.89,b.y,Math.max(2,b.w*.11),b.h);
+      ctx.fillStyle="#e3e9a7";ctx.fillRect(b.x+b.w*.2,b.y,b.w*.6,Math.max(2,camera.scale*.15));
+    }else{
+      tilePolygon(ctx,camera,item.vertices,art.timber,"#5c6551",1.2,1.8);
+      ctx.fillStyle="#45574b99";ctx.fillRect(b.x,b.y,b.w,b.h);
+      for(let y=b.y;y<b.y+b.h;y+=camera.scale*1.2){ctx.fillStyle="#bca878";ctx.fillRect(b.x,y,b.w,Math.max(2,camera.scale*.1));}
+      outline(ctx,camera,item.vertices,"#394c42",2);
+    }
+  }else if(item.material==="cheese"){
     polygon(ctx,camera,item.vertices);ctx.fillStyle="#e7b45f";ctx.fill();ctx.save();ctx.clip();
     const b=screenBounds(camera,item.vertices);
     for(const [u,v,r] of [[.68,.72,.1],[.87,.52,.07],[.43,.86,.06]]) {
@@ -159,9 +182,33 @@ function decorate(ctx,camera,item) {
   }
   ctx.restore();
 }
+function gardenBackdrop(ctx,camera,room){
+  // Layered woodland silhouettes and flowering vines are decorative only.
+  const s=camera.scale,b=room.bounds;
+  for(let i=0;i<=Math.ceil((b.maxX-b.minX)/4);i++){
+    const x=b.minX+i*4+.7,p=worldToScreen(camera,{x,y:2.8}),h=s*(7+(i%4)*1.25),r=s*(1.8+(i%3)*.22);
+    ctx.fillStyle=i%2?"#38594e":"#46685a";ctx.fillRect(p.x-s*.18,p.y-h,s*.36,h);
+    for(const [ox,oy,k] of [[-.7,.12,1],[.75,.18,.84],[0,.7,.9]]){
+      ctx.beginPath();ctx.ellipse(p.x+ox*s,p.y-h-oy*s,r*k,r*.64*k,0,0,Math.PI*2);ctx.fill();
+    }
+    ctx.fillStyle="#d6b89266";for(let j=0;j<3;j++){ctx.beginPath();ctx.arc(p.x+(j-1)*s*.62,p.y-h+(j%2)*s*.6,Math.max(1,s*.055),0,Math.PI*2);ctx.fill();}
+  }
+}
+function drawPlates(ctx,camera,room){
+  for(const plate of room.plates??[]){
+    const p=worldToScreen(camera,plate),g=room.objects.find(o=>o.id===plate.gateId),b=polygonBounds(g.vertices),q=worldToScreen(camera,{x:(b.minX+b.maxX)/2,y:plate.y});
+    const s=camera.scale,colour=plate.pressed?"#c7ef9d":"#f1c37b";
+    ctx.save();ctx.strokeStyle=colour;ctx.lineWidth=Math.max(1.5,s*.07);ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(p.x+plate.width*s/2,p.y+4);ctx.lineTo(p.x+plate.width*s/2,p.y+s*.7);ctx.lineTo(q.x,q.y+s*.7);ctx.lineTo(q.x,q.y+4);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle="#665947";ctx.fillRect(p.x,p.y+1,plate.width*s,Math.max(4,s*.19));
+    ctx.fillStyle=colour;ctx.fillRect(p.x+1,p.y+1,plate.width*s-2,Math.max(2,s*.10));
+    worldLabel(ctx,camera,plate.x+plate.width/2,plate.y-.6,plate.pressed?"PLATE HELD":"WEIGHT PLATE",colour);
+    worldLabel(ctx,camera,(b.minX+b.maxX)/2,plate.y+3.8,g.open?"OPEN":"CLOSED",colour);ctx.restore();
+  }
+}
 function sceneDetails(ctx,camera,room){
   // Architecture behind the playable silhouettes, never added to collision geometry.
   const rect=(x,y,w,h,colour)=>{const p=worldToScreen(camera,{x,y:y+h});ctx.fillStyle=colour;ctx.fillRect(p.x,p.y,w*camera.scale,h*camera.scale);};
+  if(room.id==="gardens-06")rect(0,3,7,5,"#253c35c9");
   if(room.id==="gatehouse-04"){
     rect(0,3,7,5,"#34293dc9");
     for(const x of [1,3.5,6])rect(x,3,.12,5,"#78657980");
@@ -229,14 +276,16 @@ function apprentice(ctx,camera,player,art,reducedMotion) {
 /** A deterministic scene draw. Art never modifies the room or collision polygons. */
 export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,reducedMotion=false) {
   ctx.setTransform(metrics.scaleX,0,0,metrics.scaleY,0,0);
-  const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,"#514963");sky.addColorStop(1,"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
-  backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);
+  const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
+  if(room.chapter!==2){backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);}
   ctx.save();
   const b=room.bounds,tl=worldToScreen(camera,{x:b.minX,y:b.maxY}),br=worldToScreen(camera,{x:b.maxX,y:b.minY});
   ctx.beginPath();ctx.rect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.clip();
+  if(room.chapter===2)gardenBackdrop(ctx,camera,room);
   sceneDetails(ctx,camera,room);
   for(const item of room.hazards)hazard(ctx,camera,item,art);
   for(const item of room.terrain)terrain(ctx,camera,item,art);
+  drawPlates(ctx,camera,room);
   for(const item of room.ladders??[])ladder(ctx,camera,item);
   for(const item of room.objects){
     if(item.reflectionOpacity!==undefined){ctx.save();ctx.globalAlpha=item.reflectionOpacity;object(ctx,camera,item,art);ctx.restore();}
@@ -245,6 +294,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   for(const item of room.checkpoints??[])checkpoint(ctx,camera,item,player.checkpoint===item.id);
   for(const item of room.decor)decorate(ctx,camera,item);
   portal(ctx,camera,room.exit,art);apprentice(ctx,camera,player,art,reducedMotion);
+  if(room.id==="gardens-06"){const m=room.objects.find(o=>o.kind==="mushroom"),b=polygonBounds(m.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.65,"SPRING CAP","#f9dcb4");}
   if(room.tutorial){objectRunes(ctx,camera,room);worldLabel(ctx,camera,room.exit.x,room.exit.y+room.exit.height+.35,"EXIT","#ffe2a5");}
   ctx.restore();
   // Subtle vignette establishes the playable area without darkening the whole room.

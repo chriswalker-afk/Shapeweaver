@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR00 — repository bootstrap. The game is not yet playable. PR01 will establish the runnable browser scaffold, tests and deployment workflow.
+PR01 — runnable browser scaffold. The app opens a responsive development preview; gameplay, original artwork and transformations are not yet implemented. Next: PR02 visual identity.
 
 ## Design documents
 
@@ -29,3 +29,23 @@ PR00 — repository bootstrap. The game is not yet playable. PR01 will establish
 Target: a static browser game hosted on GitHub Pages, eventually at `shapeweaver.mrwalkermaths.com`. Hosting and domain configuration are not yet set up.
 
 See the roadmap before starting the next PR. Level briefs are proposals, not certified solutions; geometry, move targets and traversability must be verified during implementation.
+
+## Development
+
+Requires Node.js 22 or later and npm. No third-party runtime or development dependencies.
+
+- `npm run dev` — serve source files at http://127.0.0.1:4173/ (refresh after editing).
+- `npm test` — run the Node test suite, including a real HTTP smoke test under the root and repository subpath.
+- `npm run build` — copy the public application into a clean `dist/` directory.
+- `npm run preview` — build and serve the production output locally.
+- `npm run check` — run tests and build.
+
+The dev server binds only to localhost. Set `PORT=...` if needed, or `BASE_PATH=/Shapeweaver/` to simulate the GitHub Pages project subpath. For example, `BASE_PATH=/Shapeweaver/ npm run preview` (POSIX shell); open http://127.0.0.1:4173/Shapeweaver/. Use relative module and asset URLs so the app works at a custom domain as well.
+
+## Deployment
+
+CI tests and builds on pull requests and main pushes. To publish the static site, an administrator must first choose **GitHub Actions** in Settings → Pages → Build and deployment → Source. Then manually run the **Deploy to GitHub Pages** workflow on main. It tests, builds, uploads only `dist/`, and deploys via the protected github-pages environment. No deployment is claimed until Pages is configured and the workflow succeeds. Automatic deployment and custom-domain configuration can follow at release.
+
+## Scaffold scope
+
+The entry module mounts a responsive high-DPI canvas in a semantic HTML shell. The canvas is a clearly labelled development placeholder, not a playable level. The module boundaries are designed to grow into the documented architecture. PR02 replaces the neutral styling with the storybook visual identity; PR03–06 implement the renderer, grid, player and object engine.

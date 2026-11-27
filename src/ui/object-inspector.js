@@ -1,3 +1,4 @@
+import {dockedSocket} from "../mechanisms/hinge-sockets.js";
 import {createObjectEngine} from "../core/object-engine.js";
 import {getSpell} from "./identity.js";
 import {screenToWorld} from "../rendering/camera.js";
@@ -53,7 +54,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
     spell.replaceChildren(option("","Choose a transformation…"),...(object?.permissions??[]).map(t=>option(t,getSpell(t).label)));
     spell.disabled=!object;spell.value=type??"";
     refs.textContent=object?refsText(engine.references(object.id)):"Select a highlighted object in the room or from the list.";
-    permissions.textContent=object?"Allowed: "+object.permissions.map(t=>getSpell(t).label).join(", ")+(object.hinge?" · Fixed hinge H "+format(object.hinge):"")+(object.scaleRange?" · Scale factor per cast: "+object.scaleRange.join("–"):""):"";
+    permissions.textContent=object?"Allowed: "+object.permissions.map(t=>getSpell(t).label).join(", ")+(object.hinge?" · "+(object.dockable?"Mobile hinge H "+format(object.hinge)+(dockedSocket(room,object)?" (docked)":" (undocked; translate to socket)"):object.pivotOnly?"Marked pivot H "+format(object.hinge):"Fixed hinge H "+format(object.hinge)):"")+(object.scaleRange?" · Scale factor per cast: "+object.scaleRange.join("–"):""):"";
     buildFields();result.textContent=object?"Choose a transformation and enter its parameters.":"No object selected.";
   }
   function selectObject(id){

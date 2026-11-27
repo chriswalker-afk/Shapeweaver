@@ -5,17 +5,17 @@ import {createBestResults} from "../src/core/best-results.js";
 import {mountCampaign} from "../src/ui/campaign.js";
 test("only released levels are playable and planned chapters cover 36 levels",()=>{
  assert.equal(CHAPTERS.length,7);assert.equal(CHAPTERS.at(-1).last,36);
- assert.deepEqual(LEVELS.map(l=>l.number),[1,2,3,4,5,6]);
- assert.deepEqual(filterLevels({spell:"reflect"}).map(l=>l.number),[4,6]);
- assert.equal(filterLevels({math:"2"}).length,2);
- assert.equal(filterLevels({chapter:"2"}).length,2);
+ assert.deepEqual(LEVELS.map(l=>l.number),[1,2,3,4,5,6,7,8]);
+ assert.deepEqual(filterLevels({spell:"reflect"}).map(l=>l.number),[4,6,8]);
+ assert.equal(filterLevels({math:"2"}).length,3);
+ assert.equal(filterLevels({chapter:"2"}).length,4);
  assert.equal(filterLevels({math:"1",puzzle:"1"}).length,4);
 });
 test("progress uses existing personal bests and resumes first incomplete level",()=>{
  const best=createBestResults({});assert.equal(campaignProgress(best).next.number,1);
  best.record({levelId:"gatehouse-02",moves:1,stars:3});assert.equal(campaignProgress(best).next.number,1);
  best.record({levelId:"gatehouse-01",moves:2,stars:2});
- const p=campaignProgress(best);assert.equal(p.completed,2);assert.equal(p.stars,5);assert.equal(p.maximum,18);assert.equal(p.next.number,3);
+ const p=campaignProgress(best);assert.equal(p.completed,2);assert.equal(p.stars,5);assert.equal(p.maximum,24);assert.equal(p.next.number,3);
 });
 
 function element(){
@@ -33,16 +33,16 @@ test("library shows only playable puzzles, filters, resumes and refreshes progre
  ui.render();
  assert.equal(els["campaign-map"].children.length,7);
  assert.equal(els["campaign-map"].children.filter(c=>c.disabled).length,5);
- assert.equal(els["campaign-levels"].children.length,6);
+ assert.equal(els["campaign-levels"].children.length,8);
  els["filter-spell"].value="reflect";els["filter-spell"].fire("change");
- assert.equal(els["campaign-levels"].children.length,2);
+ assert.equal(els["campaign-levels"].children.length,3);
  els["campaign-levels"].children[0].fire("click");
  assert.deepEqual(routes,["level4"]);
- els["filter-math"].value="3";els["filter-math"].fire("change");
+ els["filter-math"].value="4";els["filter-math"].fire("change");
  assert.match(els["campaign-levels"].children[0].textContent,/No released puzzles/);
- els["campaign-clear"].fire("click");assert.equal(els["campaign-levels"].children.length,6);
+ els["campaign-clear"].fire("click");assert.equal(els["campaign-levels"].children.length,8);
  best.record({levelId:"gatehouse-01",moves:2,stars:2});
- ui.render();assert.match(els["campaign-progress"].textContent,/1 \/ 6 released puzzles complete · 2 \/ 18 stars/);
+ ui.render();assert.match(els["campaign-progress"].textContent,/1 \/ 8 released puzzles complete · 2 \/ 24 stars/);
  els["campaign-resume"].fire("click");assert.deepEqual(routes,["level4","level2"]);
  assert.match(els["campaign-levels"].children[0].children.at(-1).textContent,/★★☆ · 2 moves/);
  ui.destroy();assert.ok(Object.values(els).every(e=>e.listeners.size===0));

@@ -7,6 +7,8 @@ import {createPhysicsWorld} from "../physics/collision.js";
 import {createPlayer,stepPlayer} from "../physics/platformer.js";
 import {createFixedLoop} from "../core/fixed-loop.js";
 import {mountMovementInput} from "./movement-input.js";
+import {mountObjectInspector} from "./object-inspector.js";
+import {drawObjectOverlay} from "../rendering/object-overlay.js";
 import { SNAP_STEPS,pickCoordinate,parseCoordinate,formatCoordinate,clientToScreen } from "../geometry/coordinates.js";
 
 /** Movement practice room, coordinate inspection, and deterministic simulation. */
@@ -17,13 +19,13 @@ export function mountRoomPreview(document,view) {
   const room=validateRoom(GATEHOUSE_PREVIEW);
   const $=id=>document.getElementById(id);
   const physics=createPhysicsWorld(room);
-  let player=createPlayer(physics),active=false,lastEvent=null;
+  let player=createPlayer(physics),active=false,lastEvent=null,objectMode=false,inspector=null;
   const playStatus=$("play-status"),followButton=$("follow-toggle"),movementPanel=$("movement-controls");
   const reducedMotion=()=>Boolean(view.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   let follow=true;
-  const input=mountMovementInput(document,view,()=>active&&!picking&&!player.completed&&!player.blockedRespawn);
+  const input=mountMovementInput(document,view,()=>active&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
   const loop=createFixedLoop(view,()=>{
-    if(!active||picking||document.hidden)return;
+    if(!active||picking||objectMode||document.hidden)return;
     const next=stepPlayer(physics,player,input.sample());
     player=next;
     if(next.event&&next.event!==lastEvent){
@@ -38,6 +40,7 @@ export function mountRoomPreview(document,view) {
   let camera=null,mode="overview",focus=null,zoom=null,viewport=null,plan=null;
   let grid=true,axes=true,picking=false,snap=1,point=null;
   const images=loadWorldArt(view,()=>viewport?.resize());
+  inspector=mountObjectInspector(document,room,()=>player,()=>redraw(),setObjectMode);
   function updateControls(){
     controls.overview?.setAttribute("aria-pressed",String(mode==="overview"));
     controls.inspect?.setAttribute("aria-pressed",String(mode==="inspect"));
@@ -48,7 +51,7 @@ export function mountRoomPreview(document,view) {
     if(axesButton)axesButton.textContent=axes?"Axes: on":"Axes: off";
     if(pickButton)pickButton.textContent=picking?"Picking point":"Pick point";
     if(panel)panel.hidden=!picking;
-    if(canvas.style)canvas.style.cursor=picking?"crosshair":"default";
+    if(canvas.style)canvas.style.cursor=picking||objectMode?"crosshair":"default";
     if(!camera)return;
     const b=room.bounds,e=.0001;
     for(const [id,allowed] of Object.entries({left:camera.left>b.minX+e,right:camera.right<b.maxX-e,up:camera.top<b.maxY-e,down:camera.bottom>b.minY+e})){
@@ -58,17 +61,19 @@ export function mountRoomPreview(document,view) {
     if(controls["zoom-out"])controls["zoom-out"].disabled=camera.zoom<=1+e;
     const gridStatus=grid&&plan?" · Grid "+plan.minorStep+(plan.minorStep===1?" unit":" units"):"";
     const zoomLabel=Number(camera.zoom.toFixed(2));
-    const label=(mode==="overview"?"Full room":"Inspect · "+zoomLabel+"× fit")+gridStatus+" · "+(picking?"Movement paused":"Practice room");
+    const label=(mode==="overview"?"Full room":"Inspect · "+zoomLabel+"× fit")+gridStatus+" · "+(picking||objectMode?"Movement paused":"Practice room");
     if(status.textContent!==label)status.textContent=label;
     followButton?.setAttribute("aria-pressed",String(follow));
-    if(movementPanel)movementPanel.hidden=picking;
+    if(movementPanel)movementPanel.hidden=picking||objectMode;
   }
   viewport=mountViewport(canvas,host,view,(ctx,metrics)=>{
-    const target=active&&follow&&!picking&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
+    const target=active&&follow&&!picking&&!objectMode&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
     camera=createCamera(room.bounds,metrics.width,metrics.height,mode,target,zoom);
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
     renderWorld(ctx,metrics,camera,room,images.art,player,reducedMotion());
-    plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});updateControls();
+    plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});
+    if(objectMode&&inspector){const s=inspector.getState();drawObjectOverlay(ctx,camera,room.bounds,s.objects,s.selected,s.preview);}
+    updateControls();
   });
   if(!viewport)status.textContent="Canvas 2D is unavailable in this browser.";
   const listeners=[];
@@ -87,9 +92,17 @@ export function mountRoomPreview(document,view) {
     redraw();return true;
   }
   function setPicking(value){
-    picking=Boolean(value);input.clear();redraw();
+    picking=Boolean(value);if(picking&&objectMode){objectMode=false;inspector?.setActive(false);}input.clear();redraw();
     if(message)message.textContent=point?formatCoordinate(point):"Click or tap the room, or enter coordinates.";
     return picking;
+  }
+  function setObjectMode(value){
+    if(!inspector)return false;
+    objectMode=Boolean(value);
+    if(objectMode)picking=false;
+    inspector.setActive(objectMode);input.clear();redraw();
+    if(!objectMode)canvas.focus?.({preventScroll:true});
+    return objectMode;
   }
   function setSnap(value){if(!SNAP_STEPS.includes(value))return false;snap=value;return true;}
   function report(text){if(message)message.textContent=text;}
@@ -119,26 +132,26 @@ export function mountRoomPreview(document,view) {
   on(form,"submit",event=>{event.preventDefault();enterPoint(xInput?.value,yInput?.value);});
   on($("coordinate-clear"),"click",clearPoint);
   on(canvas,"click",event=>{
-    if(!camera||!picking)return;
+    if(!camera||(!picking&&!objectMode))return;
     const p=clientToScreen(canvas.getBoundingClientRect(),event.clientX,event.clientY,camera);
-    if(p)pickAt(p);
+    if(p){if(objectMode)inspector?.pick(camera,p);else pickAt(p);}
   });
   function setActive(value){
     active=Boolean(value);input.clear();
-    if(active){viewport?.resize();loop.start();}else loop.stop();
+    if(active){viewport?.resize();loop.start();}else{loop.stop();objectMode=false;inspector?.setActive(false);}
   }
   function resetPlayer(){
-    player=createPlayer(physics);lastEvent=null;input.clear();follow=true;
+    player=createPlayer(physics);lastEvent=null;input.clear();follow=true;objectMode=false;inspector?.setActive(false);
     if(playStatus)playStatus.textContent="Practice restarted.";
     redraw();
   }
   on(followButton,"click",()=>{follow=!follow;redraw();});
   on($("reset-practice"),"click",()=>{resetPlayer();canvas.focus?.({preventScroll:true});});
   // Click the stage to return keyboard focus to gameplay after inspecting controls.
-  on(host,"click",()=>{if(!picking)canvas.focus?.({preventScroll:true});});
+  on(host,"click",()=>{if(!picking&&!objectMode)canvas.focus?.({preventScroll:true});});
   updateControls();
-  return {room,setActive,resetPlayer,getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
+  return {room,setActive,resetPlayer,setObjectMode,inspector,getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
     getCamera:()=>camera,getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),
     refresh:()=>viewport?.resize(),
-    destroy(){loop.stop();input.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};
+    destroy(){loop.stop();input.destroy();inspector?.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};
 }

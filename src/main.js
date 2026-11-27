@@ -12,7 +12,7 @@ export function startApp(document, view) {
   const state = createAppState();
   const viewport = mountViewport(canvas, host, view);
   status.textContent = viewport
-    ? "Scaffold ready · Explore the Gatehouse movement practice room or the spellbook."
+    ? "Scaffold ready · Explore the Gatehouse movement and object preview room or the spellbook."
     : "Canvas is unavailable in this browser. The game requires Canvas 2D.";
   const room = typeof view.Image === "function" ? mountRoomPreview(document, view) : null;
   const identity = typeof document.querySelectorAll === "function" ? mountIdentity(document, state, next => { room?.setActive(next === "room"); state.playable = next === "room" && Boolean(room); }) : null;

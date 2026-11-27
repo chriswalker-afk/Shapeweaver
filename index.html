@@ -59,7 +59,7 @@
       </section>
       <section class="room-view" id="room-view" aria-labelledby="room-heading" hidden>
         <header class="room-toolbar">
-          <div class="room-heading"><p>Chapter I · Movement practice</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
+          <div class="room-heading"><p>Chapter I · Interactive object practice</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
           <div class="camera-controls" aria-label="Camera and coordinate tools">
             <button type="button" id="camera-overview" aria-pressed="true">Full room</button>
             <button type="button" id="camera-inspect" aria-pressed="false">Inspect</button>
@@ -78,13 +78,14 @@
             <button type="button" id="grid-toggle" aria-pressed="true">Grid: on</button>
             <button type="button" id="axes-toggle" aria-pressed="true">Axes: on</button>
             <button type="button" id="pick-toggle" aria-pressed="false" aria-controls="coordinate-panel">Pick point</button>
+            <button type="button" id="object-toggle" aria-pressed="false" aria-controls="object-panel">Objects</button>
           </div>
           <button type="button" id="follow-toggle" class="room-back" aria-pressed="true">Follow</button>
           <button type="button" id="reset-practice" class="room-back">Reset</button>
           <button type="button" class="room-back" id="close-room">← Title</button>
         </header>
         <div class="room-stage" id="room-stage">
-          <canvas id="room-canvas" tabindex="0" aria-label="Gatehouse movement practice. Arrow keys or WASD to move and climb; Space or Z to jump. Coordinate picking pauses movement."></canvas>
+          <canvas id="room-canvas" tabindex="0" aria-label="Gatehouse movement practice. Arrow keys or WASD to move and climb; Space or Z to jump. Coordinate picking and object inspection pause movement."></canvas>
         </div>
         <section id="coordinate-panel" class="coordinate-panel" aria-label="Coordinate picker" hidden>
           <label class="snap-field" for="coordinate-snap">Click snap <select id="coordinate-snap"><option value="1">1 unit</option><option value="0.5">½ unit</option><option value="0.1">0.1 unit</option></select></label>
@@ -95,6 +96,21 @@
             <button type="button" id="coordinate-clear">Clear</button>
           </form>
           <output id="coordinate-result" role="status" aria-live="polite">Click or tap the room, or enter coordinates.</output>
+        </section>
+        <section id="object-panel" class="object-panel" aria-label="Object inspector and transformation previews" hidden>
+          <div class="object-top">
+            <label>Object <select id="object-select"></select></label>
+            <label>Transformation <select id="object-spell" disabled></select></label>
+            <span id="object-permissions"></span>
+            <button type="button" id="object-close">Back to movement</button>
+          </div>
+          <p id="object-references" class="object-references"></p>
+          <form id="object-form" class="object-form" novalidate hidden>
+            <div id="object-fields" class="object-fields"></div>
+            <button type="submit" class="preview-action">Preview</button><button type="button" id="object-clear">Clear</button>
+            <span class="object-preview-note">Preview only · Apply arrives in later stages</span>
+          </form>
+          <output id="object-result" role="status" aria-live="polite"></output>
         </section>
         <footer class="room-footer">
           <div class="movement-controls" id="movement-controls" role="group" aria-label="Character movement">

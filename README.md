@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR05 — platformer engine. Explore the Gatehouse movement practice room: walk, jump, climb, cross a fixed bridge and reach the portal. Coordinate tools remain available; transformation spells follow in PR06–10. Not an official campaign level.
+PR06 — interactive object engine. Explore the Gatehouse practice room, move the apprentice and open Objects to select props remotely, inspect coordinates and preview permitted transformations. Ghosts check final pose only; no spell can be applied yet. Next: PR07 translation and Level 1.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR05 — platformer engine. Explore the Gatehouse movement practice room: walk, 
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Interactive object engine](docs/object-engine.md) — permissions, selection, reference geometry, previews and final-pose validation.
 - [Platformer engine](docs/platformer-engine.md) — movement, collision, ladder, checkpoint and replay contract.
 - [Coordinate system](docs/coordinate-system.md) — grid, true axes, adaptive rulers, zoom and point picking.
 - [World renderer](docs/world-renderer.md) — room fixture, camera, layer ordering and geometry contract.

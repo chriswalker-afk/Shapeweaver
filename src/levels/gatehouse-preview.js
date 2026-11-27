@@ -1,4 +1,5 @@
 import { rectangle, deepFreeze, polygonBounds, signedArea, boundsContain } from "../geometry/world.js";
+import {validateObjectDefinitions} from "../core/object-engine.js";
 
 /** Movement practice fixture, NOT a released campaign puzzle. */
 export const GATEHOUSE_PREVIEW = deepFreeze({
@@ -18,9 +19,9 @@ export const GATEHOUSE_PREVIEW = deepFreeze({
     {id:"east-water",kind:"water",vertices:rectangle(16,0,5,2.1)}
   ],
   objects:[
-    {id:"beam",kind:"beam",material:"timber",vertices:rectangle(1.5,6.65,6,0.42)},
-    {id:"gate",kind:"gate",material:"timber",vertices:rectangle(0.4,3,0.42,2.4),hinge:[0.61,3]},
-    {id:"wedge",kind:"wedge",material:"cheese",vertices:[[4,3],[6.4,3],[6.4,4.4]]},
+    {id:"beam",label:"Timber beam",kind:"beam",material:"timber",vertices:rectangle(1.5,6.65,6,0.42),permissions:["translate"],support:"supported"},
+    {id:"gate",label:"Hinged gate",kind:"gate",material:"timber",vertices:rectangle(31.2,6,0.42,2.4),hinge:[31.2,6],permissions:["rotate"],support:"hinged"},
+    {id:"wedge",label:"Cheese wedge",kind:"wedge",material:"cheese",vertices:[[4,3],[6.4,3],[6.4,4.4]],permissions:["enlarge","reflect"],support:"supported",scaleRange:[0.5,2]},
     {id:"crate",kind:"crate",material:"timber",vertices:rectangle(17.8,2.1,1.3,1.3),decorative:true}
   ],
   ladders:[{id:"practice-ladder",x:8.4,width:0.55,bottom:3,top:6.65}],
@@ -54,5 +55,6 @@ export function validateRoom(room) {
   if (![spawn.x,spawn.y,exit.x,exit.y,exit.width,exit.height].every(Number.isFinite) || exit.width<=0||exit.height<=0 ||
     !boundsContain(b,{minX:spawn.x,maxX:spawn.x,minY:spawn.y,maxY:spawn.y}) ||
     !boundsContain(b,{minX:exit.x-exit.width/2,maxX:exit.x+exit.width/2,minY:exit.y,maxY:exit.y+exit.height})) throw new Error("Invalid spawn or exit");
+  validateObjectDefinitions(room);
   return room;
 }

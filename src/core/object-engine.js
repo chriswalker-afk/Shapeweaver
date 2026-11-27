@@ -1,6 +1,7 @@
 import {polygonBounds,boundsContain,deepFreeze} from "../geometry/world.js";
 import {pointPolygonDistance,polygonsOverlap,triangulate,GEOMETRY_EPS} from "../geometry/polygons.js";
 import {playerBox,polygonIntersectsBox} from "../physics/collision.js";
+import {resolveMechanisms,obstructedGate} from "../mechanisms/pressure-plates.js";
 import {TYPES,parsePreviewRequest,previewGeometry,referencePoints,isIdentity} from "../transformations/preview-math.js";
 
 const name=o=>o.label??o.id;
@@ -62,6 +63,11 @@ export function previewObject(room,player,id,type,raw){
   if(object.support==="supported"){
     const down=geometry.vertices.map(([x,y])=>[x,y-.002]);
     if(!solids.some(s=>polygonsOverlap(down,s.vertices)))return failure("unsupported","The preview has no support beneath it.",extra);
+  }
+  if(room.plates?.length){
+    const candidate=resolveMechanisms({...room,objects:room.objects.map(o=>o.id===id?{...o,vertices:geometry.vertices}:o)});
+    if(obstructedGate(candidate))return failure("gate-obstructed","A linked gate would close on an object. Clear the gate first.",extra);
+    if(player&&candidate.objects.some(o=>o.kind==="linked-gate"&&!o.open&&polygonIntersectsBox(o.vertices,playerBox(player))))return failure("gate-obstructed","A linked gate would close on the apprentice. Move clear first.",extra);
   }
   return {ok:true,code:"final-clear",scope:"final-pose",message:"Final position is clear. Travel path is not yet checked; Apply is unavailable.",...extra};
 }

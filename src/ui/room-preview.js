@@ -1,8 +1,8 @@
 import { GATEHOUSE_PREVIEW, validateRoom } from "../levels/gatehouse-preview.js";
-import { ACROSS_THE_BROOK, brookHint } from "../levels/across-the-brook.js";
-import { STUBBORN_GATE, gateHint } from "../levels/stubborn-gate.js";
-import { LITTLE_CHEESY, cheesyHint } from "../levels/little-cheesy.js";
-import { MISSING_BARREL, barrelHint } from "../levels/missing-barrel.js";
+import { ACROSS_THE_BROOK } from "../levels/across-the-brook.js";
+import { STUBBORN_GATE } from "../levels/stubborn-gate.js";
+import { LITTLE_CHEESY } from "../levels/little-cheesy.js";
+import { MISSING_BARREL } from "../levels/missing-barrel.js";
 import { previewReflection, commitReflection, reflectedFrame } from "../transformations/reflection.js";
 import { previewEnlargement, commitEnlargement, enlargedFrame } from "../transformations/enlargement.js";
 import { previewRotation, commitRotation, rotatedFrame } from "../transformations/rotation.js";
@@ -11,6 +11,7 @@ import { FIXED_DT, MOTION } from "../physics/platformer.js";
 import {returnToSafety} from "../physics/recovery.js";
 import {createAttemptHistory,rememberSafePosition,recordCast,undoLastCast,attemptSummary} from "../core/attempt-history.js";
 import {completedResult} from "../core/level-results.js";
+import {HINT_STAGES,tutorialSituation,contextualGuide,tutorialHint} from "../levels/tutorial-guidance.js";
 import { createCamera, panCamera, zoomCamera, MAX_ZOOM, ZOOM_STEP } from "../rendering/camera.js";
 import { loadWorldArt, renderWorld } from "../rendering/world-art.js";
 import { mountViewport } from "../rendering/viewport.js";
@@ -25,21 +26,13 @@ import { SNAP_STEPS,pickCoordinate,parseCoordinate,formatCoordinate,clientToScre
 
 // Keep spell dispatch and tutorial copy data-driven as new transformation types arrive.
 const TUTORIALS=Object.freeze({
-  translate:{label:"Translation",preview:previewTranslation,commit:commitTranslation,frame:translatedFrame,duration:.65,hint:brookHint,
-    objective:"Your goal: bridge the brook and reach the portal. Open Objects, select the timber beam, and choose Translation.",
-    casting:"The beam is moving.",after:"Check the new position. Walk towards the brook, jump onto the beam and reach the portal. You can cast again from safe ground if needed.",
+  translate:{label:"Translation",preview:previewTranslation,commit:commitTranslation,frame:translatedFrame,duration:.65,
     ready:"Translation applied. Walk towards the brook and jump onto the beam.",finished:"You crossed the brook."},
-  rotate:{label:"Rotation",preview:previewRotation,commit:commitRotation,frame:rotatedFrame,duration:.75,hint:gateHint,
-    objective:"Your goal: open the gate and reach the portal. Open Objects, select the hinged gate, and choose Rotation. Read the hinge coordinates, angle and direction.",
-    casting:"The gate is turning.",after:"Check the gate position. Walk beneath it towards the portal if the passage is clear. You can cast again from safe ground.",
+  rotate:{label:"Rotation",preview:previewRotation,commit:commitRotation,frame:rotatedFrame,duration:.75,
     ready:"Rotation applied. Walk beneath the open gate if the passage is clear.",finished:"You passed the gate."},
-  enlarge:{label:"Enlargement",preview:previewEnlargement,commit:commitEnlargement,frame:enlargedFrame,duration:.8,hint:cheesyHint,
-    objective:"Your goal: reach the high ledge. Open Objects, select the cheese wedge, and choose Enlargement. Compare the heights and choose a scale factor and centre.",
-    casting:"The cheese is changing size.",after:"Check the ramp height and position. Walk up it towards the portal. You can resize again from safe ground if needed.",
+  enlarge:{label:"Enlargement",preview:previewEnlargement,commit:commitEnlargement,frame:enlargedFrame,duration:.8,
     ready:"Enlargement applied. Walk up the ramp if it reaches the ledge.",finished:"You reached the high ledge."},
-  reflect:{label:"Reflection",preview:previewReflection,commit:commitReflection,frame:reflectedFrame,duration:.8,hint:barrelHint,
-    objective:"Your goal: rescue the barrel from the sealed store and reach the raised ledge. Open Objects, select the barrel and choose Reflection. Enter the mirror line equation.",
-    casting:"The barrel is passing through the mirror.",after:"Check the barrel position. Jump onto the barrel, then jump onto the ledge and reach the portal. You can reflect again from safe ground.",
+  reflect:{label:"Reflection",preview:previewReflection,commit:commitReflection,frame:reflectedFrame,duration:.8,
     ready:"Reflection applied. Jump onto the barrel, then onto the ledge.",finished:"You rescued the barrel and reached the ledge."}
 });
 const LEVELS=Object.freeze({level1:ACROSS_THE_BROOK,level2:STUBBORN_GATE,level3:LITTLE_CHEESY,level4:MISSING_BARREL});
@@ -53,10 +46,13 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   let initialRoom=validateRoom(GATEHOUSE_PREVIEW),room=initialRoom;
   const $=id=>document.getElementById(id);
   let physics=createPhysicsWorld(room),animation=null,history=createAttemptHistory(),hintStage=0,result=null;
+  let guidanceEnabled=true,situation=tutorialSituation(room);
   let player=createPlayer(physics),active=false,lastEvent=null,objectMode=false,inspector=null;
   let lastSafe=rememberSafePosition(physics,player);
   const playStatus=$("play-status"),followButton=$("follow-toggle"),movementPanel=$("movement-controls");
   const guide=$("tutorial-guide"),hintButton=$("tutorial-hint"),moves=$("tutorial-moves"),tutorialTools=$("tutorial-tools");
+  const guidanceButton=$("tutorial-guidance-toggle"),hintPanel=$("tutorial-hint-panel"),hintTitle=$("tutorial-hint-title"),hintText=$("tutorial-hint-text"),hintPrevious=$("tutorial-hint-previous"),hintNext=$("tutorial-hint-next"),hintClose=$("tutorial-hint-close");
+  const canHint=()=>Boolean(active&&situation&&!animation&&!player.completed&&!player.blockedRespawn);
   const undoButton=$("undo-cast"),returnButton=$("return-safety"),recoveryCount=$("recovery-count");
   const canUndo=()=>active&&!animation&&!player.completed&&history.stack.length>0;
   const spellType=()=>tutorialType(room);
@@ -89,7 +85,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   let camera=null,mode="overview",focus=null,zoom=null,viewport=null,plan=null;
   let grid=true,axes=true,picking=false,snap=1,point=null;
   const images=loadWorldArt(view,()=>viewport?.resize());
-  inspector=mountObjectInspector(document,room,()=>player,()=>redraw(),setObjectMode,{
+  inspector=mountObjectInspector(document,room,()=>player,()=>{updateGuide();redraw();},setObjectMode,{
     canApply:type=>Boolean(type===spellType()&&!animation&&!player.completed&&!player.blockedRespawn),
     preview:(type,id,raw)=>TUTORIALS[type].preview(room,player,id,raw),
     apply:applySpell
@@ -151,7 +147,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   }
   function setPicking(value){
     if(animation)return false;
-    picking=Boolean(value);if(picking&&objectMode){objectMode=false;inspector?.setActive(false);}input.clear();redraw();
+    picking=Boolean(value);if(picking&&objectMode){objectMode=false;inspector?.setActive(false);}input.clear();updateGuide();redraw();
     if(message)message.textContent=point?formatCoordinate(point):"Click or tap the room, or enter coordinates.";
     return picking;
   }
@@ -159,7 +155,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(!inspector||animation)return false;
     objectMode=Boolean(value);
     if(objectMode)picking=false;
-    inspector.setActive(objectMode);input.clear();redraw();
+    inspector.setActive(objectMode);input.clear();updateGuide();redraw();
     if(!objectMode)canvas.focus?.({preventScroll:true});
     return objectMode;
   }
@@ -198,7 +194,8 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   function setActive(value){
     active=Boolean(value);input.clear();
     if(active){viewport?.resize();loop.start();}else{loop.stop();animation=null;objectMode=false;inspector?.setActive(false);}
-    updateRecoveryControls();
+    if(!active)hintStage=0;
+    updateGuide();
   }
   function updateRecoveryControls(){
     if(undoButton){
@@ -215,26 +212,36 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
       recoveryCount.hidden=!text;
     }
   }
+  function setText(el,text){if(el&&el.textContent!==text)el.textContent=text;}
   function updateGuide(){
-    const config=tutorial();
+    const config=situation?.config;
     if(tutorialTools)tutorialTools.hidden=!config;
-    if(guide){
-      guide.hidden=!config;
-      if(config){
-        guide.textContent=player.blockedRespawn?"You need to recover before moving. "+(canUndo()?"Use Undo to restore an earlier safe state, or Reset.":"Use Reset to start again.") : player.completed?"Well done! You reached the portal using "+history.entries.length+" "+config.label.toLowerCase()+(history.entries.length===1?"":"s")+".":animation?config.casting:hintStage?config.hint(room,hintStage):history.stack.length?config.after:config.objective;
-      }
-    }
-    if(moves)moves.textContent="Moves: "+history.entries.length;
-    if(hintButton){hintButton.textContent=hintStage===3?"Hide hint":hintStage?"Next hint":"Hint";hintButton.disabled=Boolean(animation)||player.completed||player.blockedRespawn;}
+    const context=contextualGuide(room,player,inspector?.getState(),{casting:Boolean(animation),picking,canUndo:canUndo(),moves:history.entries.length,situation});
+    if(guide){guide.hidden=!config||!guidanceEnabled;setText(guide,context?context.step+" · "+context.text:"");}
+    if(guidanceButton){guidanceButton.setAttribute("aria-pressed",String(guidanceEnabled));setText(guidanceButton,guidanceEnabled?"Guide: on":"Guide: off");}
+    if(moves)setText(moves,"Moves: "+history.entries.length);
+    if(!canHint())hintStage=0;
+    if(hintButton){hintButton.setAttribute("aria-expanded",String(hintStage>0));setText(hintButton,hintStage?"Hide hints":"Hints");hintButton.disabled=!canHint();}
+    const hint=hintStage?tutorialHint(room,player,hintStage,situation):null;
+    if(hintPanel)hintPanel.hidden=!hint;
+    setText(hintTitle,hint?"Hint "+hint.stage+" of "+HINT_STAGES.length+" · "+hint.label:"");
+    setText(hintText,hint?.text??"");
+    if(hintPrevious)hintPrevious.disabled=hintStage<=1;
+    if(hintNext){hintNext.hidden=hintStage>=HINT_STAGES.length;hintNext.disabled=!hint||hintStage>=HINT_STAGES.length;setText(hintNext,hintStage===HINT_STAGES.length-1?"Show worked solution":"Next hint");}
     updateRecoveryControls();
   }
+  function setHintStage(stage){
+    if(!canHint()||!Number.isInteger(stage)||stage<0||stage>HINT_STAGES.length)return false;
+    hintStage=stage;input.clear();updateGuide();redraw();return true;
+  }
+  function setGuidance(value){guidanceEnabled=Boolean(value);updateGuide();redraw();return guidanceEnabled;}
   function applySpell(type,id,raw){
     if(type!==spellType()||!room.tutorial||!objectMode||animation)return {ok:false,code:"unavailable",message:"That spell is not available now."};
     const tx=TUTORIALS[type].commit(room,player,id,raw);
     if(!tx.ok)return tx;
     // Commit geometry + collision index together; animation is presentation only.
     history=recordCast(history,physics,player,lastSafe,tx.record);
-    room=tx.room;physics=tx.physics;lastSafe=rememberSafePosition(physics,player,lastSafe);hintStage=0;
+    room=tx.room;physics=tx.physics;situation=tutorialSituation(room);lastSafe=rememberSafePosition(physics,player,lastSafe);hintStage=0;
     objectMode=false;inspector?.setActive(false);inspector?.replaceRoom(room);input.clear();
     if(!reducedMotion())animation={type,transition:tx.transition,elapsed:0,duration:TUTORIALS[type].duration};
     if(playStatus)playStatus.textContent=animation?actionLabel()+" applied. Wait for the object to settle.":readyMessage();
@@ -250,7 +257,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(!canUndo())return false;
     const tx=undoLastCast(history,player);
     if(!tx.ok){if(playStatus)playStatus.textContent=tx.message;return false;}
-    history=tx.history;room=tx.room;physics=tx.physics;player=tx.player;
+    history=tx.history;room=tx.room;physics=tx.physics;player=tx.player;situation=tutorialSituation(room);
     lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
     if(playStatus)playStatus.textContent="Last transformation undone. Restored a safe earlier position. The original move still counts.";
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return true;
@@ -264,7 +271,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return true;
   }
   function resetPlayer(){
-    room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);history=createAttemptHistory();result=null;
+    room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);history=createAttemptHistory();result=null;situation=tutorialSituation(room);
     lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
     if(playStatus)playStatus.textContent=room.tutorial?"Arrows / WASD · Space to jump":"Practice restarted.";
     updateGuide();redraw();
@@ -277,14 +284,18 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter I · Level "+initialRoom.number+" · "+TUTORIALS[tutorialType(initialRoom)].label:"Chapter I · Interactive object practice";
     resetPlayer();
   }
-  on(hintButton,"click",()=>{if(!animation&&!player.completed&&!player.blockedRespawn){hintStage=(hintStage+1)%4;updateGuide();}});
+  on(guidanceButton,"click",()=>setGuidance(!guidanceEnabled));
+  on(hintButton,"click",()=>setHintStage(hintStage?0:1));
+  on(hintPrevious,"click",()=>{if(hintStage>1)setHintStage(hintStage-1);});
+  on(hintNext,"click",()=>{if(hintStage>0&&hintStage<HINT_STAGES.length){setHintStage(hintStage+1);if(hintStage===HINT_STAGES.length)hintClose?.focus?.({preventScroll:true});}});
+  on(hintClose,"click",()=>{setHintStage(0);hintButton?.focus?.({preventScroll:true});});
   on(undoButton,"click",undoCast);on(returnButton,"click",recoverPlayer);
   on(followButton,"click",()=>{follow=!follow;redraw();});
   on($("reset-practice"),"click",()=>{resetPlayer();canvas.focus?.({preventScroll:true});});
   // Click the stage to return keyboard focus to gameplay after inspecting controls.
   on(host,"click",()=>{if(!picking&&!objectMode)canvas.focus?.({preventScroll:true});});
   updateControls();updateGuide();
-  return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getResult:()=>result,getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
+  return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getResult:()=>result,setGuidance,setHintStage,getTutorialState:()=>({guidanceEnabled,hintStage,step:contextualGuide(room,player,inspector?.getState(),{casting:Boolean(animation),picking,canUndo:canUndo(),moves:history.entries.length,situation})?.step??null}),getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
     getCamera:()=>camera,getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),
     refresh:()=>viewport?.resize(),
     destroy(){loop.stop();input.destroy();inspector?.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};

@@ -69,3 +69,6 @@ Undo restores the exact previous immutable room and a safe pre-cast player posit
 
 ## PR12 implementation note
 Completion-only efficiency stars use each level's tested `efficientMoves` target and optional `twoStarMoves` allowance (default target + 2). The four current tutorials have targets of 1 move. A separate results screen lists all committed casts, including undone moves, and shows locally retained personal bests. No speed, fall, hint or undo action penalty beyond counting the original successful cast. See [stars and results](stars-and-results.md).
+
+## PR13 implementation note
+The contextual guide follows current interaction and object arrangement without locking the player into steps. A separate optional five-stage hint panel progresses from obstacle to object, transformation, coordinate reasoning and explicit worked solution. The final hint validates its proposed cast against the live world and apprentice before advising preview/apply. Hints and guidance never auto-fill or cast and never affect scoring. See [tutorials and hints](tutorials-and-hints.md).

@@ -253,3 +253,16 @@ h1,h2,h3 { font-family: var(--display); }
 .results-actions .gold-button { min-width:0; }
 @media(max-width:650px) and (orientation:portrait){.results-sheet{grid-template-columns:minmax(0,1fr);gap:.65rem}.results-solution{border-left:0;padding-left:0;border-top:1px solid #766078;padding-top:.7rem}.results-history{max-height:35dvh}.results-actions{justify-content:stretch}.results-actions button{flex:1 1 auto}.results-stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-height:520px) and (orientation:landscape){.results-view{padding:.45rem}.results-sheet{padding:.65rem .9rem;gap:.4rem .85rem}.results-header{padding-bottom:.3rem}.results-header h2{font-size:1.4rem}.results-stars{font-size:2.4rem}.results-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:.25rem}.result-stat{padding:.25rem}.result-stat dt{font-size:.68rem}.result-stat dd{font-size:1.15rem}.results-history{max-height:38dvh}.results-actions{padding-top:.35rem}.results-note{font-size:.73rem}}
+
+/* PR13: optional, compact non-modal tutorial help in the existing footer. */
+#tutorial-guide { color:#f0dbb5; font-size:.78rem; line-height:1.4; }
+#tutorial-guidance-toggle[aria-pressed="true"],#tutorial-hint[aria-expanded="true"] { border-color:#d8b47d;color:#f9dda7; }
+.tutorial-tools { flex-wrap:wrap; }
+.tutorial-hint-panel { flex:1 0 100%;display:flex;align-items:center;gap:.5rem .8rem;flex-wrap:wrap;min-width:0;padding:.5rem .65rem;border:1px solid #9c805b;border-left:3px solid #d8b47d;border-radius:.25rem;background:#352940;color:#f2e4d1; }
+.hint-content { flex:1 1 16rem;min-width:0; }
+#tutorial-hint-title { color:#f2d6a3;font-size:.79rem; }
+#tutorial-hint-text { margin:.15rem 0 0;line-height:1.45;overflow-wrap:anywhere;font-size:.8rem; }
+.hint-actions { display:flex;align-items:center;flex-wrap:wrap;gap:.3rem; }
+.hint-actions button:disabled { opacity:.45;cursor:default; }
+@media(max-height:520px) and (orientation:landscape){#tutorial-guide{font-size:.7rem}.tutorial-hint-panel{padding:.25rem .45rem;gap:.25rem .5rem}#tutorial-hint-title,#tutorial-hint-text{font-size:.72rem}.hint-actions button{min-height:28px;padding:.18rem .35rem}}
+@media(max-width:650px) and (orientation:portrait){.hint-content{flex-basis:100%}.hint-actions{justify-content:flex-end;width:100%}.hint-actions button{min-height:40px}}

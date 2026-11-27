@@ -15,7 +15,7 @@ export function startApp(document, view) {
   const state = createAppState();
   const viewport = mountViewport(canvas, host, view);
   status.textContent = viewport
-    ? "Scaffold ready · Play the four Gatehouse tutorials, earn efficiency stars, explore practice, or open the spellbook."
+    ? "Scaffold ready · Play the four guided Gatehouse tutorials, earn efficiency stars, explore practice, or open the spellbook."
     : "Canvas is unavailable in this browser. The game requires Canvas 2D.";
   let identity=null;
   const bestResults=createBestResults(view);

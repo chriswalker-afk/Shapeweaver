@@ -12,7 +12,7 @@ function node(tag="div"){
   fire(k,event={}){listeners.get(k)?.({preventDefault(){},...event})},focus(){this.focused=true}};
 }
 function fixture(reduce,withApp=false){
- const ids="room-canvas room-stage room-status play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-moves reset-practice undo-cast return-safety recovery-count world app-status title-view spellbook-view title-art room-view spell-name spell-description spell-example spell-image spell-detail translation-vector open-spellbook close-spellbook spellbook-heading open-room open-level1 open-level2 open-level3 open-level4 close-room results-view results-heading results-level results-stars results-message results-stats results-thresholds results-best results-history results-empty results-replay results-next results-title".split(" ");
+ const ids="room-canvas room-stage room-status play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-guidance-toggle tutorial-hint-panel tutorial-hint-title tutorial-hint-text tutorial-hint-previous tutorial-hint-next tutorial-hint-close tutorial-moves reset-practice undo-cast return-safety recovery-count world app-status title-view spellbook-view title-art room-view spell-name spell-description spell-example spell-image spell-detail translation-vector open-spellbook close-spellbook spellbook-heading open-room open-level1 open-level2 open-level3 open-level4 close-room results-view results-heading results-level results-stars results-message results-stats results-thresholds results-best results-history results-empty results-replay results-next results-title".split(" ");
  const els=Object.fromEntries(ids.map(id=>[id,node()])),rect={left:0,top:0,width:1000,height:500};
  const ctx={save(){},restore(){},setTransform(){},createLinearGradient(){return{addColorStop(){}}},createRadialGradient(){return{addColorStop(){}}},
  fillRect(){},drawImage(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){},stroke(){},clip(){},rect(){},translate(){},rotate(){},ellipse(){},arc(){},strokeRect(){},quadraticCurveTo(){},strokeText(){},fillText(){},measureText(s){return{width:s.length*7}},setLineDash(){}};
@@ -33,7 +33,7 @@ test("first tutorial selection, actual Apply, animation locks, reset, and separa
   const {els,view,controller:c,frame}=fixture(reduce),click=id=>els[id].fire("click");
   c.setLevel("level1");c.setActive(true);assert.equal(c.room.id,"gatehouse-01");assert.equal(els["tutorial-tools"].hidden,false);
   assert.match(els["tutorial-guide"].textContent,/bridge the brook/);
-  click("tutorial-hint");click("tutorial-hint");assert.match(els["tutorial-guide"].textContent,/3, 3/);
+  click("tutorial-hint");for(let i=0;i<3;i++)click("tutorial-hint-next");assert.match(els["tutorial-hint-text"].textContent,/3, 3/);click("tutorial-hint-close");
   click("object-toggle");const p=worldToScreen(c.getCamera(),{x:5,y:3.2});
   els["room-canvas"].fire("click",{clientX:p.x,clientY:p.y});
   assert.equal(c.inspector.getState().selected,"brook-beam");
@@ -63,7 +63,7 @@ test("second tutorial validates angle, direction and exact centre; applies, anim
   c.setLevel("level2");c.setActive(true);assert.equal(c.room.id,"gatehouse-02");
   assert.match(els["room-chapter"].textContent,/Level 2.*Rotation/);
   assert.match(els["tutorial-guide"].textContent,/open the gate/);
-  click("tutorial-hint");click("tutorial-hint");assert.match(els["tutorial-guide"].textContent,/14, 8/);
+  click("tutorial-hint");for(let i=0;i<3;i++)click("tutorial-hint-next");assert.match(els["tutorial-hint-text"].textContent,/14, 8/);click("tutorial-hint-close");
   click("object-toggle");const p=worldToScreen(c.getCamera(),{x:14.25,y:5});
   els["room-canvas"].fire("click",{clientX:p.x,clientY:p.y});
   assert.equal(c.inspector.getState().selected,"stubborn-gate");assert.equal(c.inspector.selectType("translate"),false);
@@ -100,7 +100,7 @@ test("third tutorial requires explicit positive factor and centre, previews, app
   c.setLevel("level3");c.setActive(true);assert.equal(c.room.id,"gatehouse-03");
   assert.match(els["room-chapter"].textContent,/Level 3.*Enlargement/);
   assert.match(els["tutorial-guide"].textContent,/high ledge/);
-  click("tutorial-hint");click("tutorial-hint");assert.match(els["tutorial-guide"].textContent,/3 units high/);
+  click("tutorial-hint");for(let i=0;i<3;i++)click("tutorial-hint-next");assert.match(els["tutorial-hint-text"].textContent,/3 units high/);click("tutorial-hint-close");
   click("object-toggle");const p=worldToScreen(c.getCamera(),{x:24,y:4});
   els["room-canvas"].fire("click",{clientX:p.x,clientY:p.y});
   assert.equal(c.inspector.getState().selected,"cheesy-wedge");assert.equal(c.inspector.selectType("rotate"),false);
@@ -136,7 +136,7 @@ test("fourth tutorial validates mirror equation, commits a magical transfer and 
   c.setLevel("level4");c.setActive(true);assert.equal(c.room.id,"gatehouse-04");
   assert.match(els["room-chapter"].textContent,/Level 4.*Reflection/);
   assert.match(els["tutorial-guide"].textContent,/rescue the barrel/);
-  click("tutorial-hint");click("tutorial-hint");assert.match(els["tutorial-guide"].textContent,/midpoint/);
+  click("tutorial-hint");for(let i=0;i<3;i++)click("tutorial-hint-next");assert.match(els["tutorial-hint-text"].textContent,/midpoint/);click("tutorial-hint-close");
   click("object-toggle");const p=worldToScreen(c.getCamera(),{x:4.5,y:4.2});
   els["room-canvas"].fire("click",{clientX:p.x,clientY:p.y});
   assert.equal(c.inspector.getState().selected,"missing-barrel");assert.equal(c.inspector.selectType("translate"),false);
@@ -303,4 +303,62 @@ test("last available level completes without a nonexistent next level; returns t
  els["results-next"].fire("click");assert.equal(app.state.view,"results");
  els["results-title"].fire("click");assert.equal(app.state.view,"title");assert.equal(els["results-view"].hidden,true);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+
+test("guide follows selection, parameters, preview and cast without forcing steps",()=>{
+ const f=fixture(true),{controller:c,els}=f,click=id=>els[id].fire("click");
+ c.setLevel("level1");c.setActive(true);
+ assert.equal(c.getTutorialState().step,"Explore");assert.equal(els["tutorial-hint-panel"].hidden,true);
+ click("object-toggle");assert.equal(c.getTutorialState().step,"Select object");
+ c.inspector.selectObject("brook-beam");assert.equal(c.getTutorialState().step,"Choose transformation");
+ c.inspector.selectType("translate");assert.equal(c.getTutorialState().step,"Enter parameters");
+ assert.match(els["tutorial-guide"].textContent,/horizontal first, vertical second/);
+ c.inspector.showPreview({dx:12,dy:1});assert.equal(c.getTutorialState().step,"Revise");
+ c.inspector.showPreview({dx:12,dy:0});assert.equal(c.getTutorialState().step,"Apply or revise");
+ const fields=c.inspector.getState().preview;assert.ok(fields.ok);
+ click("object-close");assert.equal(c.getTutorialState().step,"Explore");
+ click("pick-toggle");assert.equal(c.getTutorialState().step,"Read coordinates");click("pick-toggle");
+ assert.equal(cast(f,"brook-beam","translate",{dx:12,dy:0}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ assert.equal(c.undoCast(),true);assert.equal(c.getTutorialState().step,"Explore");
+ assert.equal(c.getAttemptSummary().moves,1);c.destroy();
+});
+test("five-stage hints reveal only on request and never alter inspector fields, history or stars",()=>{
+ const f=fixture(true),{controller:c,els,view,frame}=f,click=id=>els[id].fire("click");
+ c.setLevel("level2");c.setActive(true);
+ click("tutorial-guidance-toggle");assert.equal(els["tutorial-guide"].hidden,true);
+ click("tutorial-hint");assert.equal(c.getTutorialState().hintStage,1);
+ assert.match(els["tutorial-hint-title"].textContent,/1 of 5.*Obstacle/);
+ assert.equal(els["tutorial-hint-previous"].disabled,true);
+ const initial=c.room,player=c.getPlayer(),summary=c.getAttemptSummary();
+ for(let i=0;i<3;i++)click("tutorial-hint-next");
+ assert.match(els["tutorial-hint-title"].textContent,/4 of 5.*Mathematical reasoning/);
+ assert.match(els["tutorial-hint-text"].textContent,/14, 8/);
+ assert.doesNotMatch(els["tutorial-hint-text"].textContent,/90° anticlockwise/);
+ assert.equal(els["tutorial-hint-next"].textContent,"Show worked solution");
+ click("tutorial-hint-next");assert.match(els["tutorial-hint-text"].textContent,/90° anticlockwise/);
+ assert.equal(els["tutorial-hint-next"].hidden,true);
+ assert.equal(c.room,initial);assert.deepEqual(c.getPlayer(),player);assert.deepEqual(c.getAttemptSummary(),summary);
+ assert.equal(c.inspector.getState().active,false);
+ click("tutorial-hint-previous");assert.equal(c.getTutorialState().hintStage,4);
+ click("tutorial-hint-close");assert.equal(els["tutorial-hint-panel"].hidden,true);assert.equal(els["tutorial-hint-text"].textContent,"");
+ click("tutorial-hint");assert.equal(c.getTutorialState().hintStage,1);
+ click("object-toggle");c.inspector.selectObject("stubborn-gate");c.inspector.selectType("rotate");
+ const inputs=els["object-fields"].querySelectorAll();
+ for(const field of inputs)field.value="";inputs.find(x=>x.name==="cx").value="14";
+ for(let i=0;i<4;i++)click("tutorial-hint-next");
+ assert.equal(inputs.find(x=>x.name==="cx").value,"14");assert.equal(inputs.find(x=>x.name==="cy").value,"");
+ assert.equal(c.inspector.getState().preview,null);assert.equal(c.getAttemptSummary().moves,0);
+ assert.equal(cast(f,"stubborn-gate","rotate",{angle:90,direction:"anticlockwise",cx:14,cy:8}).ok,true);
+ assert.equal(c.getTutorialState().hintStage,0);assert.equal(els["tutorial-hint-panel"].hidden,true);
+ click("tutorial-hint");assert.match(els["tutorial-hint-text"].textContent,/already in a useful position/);
+ click("tutorial-hint-close");
+ view.fire("keydown",{code:"ArrowRight"});frame(300);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,1);
+ assert.equal(els["tutorial-hint"].disabled,true);assert.equal(c.setHintStage(1),false);
+ c.setLevel("level3");assert.equal(c.getTutorialState().guidanceEnabled,false);assert.equal(els["tutorial-guide"].hidden,true);
+ click("tutorial-guidance-toggle");assert.equal(els["tutorial-guide"].hidden,false);
+ click("tutorial-hint");click("reset-practice");assert.equal(c.getTutorialState().hintStage,0);
+ click("tutorial-hint");assert.equal(c.recoverPlayer(),true);assert.equal(c.getTutorialState().hintStage,0);
+ c.setLevel("room");assert.equal(els["tutorial-tools"].hidden,true);assert.equal(c.setHintStage(1),false);c.destroy();
 });

@@ -6,13 +6,14 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR01 — runnable browser scaffold. The app opens a responsive development preview; gameplay, original artwork and transformations are not yet implemented. Next: PR02 visual identity.
+PR02 — visual identity. The title and interactive spellbook preview establish original vector art, branding and spell symbols. Not yet playable. Next: PR03 world renderer.
 
 ## Design documents
 
 - [Game design](docs/game-design.md) — player experience, mathematics, rules, recovery, accessibility and visual direction.
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
+- [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
 - [Architecture and quality](docs/architecture.md) — technical boundaries, geometry, level data and test strategy.
 - [Contribution guide](CONTRIBUTING.md) — PR workflow and acceptance criteria.
 
@@ -48,4 +49,4 @@ CI tests and builds on pull requests and main pushes. To publish the static site
 
 ## Scaffold scope
 
-The entry module mounts a responsive high-DPI canvas in a semantic HTML shell. The canvas is a clearly labelled development placeholder, not a playable level. The module boundaries are designed to grow into the documented architecture. PR02 replaces the neutral styling with the storybook visual identity; PR03–06 implement the renderer, grid, player and object engine.
+The entry module mounts a responsive high-DPI canvas beneath an illustrated title and accessible spellbook. Title artwork and the reference apprentice are original SVG files, not playable collision geometry. PR03–06 implement the renderer, grid, player and object engine.

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 168" role="img" aria-label="Purple-hooded apprentice with a russet scarf">
+<defs>
+<linearGradient id="cloak" x1="0%" y1="0%" x2="80%" y2="100%"><stop stop-color="#9176b5"/><stop offset=".55" stop-color="#594478"/><stop offset="1" stop-color="#372b52"/></linearGradient>
+<linearGradient id="hood" x2="80%" y2="100%"><stop stop-color="#a58ac6"/><stop offset="1" stop-color="#54406f"/></linearGradient>
+<linearGradient id="skin" x2="60%" y2="100%"><stop stop-color="#f7d7a8"/><stop offset="1" stop-color="#c98c6e"/></linearGradient>
+<linearGradient id="scarf" x2="100%" y2="100%"><stop stop-color="#df9262"/><stop offset="1" stop-color="#9a443e"/></linearGradient>
+</defs>
+<ellipse cx="59" cy="158" rx="43" ry="7" fill="#201a28" opacity=".35"/>
+<g stroke="#34283d" stroke-width="2" stroke-linejoin="round">
+<path d="M45 124l-4 24-8 8h24l6-27M69 124l2 26-1 6h25l-12-9-4-23" fill="#544049"/>
+<path d="M42 147l15 3-1 7H32q-2-5 10-10M71 149l14-2 11 9H70z" fill="#715148"/>
+<path d="M37 62Q20 86 18 137q29 14 67 1l-6-68z" fill="url(#cloak)"/>
+<path d="M45 75q-4 40-11 65M67 79l9 60" fill="none" stroke="#a48bc0" opacity=".65"/>
+<path d="M38 60q-13-6-12-24Q27 15 54 6q30 6 41 34l-8 24-20 9z" fill="url(#hood)"/>
+<path d="M44 31q15-12 34 2l9 21-9 15-25 5-15-17z" fill="#31283f"/>
+<path d="M48 37q14-9 31 1l7 15-5 9-7 7-17-2-10-13z" fill="url(#skin)" stroke-width="1.5"/>
+<path d="M44 37q8-13 23-12l12 9q-12-4-20 6l-7 8z" fill="#664a40"/>
+<ellipse cx="73" cy="48" rx="2.3" ry="3.5" fill="#35283c" stroke="none"/>
+<path d="M77 53l5 2-5 3M69 62q4 2 8 0" fill="none" stroke="#8b5149" stroke-width="1.2"/>
+<path d="M36 64q21 11 47 0l4 11q-24 14-49 1z" fill="url(#scarf)"/>
+<path d="M40 70Q17 65 6 85q15-6 25 3l15-12" fill="url(#scarf)"/>
+<path d="M73 83l13 14 12-7 5 8-19 13-12-9" fill="url(#cloak)"/>
+<circle cx="100" cy="94" r="5" fill="url(#skin)"/>
+<path d="M104 150V67" fill="none" stroke="#7c553e" stroke-width="5"/>
+<path d="M104 151V67" fill="none" stroke="#d2a275" stroke-width="1.3"/>
+<path d="M104 52l9 10-9 12-9-12z" fill="#e8c98d" stroke="#7e5744"/>
+<path d="M104 56l5 6-5 7-5-7z" fill="#f8ebc8" stroke="none"/>
+<path d="M42 94q21 7 40 0l1 6q-20 10-43 1z" fill="#49374b"/>
+<path d="M62 95h9v8h-9z" fill="#d1a86e" stroke="#48354a"/>
+<path d="M40 109l13 4-1 15-15-3z" fill="#725044"/>
+<path d="M32 137q24 8 49 0" fill="none" stroke="#c5a27a" stroke-width="2" stroke-dasharray="3 4"/>
+</g></svg>

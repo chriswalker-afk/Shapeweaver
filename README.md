@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR21 — Internal level workshop. Developer-only coordinate editor, exact properties, local import, real-engine playtesting, interleaved replay recording and verified export. Next: PR22 The Riverworks, Levels 13–14.
+PR22 — The Riverworks: Levels 13–14. Fourteen released puzzles, two-ended bridge bearings, dependent staircase supports, workshop-replayed solution fixtures and blue-green dockyard scenery. Next: PR23 Levels 15–16.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR21 — Internal level workshop. Developer-only coordinate editor, exact proper
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Riverworks opening](docs/riverworks.md) — Levels 13–14, structural supports and verified replay routes.
 - [Internal level workshop](docs/internal-workshop.md) — authoring, validation and replay workflow.
 - [First campaign audit](docs/first-campaign-audit.md) — replay evidence, difficulty review and remaining classroom QA.
 - [Clockwork finale](docs/clockwork-finale.md) — Levels 11–12, shape-socket geometry and external centres.

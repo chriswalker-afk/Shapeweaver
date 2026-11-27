@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR04 — coordinate system. Explore the Gatehouse, toggle the grid and axes, zoom/pan, and pick or enter exact coordinates. Static preview; player movement follows in PR05.
+PR05 — platformer engine. Explore the Gatehouse movement practice room: walk, jump, climb, cross a fixed bridge and reach the portal. Coordinate tools remain available; transformation spells follow in PR06–10. Not an official campaign level.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR04 — coordinate system. Explore the Gatehouse, toggle the grid and axes, zoo
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Platformer engine](docs/platformer-engine.md) — movement, collision, ladder, checkpoint and replay contract.
 - [Coordinate system](docs/coordinate-system.md) — grid, true axes, adaptive rulers, zoom and point picking.
 - [World renderer](docs/world-renderer.md) — room fixture, camera, layer ordering and geometry contract.
 - [Architecture and quality](docs/architecture.md) — technical boundaries, geometry, level data and test strategy.
@@ -51,4 +52,4 @@ CI tests and builds on pull requests and main pushes. To publish the static site
 
 ## Scaffold scope
 
-The entry module mounts a responsive high-DPI canvas beneath an illustrated title and accessible spellbook. Title artwork and the reference apprentice are original SVG files, not playable collision geometry. PR03 adds the separate world renderer and camera; PR04 adds the mathematical overlay and coordinate picker; PR05–06 implement the player and object engine.
+The entry module mounts a responsive high-DPI canvas beneath an illustrated title and accessible spellbook. Title artwork and the reference apprentice are original SVG files, not playable collision geometry. PR03 adds the separate world renderer and camera; PR04 adds the mathematical overlay and coordinate picker; PR05 implements deterministic player movement; PR06 introduces interactive objects.

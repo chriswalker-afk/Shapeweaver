@@ -14,3 +14,6 @@ src/levels/gatehouse-preview.js exports an immutable room fixture and initial va
 ## QA
 - Automated: camera round trips and uniform scale, clamped panning, viewport independence, geometry/data validation, deterministic render smoke with mock context, HTTP production asset delivery, title/spellbook/room navigation.
 - Manual: open room on desktop 1366x768, 1920x1080, 1280x720, 956x440 landscape and phone portrait. Check readable controls, room canvas occupies most of screen, no covering gameplay, textures align with polygon edges, character feet touch terrain, portal sits on east ledge. Inspect/pan both axes and resize; return to title and spellbook. Record screenshots and issues before visual sign-off.
+
+## PR05 update
+The fixture is now a playable movement practice room, with a fixed timber bridge, ladder and two safe checkpoints. The gate is moved out of the primary path. The renderer uses live player state, not spawn coordinates; see [platformer engine](platformer-engine.md). Previous PR03 scope descriptions are historical.

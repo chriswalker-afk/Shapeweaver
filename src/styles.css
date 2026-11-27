@@ -172,3 +172,15 @@ h1,h2,h3 { font-family: var(--display); }
   .coordinate-panel { padding:.2rem .45rem; gap:.2rem .4rem; }
   .coordinate-panel input { width:4rem; }
 }
+
+/* PR05: compact, multi-pointer-safe movement controls below the world. */
+.movement-controls { display:flex;align-items:center;gap:.28rem;flex-wrap:nowrap;touch-action:none;user-select:none; }
+.movement-controls button { min-width:42px;min-height:42px;padding:.3rem .55rem;background:#392b48;color:#f5e4c7;border:1px solid #a58b68;border-radius:.25rem;font-weight:700;touch-action:none;user-select:none; }
+.movement-controls button:active { background:#e2be85;color:#302438; }
+.movement-controls .jump-control { min-width:66px; }
+.play-info { display:flex;flex:1 1 13rem;flex-direction:column;justify-content:center;gap:.15rem; }
+#play-status { color:#f3dfb8; }
+#follow-toggle[aria-pressed="true"] { border-color:#e6c18c;color:#f1d5a6; }
+#room-canvas:focus-visible { outline-offset:-3px; }
+@media(max-height:520px) and (orientation:landscape){.movement-controls button{min-height:32px;min-width:36px;padding:.2rem .4rem}.room-footer{align-items:center}.play-info{font-size:.68rem}}
+@media(max-width:650px) and (orientation:portrait){.room-footer{justify-content:center}.play-info{flex-basis:100%;text-align:center}.movement-controls button{min-height:44px;min-width:44px}}

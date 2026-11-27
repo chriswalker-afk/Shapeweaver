@@ -59,7 +59,7 @@
       </section>
       <section class="room-view" id="room-view" aria-labelledby="room-heading" hidden>
         <header class="room-toolbar">
-          <div class="room-heading"><p>Chapter I · Renderer test room</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
+          <div class="room-heading"><p>Chapter I · Movement practice</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
           <div class="camera-controls" aria-label="Camera and coordinate tools">
             <button type="button" id="camera-overview" aria-pressed="true">Full room</button>
             <button type="button" id="camera-inspect" aria-pressed="false">Inspect</button>
@@ -79,10 +79,12 @@
             <button type="button" id="axes-toggle" aria-pressed="true">Axes: on</button>
             <button type="button" id="pick-toggle" aria-pressed="false" aria-controls="coordinate-panel">Pick point</button>
           </div>
+          <button type="button" id="follow-toggle" class="room-back" aria-pressed="true">Follow</button>
+          <button type="button" id="reset-practice" class="room-back">Reset</button>
           <button type="button" class="room-back" id="close-room">← Title</button>
         </header>
         <div class="room-stage" id="room-stage">
-          <canvas id="room-canvas" role="img" aria-label="Gatehouse renderer test room: apprentice on a stone bank, a river and central support, timber beam, cheese wedge, raised shelf, gate and portal. Static preview, not playable. The coordinate picker also supports typed x and y values."></canvas>
+          <canvas id="room-canvas" tabindex="0" aria-label="Gatehouse movement practice. Arrow keys or WASD to move and climb; Space or Z to jump. Coordinate picking pauses movement."></canvas>
         </div>
         <section id="coordinate-panel" class="coordinate-panel" aria-label="Coordinate picker" hidden>
           <label class="snap-field" for="coordinate-snap">Click snap <select id="coordinate-snap"><option value="1">1 unit</option><option value="0.5">½ unit</option><option value="0.1">0.1 unit</option></select></label>
@@ -94,7 +96,16 @@
           </form>
           <output id="coordinate-result" role="status" aria-live="polite">Click or tap the room, or enter coordinates.</output>
         </section>
-        <footer class="room-footer"><span id="room-status" role="status">Loading the renderer preview…</span><span>Movement and spells coming later</span></footer>
+        <footer class="room-footer">
+          <div class="movement-controls" id="movement-controls" role="group" aria-label="Character movement">
+            <button type="button" data-move="left" aria-label="Walk left">←</button>
+            <button type="button" data-move="right" aria-label="Walk right">→</button>
+            <button type="button" data-move="up" aria-label="Climb up">↑</button>
+            <button type="button" data-move="down" aria-label="Climb down">↓</button>
+            <button type="button" data-move="jump" class="jump-control">Jump</button>
+          </div>
+          <div class="play-info"><span id="room-status">Loading practice room…</span><span id="play-status" role="status">Arrows / WASD · Space to jump · Up/down on ladders</span></div>
+        </footer>
       </section>
     </section>
   </main>

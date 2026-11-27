@@ -3,15 +3,35 @@ import { createCamera, panCamera, zoomCamera, MAX_ZOOM, ZOOM_STEP } from "../ren
 import { loadWorldArt, renderWorld } from "../rendering/world-art.js";
 import { mountViewport } from "../rendering/viewport.js";
 import { drawCoordinateOverlay } from "../rendering/coordinate-grid.js";
+import {createPhysicsWorld} from "../physics/collision.js";
+import {createPlayer,stepPlayer} from "../physics/platformer.js";
+import {createFixedLoop} from "../core/fixed-loop.js";
+import {mountMovementInput} from "./movement-input.js";
 import { SNAP_STEPS,pickCoordinate,parseCoordinate,formatCoordinate,clientToScreen } from "../geometry/coordinates.js";
 
-/** Renderer and coordinate inspection only; movement and spells follow in later PRs. */
+/** Movement practice room, coordinate inspection, and deterministic simulation. */
 export function mountRoomPreview(document,view) {
   const canvas=document.getElementById("room-canvas"),host=document.getElementById("room-stage");
   const status=document.getElementById("room-status");
   if(!canvas||!host||!status)return null;
   const room=validateRoom(GATEHOUSE_PREVIEW);
   const $=id=>document.getElementById(id);
+  const physics=createPhysicsWorld(room);
+  let player=createPlayer(physics),active=false,lastEvent=null;
+  const playStatus=$("play-status"),followButton=$("follow-toggle"),movementPanel=$("movement-controls");
+  const reducedMotion=()=>Boolean(view.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+  let follow=true;
+  const input=mountMovementInput(document,view,()=>active&&!picking&&!player.completed&&!player.blockedRespawn);
+  const loop=createFixedLoop(view,()=>{
+    if(!active||picking||document.hidden)return;
+    const next=stepPlayer(physics,player,input.sample());
+    player=next;
+    if(next.event&&next.event!==lastEvent){
+      if(next.event==="respawn"||next.event==="exit"||next.event==="reset-required")input.clear();
+      if(playStatus)playStatus.textContent=next.event==="respawn"?"Returned to a safe checkpoint.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?"Gatehouse practice complete! Reset to play again.":"No safe respawn. Reset the room.";
+    }
+    lastEvent=next.event;
+  },()=>viewport?.resize());
   const controls=Object.fromEntries(["overview","inspect","left","right","up","down","zoom-in","zoom-out"].map(id=>[id,$("camera-"+id)]));
   const gridButton=$("grid-toggle"),axesButton=$("axes-toggle"),pickButton=$("pick-toggle"),panel=$("coordinate-panel");
   const snapInput=$("coordinate-snap"),xInput=$("coordinate-x"),yInput=$("coordinate-y"),form=$("coordinate-form"),message=$("coordinate-result");
@@ -38,12 +58,16 @@ export function mountRoomPreview(document,view) {
     if(controls["zoom-out"])controls["zoom-out"].disabled=camera.zoom<=1+e;
     const gridStatus=grid&&plan?" · Grid "+plan.minorStep+(plan.minorStep===1?" unit":" units"):"";
     const zoomLabel=Number(camera.zoom.toFixed(2));
-    status.textContent=(mode==="overview"?"Full room":"Inspect · "+zoomLabel+"× fit")+gridStatus+" · Static preview";
+    const label=(mode==="overview"?"Full room":"Inspect · "+zoomLabel+"× fit")+gridStatus+" · "+(picking?"Movement paused":"Practice room");
+    if(status.textContent!==label)status.textContent=label;
+    followButton?.setAttribute("aria-pressed",String(follow));
+    if(movementPanel)movementPanel.hidden=picking;
   }
   viewport=mountViewport(canvas,host,view,(ctx,metrics)=>{
-    camera=createCamera(room.bounds,metrics.width,metrics.height,mode,focus,zoom);
+    const target=active&&follow&&!picking&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
+    camera=createCamera(room.bounds,metrics.width,metrics.height,mode,target,zoom);
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
-    renderWorld(ctx,metrics,camera,room,images.art);
+    renderWorld(ctx,metrics,camera,room,images.art,player,reducedMotion());
     plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});updateControls();
   });
   if(!viewport)status.textContent="Canvas 2D is unavailable in this browser.";
@@ -52,18 +76,18 @@ export function mountRoomPreview(document,view) {
   function redraw(){viewport?.resize();if(!camera)updateControls();}
   function setMode(next){
     if(next!=="overview"&&next!=="inspect")return false;
-    mode=next;zoom=null;focus=next==="overview"?null:{x:camera?.cx??16,y:camera?.cy??7};
+    mode=next;zoom=null;follow=true;focus=next==="overview"?null:{x:camera?.cx??16,y:camera?.cy??7};
     redraw();return true;
   }
   function useCamera(next){mode=next.mode;zoom=next.zoom;focus={x:next.cx,y:next.cy};redraw();}
-  function pan(dx,dy){if(!camera||mode!=="inspect")return false;useCamera(panCamera(camera,room.bounds,dx,dy));return true;}
+  function pan(dx,dy){if(!camera||mode!=="inspect")return false;follow=false;useCamera(panCamera(camera,room.bounds,dx,dy));return true;}
   function changeZoom(multiplier){if(!camera)return false;useCamera(zoomCamera(camera,room.bounds,multiplier));return true;}
   function setOverlay(key,value){
     if(key==="grid")grid=Boolean(value);else if(key==="axes")axes=Boolean(value);else return false;
     redraw();return true;
   }
   function setPicking(value){
-    picking=Boolean(value);redraw();
+    picking=Boolean(value);input.clear();redraw();
     if(message)message.textContent=point?formatCoordinate(point):"Click or tap the room, or enter coordinates.";
     return picking;
   }
@@ -99,9 +123,22 @@ export function mountRoomPreview(document,view) {
     const p=clientToScreen(canvas.getBoundingClientRect(),event.clientX,event.clientY,camera);
     if(p)pickAt(p);
   });
+  function setActive(value){
+    active=Boolean(value);input.clear();
+    if(active){viewport?.resize();loop.start();}else loop.stop();
+  }
+  function resetPlayer(){
+    player=createPlayer(physics);lastEvent=null;input.clear();follow=true;
+    if(playStatus)playStatus.textContent="Practice restarted.";
+    redraw();
+  }
+  on(followButton,"click",()=>{follow=!follow;redraw();});
+  on($("reset-practice"),"click",()=>{resetPlayer();canvas.focus?.({preventScroll:true});});
+  // Click the stage to return keyboard focus to gameplay after inspecting controls.
+  on(host,"click",()=>{if(!picking)canvas.focus?.({preventScroll:true});});
   updateControls();
-  return {room,setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
+  return {room,setActive,resetPlayer,getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
     getCamera:()=>camera,getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),
     refresh:()=>viewport?.resize(),
-    destroy(){viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};
+    destroy(){loop.stop();input.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};
 }

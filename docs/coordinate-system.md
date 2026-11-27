@@ -14,3 +14,6 @@ Pick point opens a compact panel. Click/tap the scene to mark a mathematical coo
 
 ## Tests and QA
 Unit tests cover zero and negative coordinates, adaptive grid steps, ruler/axis visibility, snap rules, typed input, CSS-to-world conversions and zoom invariants. Mock canvas checks overlay rendering and state isolation; room controller tests verify toggles, picking and listener cleanup. Source/build HTTP checks cover new modules and UI. Actual browser QA remains necessary: compare wide desktop, short landscape and portrait; check labels and marker when origin leaves view, off-grid state, keyboard form submission, touch picking, zoom bounds, and readable compact toolbar. PR05 will add player movement.
+
+## PR05 update
+Picking mode pauses movement and clears held movement controls. Manual camera panning disables Follow; full-room/inspect or the Follow toggle restores camera following in inspection mode. Grid and axes remain world-aligned during gameplay.

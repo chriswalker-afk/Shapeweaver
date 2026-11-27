@@ -41,3 +41,16 @@ test("ghost overlay balances canvas state and draws source and image reference l
   drawObjectOverlay(ctx,camera,room.bounds,[source],source.id,{ok:true,objectId:source.id,request:{type:"translate"},geometry});
   assert.equal(depth,0);assert.ok(labels.includes("A"));assert.ok(labels.includes("A′"));
 });
+
+test("selected shape socket labels appear with source labels, without changing reference coordinates",()=>{
+ const room=GATEHOUSE_PREVIEW,camera=createCamera(room.bounds,1000,500);
+ let depth=0;const labels=[];
+ const ctx={save(){depth++},restore(){depth--;assert.ok(depth>=0)},beginPath(){},rect(){},clip(){},moveTo(){},lineTo(){},closePath(){},stroke(){},fill(){},arc(){},measureText(t){return {width:t.length*7}},strokeText(){},fillText(t){labels.push(t)},setLineDash(){}};
+ const source=room.objects[0],slot={objectId:source.id,vertices:[[10,3],[12,3],[12,4],[10,4]]};
+ const snapshot=JSON.stringify(slot);
+ drawObjectOverlay(ctx,camera,room.bounds,[source],source.id,null,{shapeSockets:[slot]});
+ assert.equal(depth,0);for(const name of ["A","S1","S2","S3","S4"])assert.ok(labels.includes(name),name);
+ assert.equal(JSON.stringify(slot),snapshot);
+ labels.length=0;drawObjectOverlay(ctx,camera,room.bounds,[source],null,null,{shapeSockets:[slot]});
+ assert.equal(labels.some(l=>l==="S1"),false);
+});

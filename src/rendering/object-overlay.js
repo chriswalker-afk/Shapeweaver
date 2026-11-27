@@ -57,11 +57,21 @@ function mirrorSegment(line,b){
   const lo=Math.max(b.minX,-b.maxY),hi=Math.min(b.maxX,-b.minY);return lo<=hi?[[lo,-lo],[hi,-hi]]:null;
 }
 /** Draw above grid. Original geometry, reference vertices, ghost and mathematical construction guides. */
-export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview){
+export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview,{shapeSockets=[],gridPlan=null,axes=false}={}){
   ctx.save();
   const a=screen(camera,[bounds.minX,bounds.maxY]),b=screen(camera,[bounds.maxX,bounds.minY]);
   ctx.beginPath();ctx.rect(a.x,a.y,b.x-a.x,b.y-a.y);ctx.clip();
   const rect={left:Math.max(0,a.x),top:Math.max(0,a.y),right:Math.min(camera.width,b.x),bottom:Math.min(camera.height,b.y)},occupied=[];
+  // Reserve the coordinate ruler bands for label placement, but keep exact
+  // reference dots at their original points. Lock target labels share the same
+  // occupancy list, avoiding collisions with the source/image references.
+  const r=gridPlan?.rect;
+  if(axes&&r&&r.right-r.left>=68&&r.bottom-r.top>=64){
+    occupied.push({left:r.left,right:r.left+24,top:r.top,bottom:r.bottom},{left:r.left,right:r.right,top:r.bottom-24,bottom:r.bottom});
+  }
+  for(const slot of shapeSockets.filter(s=>s.objectId===selected)){
+    markReferences(ctx,camera,slot.vertices.map((point,i)=>({id:"S"+(i+1),point})),slot.filled?"#c7e9a4":"#e9bd7b","",rect,occupied);
+  }
   for(const o of objects){
     const active=o.id===selected;
     path(ctx,camera,o.vertices);ctx.strokeStyle="#211c31";ctx.lineWidth=active?4:3;ctx.stroke();

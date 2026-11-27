@@ -105,6 +105,31 @@ export function tutorialSituation(room){
   }
   return {config,ready,reasoning,worked,raw};
 }
+// Fade automatic solution scaffolding across the first three chapters. The
+// guide teaches the interface; optional hints retain the detailed mathematics.
+const CHALLENGE_GOALS=deepFreeze({
+ "gardens-05":"Cross the brook and pass the garden gate.",
+ "gardens-06":"Open a route to the high terrace.",
+ "gardens-07":"Reach the upper terrace.",
+ "gardens-08":"Reach the highest walkway.",
+ "clockwork-09":"Cross the machine channel.",
+ "clockwork-10":"Find a route under the arch and across the channel.",
+ "clockwork-11":"Reach the high landing.",
+ "clockwork-12":"Unlock the gate and reach the portal."
+});
+export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
+const FIELD_GUIDES=Object.freeze({
+ translate:"Enter the signed horizontal and vertical components of a column vector.",
+ rotate:"Enter angle, direction and both centre coordinates.",
+ enlarge:"Enter scale factor and both centre coordinates.",
+ reflect:"Enter the mirror line equation."
+});
+export function castStatusMessage(room,situation,guidanceEnabled,firstChapterMessage){
+ if(!guidanceEnabled)return "Transformation applied. Inspect the new arrangement.";
+ if(room.chapter===1&&situation?.ready&&firstChapterMessage)return firstChapterMessage;
+ if(situation?.ready)return "Transformation applied. Try the route to the portal.";
+ return "Transformation applied. Check the new arrangement; another cast may help.";
+}
 export function contextualGuide(room,player,inspection,{casting=false,picking=false,canUndo=false,moves=0,situation=tutorialSituation(room)}={}){
   const c=situation?.config;if(!c)return null;
   if(player.blockedRespawn)return {step:"Recover",text:"You need to recover before moving. "+(canUndo?"Use Undo or Reset.":"Use Reset.")};
@@ -117,10 +142,10 @@ export function contextualGuide(room,player,inspection,{casting=false,picking=fa
     if(!inspection.type)return {step:"Choose transformation",text:"Read the selected object's allowed transformations and choose one."};
     if(inspection.preview?.ok)return {step:"Apply or revise",text:"Compare the ghost image with the obstacle. If it helps, select Apply. A clear preview is not necessarily a useful solution."};
     if(inspection.preview&&!inspection.preview.ok)return {step:"Revise",text:"Read the feedback, adjust the mathematical parameters and preview again. Rejected previews use no moves."};
-    return {step:"Enter parameters",text:(inspection.type===c.type?c.fields:({translate:"Enter the signed horizontal and vertical components of a column vector.",rotate:"Enter angle, direction and both centre coordinates.",enlarge:"Enter scale factor and both centre coordinates.",reflect:"Enter the mirror line equation."}[inspection.type]??c.fields))+" Preview is free."};
+    return {step:"Enter parameters",text:(room.chapter===1&&inspection.type===c.type?c.fields:(FIELD_GUIDES[inspection.type]??"Enter the mathematical parameters."))+" Preview is free."};
   }
   if(situation.ready)return {step:"Traverse",text:c.traverse};
-  return {step:"Explore",text:c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional."};
+  return {step:"Explore",text:room.chapter===1?c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional.":room.chapter===2?campaignGoal(room)+" Inspect the objects and plan how they could work together. Hints are optional.":campaignGoal(room)+" Plan a sequence on the same object. Use Hints only if needed."};
 }
 /** Stage 5 is the only stage that supplies parameter values as a worked answer.
  * Validate the proposed cast against the live world and apprentice before suggesting Apply.

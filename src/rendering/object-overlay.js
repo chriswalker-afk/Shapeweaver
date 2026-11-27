@@ -45,7 +45,18 @@ export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview){
     ctx.save();ctx.setLineDash?.([5,4]);ctx.lineWidth=1.5;ctx.strokeStyle=c;
     if(request.type==="translate")line(ctx,screen(camera,refs[0].point),screen(camera,geometry.points[0].point));
     if(request.type==="reflect"){
-      const seg=mirrorSegment(request.line,bounds);if(seg)line(ctx,screen(camera,seg[0]),screen(camera,seg[1]));
+      const seg=mirrorSegment(request.line,bounds);
+      if(seg){
+        const a=screen(camera,seg[0]),b=screen(camera,seg[1]);
+        ctx.lineWidth=2.2;line(ctx,a,b);
+        const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+        label(ctx,request.line.equation,Math.max(8,Math.min(camera.width-70,mx+8)),Math.max(12,Math.min(camera.height-12,my-14)),c);
+      }
+      for(let i=0;i<o.vertices.length;i++){
+        const a=screen(camera,refs[i].point),b=screen(camera,geometry.points[i].point);
+        ctx.strokeStyle=c;ctx.lineWidth=1;line(ctx,a,b);
+        if(Math.hypot(a.x-b.x,a.y-b.y)>5)dot(ctx,{x:(a.x+b.x)/2,y:(a.y+b.y)/2},c,2);
+      }
     }
     if(request.centre){
       const p=screen(camera,request.centre);
@@ -76,4 +87,14 @@ export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview){
     markReferences(ctx,camera,geometry.points,c,"′");
   }
   ctx.restore();
+}
+
+/** The cast is magical: a brief mirror shimmer, not a swept solid. */
+export function drawReflectionFlash(ctx,camera,bounds,mirror,progress){
+  const seg=mirrorSegment(mirror,bounds);if(!seg)return;
+  const a=screen(camera,seg[0]),b=screen(camera,seg[1]),alpha=Math.sin(Math.PI*Math.max(0,Math.min(1,progress)));
+  ctx.save();const tl=screen(camera,[bounds.minX,bounds.maxY]),br=screen(camera,[bounds.maxX,bounds.minY]);
+  ctx.beginPath();ctx.rect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.clip();
+  ctx.globalAlpha=alpha;ctx.strokeStyle="#c5a2f2";ctx.lineWidth=10;line(ctx,a,b);
+  ctx.strokeStyle="#f6e7ff";ctx.lineWidth=2;line(ctx,a,b);ctx.restore();
 }

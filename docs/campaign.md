@@ -86,3 +86,6 @@ The Stubborn Gate now has a playable room in `src/levels/stubborn-gate.js`. Its 
 
 ## Level 3 implementation (PR09)
 A Little Cheesy is implemented in `src/levels/little-cheesy.js`. The initial wedge is 6 units wide and 3 units high; the ledge is 9 units above the floor. A factor of 3 about (25,3) produces a walkable ramp. Smaller valid enlargements and fractional corrective casts are accepted. See [enlargement tutorial](enlargement-tutorial.md).
+
+## Level 4 implementation (PR10)
+The Missing Barrel places a barrel in a sealed store; reflection in x=15 puts it on the courtyard floor near the raised ledge. Two jumps and a walk reach the portal. All four introductory tutorials are now implemented; see [reflection tutorial](reflection-tutorial.md).

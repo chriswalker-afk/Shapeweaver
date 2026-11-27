@@ -2,6 +2,8 @@ import { GATEHOUSE_PREVIEW, validateRoom } from "../levels/gatehouse-preview.js"
 import { ACROSS_THE_BROOK, brookHint } from "../levels/across-the-brook.js";
 import { STUBBORN_GATE, gateHint } from "../levels/stubborn-gate.js";
 import { LITTLE_CHEESY, cheesyHint } from "../levels/little-cheesy.js";
+import { MISSING_BARREL, barrelHint } from "../levels/missing-barrel.js";
+import { previewReflection, commitReflection, reflectedFrame } from "../transformations/reflection.js";
 import { previewEnlargement, commitEnlargement, enlargedFrame } from "../transformations/enlargement.js";
 import { previewRotation, commitRotation, rotatedFrame } from "../transformations/rotation.js";
 import { previewTranslation, commitTranslation, translatedFrame } from "../transformations/translation.js";
@@ -15,7 +17,7 @@ import {createPlayer,stepPlayer} from "../physics/platformer.js";
 import {createFixedLoop} from "../core/fixed-loop.js";
 import {mountMovementInput} from "./movement-input.js";
 import {mountObjectInspector} from "./object-inspector.js";
-import {drawObjectOverlay} from "../rendering/object-overlay.js";
+import {drawObjectOverlay,drawReflectionFlash} from "../rendering/object-overlay.js";
 import { SNAP_STEPS,pickCoordinate,parseCoordinate,formatCoordinate,clientToScreen } from "../geometry/coordinates.js";
 
 // Keep spell dispatch and tutorial copy data-driven as new transformation types arrive.
@@ -31,9 +33,13 @@ const TUTORIALS=Object.freeze({
   enlarge:{label:"Enlargement",preview:previewEnlargement,commit:commitEnlargement,frame:enlargedFrame,duration:.8,hint:cheesyHint,
     objective:"Your goal: reach the high ledge. Open Objects, select the cheese wedge, and choose Enlargement. Compare the heights and choose a scale factor and centre.",
     casting:"The cheese is changing size.",after:"Check the ramp height and position. Walk up it towards the portal. You can resize again from safe ground if needed.",
-    ready:"Enlargement applied. Walk up the ramp if it reaches the ledge.",finished:"You reached the high ledge."}
+    ready:"Enlargement applied. Walk up the ramp if it reaches the ledge.",finished:"You reached the high ledge."},
+  reflect:{label:"Reflection",preview:previewReflection,commit:commitReflection,frame:reflectedFrame,duration:.8,hint:barrelHint,
+    objective:"Your goal: rescue the barrel from the sealed store and reach the raised ledge. Open Objects, select the barrel and choose Reflection. Enter the mirror line equation.",
+    casting:"The barrel is passing through the mirror.",after:"Check the barrel position. Jump onto the barrel, then jump onto the ledge and reach the portal. You can reflect again from safe ground.",
+    ready:"Reflection applied. Jump onto the barrel, then onto the ledge.",finished:"You rescued the barrel and reached the ledge."}
 });
-const LEVELS=Object.freeze({level1:ACROSS_THE_BROOK,level2:STUBBORN_GATE,level3:LITTLE_CHEESY});
+const LEVELS=Object.freeze({level1:ACROSS_THE_BROOK,level2:STUBBORN_GATE,level3:LITTLE_CHEESY,level4:MISSING_BARREL});
 const tutorialType=room=>room.tutorial?(room.tutorial.spell??"translate"):null;
 
 /** Movement practice room, coordinate inspection, and deterministic simulation. */
@@ -112,6 +118,7 @@ export function mountRoomPreview(document,view) {
     const frame=animation?TUTORIALS[animation.type].frame(room,animation.transition,animation.elapsed/animation.duration):room;
     renderWorld(ctx,metrics,camera,frame,images.art,player,reducedMotion());
     plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});
+    if(animation?.type==="reflect")drawReflectionFlash(ctx,camera,room.bounds,animation.transition.line,animation.elapsed/animation.duration);
     if(objectMode&&inspector){const s=inspector.getState();drawObjectOverlay(ctx,camera,room.bounds,s.objects,s.selected,s.preview);}
     updateControls();
   });

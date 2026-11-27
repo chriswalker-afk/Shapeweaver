@@ -19,7 +19,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   function populate(){select.replaceChildren(option("","Choose an object…"),...engine.objects().map(o=>option(o.id,o.label??o.id)));}
   populate();
   function canApply(){return Boolean(active&&type&&actions.canApply?.(type));}
-  function pathScope(){return {translate:"translation-path",rotate:"rotation-path",enlarge:"enlargement-path"}[type];}
+  function pathScope(){return {translate:"translation-path",rotate:"rotation-path",enlarge:"enlargement-path",reflect:"reflection-destination"}[type];}
   function syncApply(){
     if(apply){apply.hidden=!canApply();apply.disabled=!canApply()||!preview?.ok||preview.scope!==pathScope();apply.textContent=type?"Apply "+getSpell(type).label.toLowerCase():"Apply";}
     if(note)note.textContent=canApply()?"Preview, then apply when clear.":"Preview only for this spell/room.";
@@ -44,7 +44,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
     if(type==="rotate"){choice("angle","Angle",[["","Choose…"],["90","90°"],["180","180°"],["270","270°"]]);choice("direction","Direction",[["","Choose…"],["clockwise","Clockwise"],["anticlockwise","Anticlockwise"]]);}
     if(type==="enlarge")makeField("factor","Scale factor","e.g. 2 or 1/2");
     if(type==="rotate"||type==="enlarge"){makeField("cx","Centre x","x");makeField("cy","Centre y","y");}
-    if(type==="reflect")makeField("line","Mirror line","e.g. x = 5");
+    if(type==="reflect")makeField("line","Mirror line equation","e.g. x = 5");
     form.hidden=!type;syncApply();
   }
   function updateObject(){
@@ -61,7 +61,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   }
   function selectType(next){
     const o=engine.get(selected);
-    type=o?.permissions.includes(next)?next:null;preview=null;result.dataset.state="";spell.value=type??"";buildFields();result.textContent=type?"Enter mathematical parameters, then Preview.":"Choose a permitted transformation.";onChange();
+    type=o?.permissions.includes(next)?next:null;preview=null;result.dataset.state="";spell.value=type??"";buildFields();result.textContent=type==="reflect"?"Enter the mirror line: x = a, y = b, y = x or y = −x. Then Preview.":type?"Enter mathematical parameters, then Preview.":"Choose a permitted transformation.";onChange();
     return Boolean(type);
   }
   function showPreview(raw){

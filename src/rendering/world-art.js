@@ -186,6 +186,11 @@ function object(ctx,camera,item,art) {
       ctx.beginPath();ctx.moveTo(b.x+2,b.y+2);ctx.lineTo(b.x+b.w-2,b.y+b.h-2);ctx.stroke();
     }
   }
+  if(item.bearing==="both-ends"){
+    const b=screenBounds(camera,item.vertices),w=Math.max(3,Math.min(camera.scale*.5,b.w/4)),h=Math.min(b.h,Math.max(2,camera.scale*.22));
+    ctx.fillStyle="#e0b76e";ctx.fillRect(b.x,b.y+b.h-h,w,h);ctx.fillRect(b.x+b.w-w,b.y+b.h-h,w,h);
+    ctx.strokeStyle="#5c514c";ctx.lineWidth=.8;ctx.strokeRect(b.x,b.y+b.h-h,w,h);ctx.strokeRect(b.x+b.w-w,b.y+b.h-h,w,h);
+  }
   if(item.hinge){
     const p=xy(camera,item.hinge);ctx.beginPath();ctx.arc(p.x,p.y,Math.max(3,camera.scale*.13),0,Math.PI*2);
     ctx.fillStyle="#e7c186";ctx.fill();ctx.strokeStyle="#544357";ctx.lineWidth=1.5;ctx.stroke();
@@ -235,6 +240,26 @@ function clockworkBackdrop(ctx,camera,room){
   }
   const a=worldToScreen(camera,{x:room.bounds.minX,y:10.5}),b=worldToScreen(camera,{x:room.bounds.maxX,y:10.5});
   ctx.strokeStyle="#aa90664d";ctx.lineWidth=Math.max(2,s*.26);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+}
+function riverworksBackdrop(ctx,camera,room){
+  // Hazy aqueducts and dock gantries are scenic silhouettes, never solid.
+  const s=camera.scale,b=room.bounds;
+  ctx.save();
+  for(let i=0;i<Math.ceil((b.maxX-b.minX)/8)+1;i++){
+    const p=worldToScreen(camera,{x:b.minX+i*8,y:3}),h=s*(5+(i%3)*1.15),w=s*6.4;
+    ctx.fillStyle="#41677955";ctx.fillRect(p.x-w*.55,p.y-h,w*.12,h);
+    ctx.fillRect(p.x+w*.45,p.y-h,w*.12,h);
+    ctx.strokeStyle="#547b875d";ctx.lineWidth=Math.max(2,s*.36);
+    ctx.beginPath();ctx.moveTo(p.x-w*.5,p.y-h*.36);ctx.quadraticCurveTo(p.x,p.y-h*1.5,p.x+w*.5,p.y-h*.36);ctx.stroke();
+    ctx.fillStyle="#547b8766";ctx.fillRect(p.x-w*.62,p.y-h,w*1.24,Math.max(2,s*.28));
+  }
+  for(let i=0;i<Math.ceil((b.maxX-b.minX)/14);i++){
+    const p=worldToScreen(camera,{x:b.minX+5+i*14,y:3}),h=s*8;
+    ctx.strokeStyle="#2e56646b";ctx.lineWidth=Math.max(1,s*.16);
+    ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,p.y-h);ctx.lineTo(p.x+s*3.4,p.y-h);ctx.lineTo(p.x,p.y-h*.63);ctx.stroke();
+    ctx.strokeStyle="#3c626c66";ctx.beginPath();ctx.moveTo(p.x+s*3.4,p.y-h);ctx.lineTo(p.x+s*3.4,p.y-h*.52);ctx.stroke();
+  }
+  ctx.restore();
 }
 function drawSockets(ctx,camera,room){
   for(const socket of room.sockets??[]){
@@ -342,13 +367,14 @@ function apprentice(ctx,camera,player,art,reducedMotion) {
 /** A deterministic scene draw. Art never modifies the room or collision polygons. */
 export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,reducedMotion=false) {
   ctx.setTransform(metrics.scaleX,0,0,metrics.scaleY,0,0);
-  const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===3?"#34434e":room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===3?"#a6a99b":room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
-  if(room.chapter!==2&&room.chapter!==3){backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);}
+  const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===4?"#31596d":room.chapter===3?"#34434e":room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===4?"#b4d0ca":room.chapter===3?"#a6a99b":room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
+  if(![2,3,4].includes(room.chapter)){backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);}
   ctx.save();
   const b=room.bounds,tl=worldToScreen(camera,{x:b.minX,y:b.maxY}),br=worldToScreen(camera,{x:b.maxX,y:b.minY});
   ctx.beginPath();ctx.rect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.clip();
   if(room.chapter===2)gardenBackdrop(ctx,camera,room);
   if(room.chapter===3)clockworkBackdrop(ctx,camera,room);
+  if(room.chapter===4)riverworksBackdrop(ctx,camera,room);
   sceneDetails(ctx,camera,room);
   for(const item of room.hazards)hazard(ctx,camera,item,art);
   for(const item of room.terrain)terrain(ctx,camera,item,art);
@@ -365,6 +391,8 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   for(const item of room.decor)decorate(ctx,camera,item);
   portal(ctx,camera,room.exit,art);apprentice(ctx,camera,player,art,reducedMotion);
   if(room.id==="gardens-06"){const m=room.objects.find(o=>o.kind==="mushroom"),b=polygonBounds(m.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.65,"SPRING CAP","#f9dcb4");}
+  if(room.id==="riverworks-13")worldLabel(ctx,camera,42,1.5,"CENTRAL PIER","#f7d7a1");
+  if(room.id==="riverworks-14")worldLabel(ctx,camera,6,5.6,"STORAGE RACK","#f7d7a1");
   if(room.id==="clockwork-10")worldLabel(ctx,camera,21.5,6.65,"LOW ARCH","#f1d09b");
   if(room.tutorial){objectRunes(ctx,camera,room);worldLabel(ctx,camera,room.exit.x,room.exit.y+room.exit.height+.35,"EXIT","#ffe2a5");}
   ctx.restore();

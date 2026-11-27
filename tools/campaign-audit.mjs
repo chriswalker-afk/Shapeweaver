@@ -9,6 +9,7 @@ import {GARDEN_BRIDGE,GARDEN_SECRET} from "../src/levels/enchanted-gardens.js";
 import {LADDER_SOLUTION,ABOVE_SOLUTION} from "../src/levels/garden-finale.js";
 import {HINGE_SOLUTION,SQUEEZE_SOLUTION} from "../src/levels/clockwork-gallery.js";
 import {WEDGE_SOLUTION,KEY_SOLUTION} from "../src/levels/clockwork-finale.js";
+import {BRIDGE_BUILDERS_SOLUTION,BROKEN_STAIRCASE_SOLUTION} from "../src/levels/riverworks.js";
 import {createPhysicsWorld} from "../src/physics/collision.js";
 import {createPlayer,stepPlayer} from "../src/physics/platformer.js";
 import {commitTranslation} from "../src/transformations/translation.js";
@@ -36,7 +37,9 @@ export const RECORDED_ROUTES=deepFreeze([
  [8,ABOVE_SOLUTION,[[142,1,0],[90,1,1],[20,0,0],[90,1,1],[450,1,0]]],
  [9,HINGE_SOLUTION,[[245,1,0],[120,1,1],[600,1,0]]],
  [10,SQUEEZE_SOLUTION,[[345,1,0],[120,1,1],[600,1,0]]],
- [11,WEDGE_SOLUTION,walk(1000)],[12,KEY_SOLUTION,walk(1000)]
+ [11,WEDGE_SOLUTION,walk(1000)],[12,KEY_SOLUTION,walk(1000)],
+ [13,BRIDGE_BUILDERS_SOLUTION,[[455,1,0],[120,1,1],[800,1,0]]],
+ [14,BROKEN_STAIRCASE_SOLUTION,[[410,1,0],[60,1,1],[75,0,0],[75,1,1],[55,1,0],[1,0,1],[290,0,0,1],[1,1,1],[350,1,0]]]
 ].map(([number,casts,route])=>({number,casts,route})));
 export function replayRoute(world,route){
  let player=createPlayer(world),ticks=0;
@@ -65,11 +68,11 @@ function invariantErrors(before,after,cast){
 /** Bounded, reproducible exploration, not a general platformer or spell solver.
  * Walk right; once each chosen delay elapses, jump from ground at eight-tick
  * intervals. Stop at the first respawn. Record exact timing of any success. */
-export function shortcutProbe(world){
+export function shortcutProbe(world,maxTicks=1000){
  const successes=[];
  for(const delay of [0,60,120,180,240,300,360,420]){
   let p=createPlayer(world);
-  for(let tick=0;tick<1000;tick++){
+  for(let tick=0;tick<maxTicks;tick++){
    p=stepPlayer(world,p,{move:1,jump:tick>=delay&&p.grounded&&tick%8===0});
    if(p.completed){successes.push({delay,ticks:tick+1});break;}
    if(p.respawns||p.blockedRespawn)break;
@@ -82,10 +85,11 @@ export function auditLevel(fixture,{probe=false}={}){
  if(!level)throw Error("Missing released level "+fixture.number);
  const room=validateRoom(level.room),initial=createPhysicsWorld(room),spawn=createPlayer(initial);
  const errors=[],sampledShortcuts=[],partialRoutes=[],thresholds=starThresholds(room);
+ const probeTicks=Math.max(1000,fixture.route.reduce((n,segment)=>n+segment[0],0));
  let world=initial,history=createAttemptHistory();
  const initialReplay=replayRoute(initial,fixture.route).player;
  if(initialReplay.completed)errors.push("Recorded route bypasses all spells");
- if(probe)for(const hit of shortcutProbe(initial))sampledShortcuts.push({casts:0,sequence:"none",...hit});
+ if(probe)for(const hit of shortcutProbe(initial,probeTicks))sampledShortcuts.push({casts:0,sequence:"none",...hit});
  for(const [i,s] of fixture.casts.entries()){
   const before=world.room.objects.find(o=>o.id===s.objectId);
   const tx=commits[s.type](world.room,spawn,s.objectId,s);
@@ -96,17 +100,24 @@ export function auditLevel(fixture,{probe=false}={}){
    const result=replayRoute(world,fixture.route).player;
    partialRoutes.push({casts:i+1,completed:result.completed});
    if(result.completed)errors.push("Recorded route succeeds after only "+(i+1)+" cast(s)");
-   if(probe)for(const hit of shortcutProbe(world))sampledShortcuts.push({casts:i+1,sequence:s.type,...hit});
+   if(probe)for(const hit of shortcutProbe(world,probeTicks))sampledShortcuts.push({casts:i+1,sequence:s.type,...hit});
   }
  }
- // A legal second spell on its own may also be tested independently.
- if(fixture.casts.length===2){
-  const s=fixture.casts[1],tx=commits[s.type](room,spawn,s.objectId,s);
-  if(tx.ok){
-   const p=replayRoute(tx.physics,fixture.route).player;
-   partialRoutes.push({casts:1,sequence:"second alone",completed:p.completed});
-   if(p.completed)errors.push("Recorded route succeeds with second cast alone");
-   if(probe)for(const hit of shortcutProbe(tx.physics))sampledShortcuts.push({casts:1,sequence:"second alone",...hit});
+ // Test every other proper ordered subset for two- and three-cast puzzles.
+ // Prefixes were already tested above. Illegal subsets are not viable routes.
+ if(fixture.casts.length>=2&&fixture.casts.length<=3){
+  for(let mask=1;mask<(1<<fixture.casts.length)-1;mask++){
+   if((mask&(mask+1))===0)continue;
+   let partial=initial,legal=true;const subset=[];
+   for(const [i,s] of fixture.casts.entries())if(mask&(1<<i)){
+    const tx=commits[s.type](partial.room,spawn,s.objectId,s);
+    if(!tx.ok){legal=false;break;}partial=tx.physics;subset.push(i+1);
+   }
+   if(!legal)continue;
+   const p=replayRoute(partial,fixture.route).player,sequence="casts "+subset.join(",");
+   partialRoutes.push({casts:subset.length,sequence,completed:p.completed});
+   if(p.completed)errors.push("Recorded route succeeds with only "+sequence);
+   if(probe)for(const hit of shortcutProbe(partial,probeTicks))sampledShortcuts.push({casts:subset.length,sequence,...hit});
   }
  }
  const {player,ticks}=replayRoute(world,fixture.route),result=completedResult(world.room,player,history);

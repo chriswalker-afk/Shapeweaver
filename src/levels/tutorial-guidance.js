@@ -1,6 +1,7 @@
 import {polygonBounds,deepFreeze} from "../geometry/world.js";
 import {gardenSituation} from "./garden-guidance.js";
 import {clockworkSituation} from "./clockwork-guidance.js";
+import {riverworksSituation} from "./riverworks-guidance.js";
 import {referencePoints} from "../transformations/preview-math.js";
 import {previewTranslation} from "../transformations/translation.js";
 import {previewRotation} from "../transformations/rotation.js";
@@ -59,6 +60,7 @@ export function tutorialConfig(room){return CONFIG[room?.id]??null;}
 export function tutorialSituation(room){
   if(room?.chapter===2)return gardenSituation(room);
   if(room?.chapter===3)return clockworkSituation(room);
+  if(room?.chapter===4)return riverworksSituation(room);
   const config=tutorialConfig(room),o=room?.objects.find(v=>v.id===config?.objectId);
   if(!config||!o)return null;
   const b=polygonBounds(o.vertices),a=ref(o,"A");
@@ -115,7 +117,9 @@ const CHALLENGE_GOALS=deepFreeze({
  "clockwork-09":"Cross the machine channel.",
  "clockwork-10":"Find a route under the arch and across the channel.",
  "clockwork-11":"Reach the high landing.",
- "clockwork-12":"Unlock the gate and reach the portal."
+ "clockwork-12":"Unlock the gate and reach the portal.",
+ "riverworks-13":"Cross both channels of the river.",
+ "riverworks-14":"Reach the upper works."
 });
 export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
 const FIELD_GUIDES=Object.freeze({
@@ -137,7 +141,7 @@ export function contextualGuide(room,player,inspection,{casting=false,picking=fa
   if(casting)return {step:"Cast",text:"The transformation is being applied. Movement resumes when the animation finishes."};
   if(picking)return {step:"Read coordinates",text:"Use the grid to inspect coordinates. Close Pick point before selecting an object or moving."};
   if(inspection?.active){
-    if(situation.ready)return {step:"Traverse",text:"The object is in a useful position. Close Objects, then "+c.traverse.charAt(0).toLowerCase()+c.traverse.slice(1)};
+    if(situation.ready)return {step:"Traverse",text:"The route appears ready. Close Objects, then "+c.traverse.charAt(0).toLowerCase()+c.traverse.slice(1)};
     if(!inspection.selected)return {step:"Select object",text:"Select an outlined object on the map or choose one from the list. The apprentice does not need to stand beside it."};
     if(!inspection.type)return {step:"Choose transformation",text:"Read the selected object's allowed transformations and choose one."};
     if(inspection.preview?.ok)return {step:"Apply or revise",text:"Compare the ghost image with the obstacle. If it helps, select Apply. A clear preview is not necessarily a useful solution."};
@@ -145,7 +149,7 @@ export function contextualGuide(room,player,inspection,{casting=false,picking=fa
     return {step:"Enter parameters",text:(room.chapter===1&&inspection.type===c.type?c.fields:(FIELD_GUIDES[inspection.type]??"Enter the mathematical parameters."))+" Preview is free."};
   }
   if(situation.ready)return {step:"Traverse",text:c.traverse};
-  return {step:"Explore",text:room.chapter===1?c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional.":room.chapter===2?campaignGoal(room)+" Inspect the objects and plan how they could work together. Hints are optional.":campaignGoal(room)+" Plan a sequence on the same object. Use Hints only if needed."};
+  return {step:"Explore",text:room.chapter===1?c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional.":room.chapter===2?campaignGoal(room)+" Inspect the objects and plan how they could work together. Hints are optional.":room.chapter===3?campaignGoal(room)+" Plan a sequence on the same object. Use Hints only if needed.":campaignGoal(room)+" Consider how the pieces can support one another. Hints are optional."};
 }
 /** Stage 5 is the only stage that supplies parameter values as a worked answer.
  * Validate the proposed cast against the live world and apprentice before suggesting Apply.

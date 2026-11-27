@@ -131,7 +131,7 @@ function object(ctx,camera,item,art) {
       for(let y=b.y;y<b.y+b.h;y+=camera.scale*1.2){ctx.fillStyle="#bca878";ctx.fillRect(b.x,y,b.w,Math.max(2,camera.scale*.1));}
       outline(ctx,camera,item.vertices,"#394c42",2);
     }
-  }else if(item.kind==="key"){
+  }else if(item.material==="brass"){
     const b=screenBounds(camera,item.vertices);
     polygon(ctx,camera,item.vertices);ctx.fillStyle="#c79e5e";ctx.fill();
     ctx.save();ctx.clip();const metal=ctx.createLinearGradient(b.x,b.y,b.x+b.w,b.y+b.h);

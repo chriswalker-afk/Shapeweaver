@@ -7,7 +7,7 @@ export const WRONG_WAY_ROUND=deepFreeze({
  spawn:{x:1.5,y:3},exit:{x:41,y:9,width:2.2,height:3.1},
  terrain:[stone("gallery-floor",0,0,44,3),stone("high-landing",34,3,10,6)],
  hazards:[],
- objects:[{id:"clockwork-wedge",label:"Asymmetric brass wedge",kind:"wedge",material:"cheese",vertices:[[8,3],[12,3],[8,5]],permissions:["reflect","enlarge"],support:"supported",scaleRange:[.5,3]}],
+ objects:[{id:"clockwork-wedge",label:"Asymmetric brass wedge",kind:"wedge",material:"brass",vertices:[[8,3],[12,3],[8,5]],permissions:["reflect","enlarge"],support:"supported",scaleRange:[.5,3]}],
  ladders:[],checkpoints:[{id:"upper-gallery",x:37,y:9}],
  decor:[{kind:"lantern",x:4,y:5},{kind:"lantern",x:20,y:5},{kind:"lantern",x:37,y:11},{kind:"lantern",x:43,y:11}],
  tutorial:{spells:["reflect","enlarge"],mathDifficulty:4,puzzleDifficulty:3,efficientMoves:2}

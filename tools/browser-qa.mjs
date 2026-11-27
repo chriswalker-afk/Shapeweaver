@@ -15,7 +15,7 @@ const cases=[
  ["cheesy-wedge","enlarge",{factor:"3",cx:"25",cy:"3"}],
  ["missing-barrel","reflect",{line:"x=15"}]
 ];
-const clockwork=[[["socket-beam","translate",{dx:"11",dy:"0"}],["socket-beam","rotate",{angle:"90",direction:"clockwise",cx:"17",cy:"3"}]],[["clearance-plank","rotate",{angle:"90",direction:"clockwise",cx:"6",cy:"3"}],["clearance-plank","translate",{dx:"17",dy:"0"}]]];
+const clockwork=[[["socket-beam","translate",{dx:"11",dy:"0"}],["socket-beam","rotate",{angle:"90",direction:"clockwise",cx:"17",cy:"3"}]],[["clearance-plank","rotate",{angle:"90",direction:"clockwise",cx:"6",cy:"3"}],["clearance-plank","translate",{dx:"17",dy:"0"}]],[["clockwork-wedge","reflect",{line:"x=13"}],["clockwork-wedge","enlarge",{factor:"3",cx:"10",cy:"3"}]],[["brass-key","enlarge",{factor:"2",cx:"8",cy:"5"}],["brass-key","rotate",{angle:"90",direction:"clockwise",cx:"13",cy:"8"}]]];
 const gardens=[ [["garden-beam","translate",{dx:"12",dy:"0"}],["garden-hinge","rotate",{angle:"90",direction:"anticlockwise",cx:"37",cy:"8"}]], [["garden-barrel","reflect",{line:"x=9"}],["garden-mushroom","enlarge",{factor:"2",cx:"30",cy:"3"}]], [["garden-ladder","rotate",{angle:"90",direction:"anticlockwise",cx:"24",cy:"12"}],["ladder-crate","translate",{dx:"17",dy:"0"}]], [["mirror-platform","reflect",{line:"y=3"}],["garden-wedge","enlarge",{factor:"3",cx:"34",cy:"7"}]] ];
 try{
  for(const [name,width,height,touch] of [["desktop",1366,768,false],["small-desktop",1024,600,false],["landscape-phone",844,390,true],["portrait-phone",390,844,true]]){
@@ -26,15 +26,15 @@ try{
   await page.locator("#campaign-view").waitFor();
   assert.equal(await page.locator(".chapter-card").count(),7);
   assert.equal(await page.locator(".chapter-card:disabled").count(),4);
-  assert.equal(await page.locator(".library-level").count(),10);
+  assert.equal(await page.locator(".library-level").count(),12);
   await page.locator("#filter-spell").selectOption("reflect");
-  assert.equal(await page.locator(".library-level").count(),3);
+  assert.equal(await page.locator(".library-level").count(),4);
   await page.locator(".library-level").filter({hasText:"The Missing Barrel"}).click();
   assert.match(await page.locator("#room-heading").innerText(),/The Missing Barrel/);
   await page.locator("#close-room").click();
   await page.locator("#open-campaign").click();
   await page.locator("#campaign-clear").click();
-  assert.equal(await page.locator(".library-level").count(),10);
+  assert.equal(await page.locator(".library-level").count(),12);
   await page.screenshot({path:out+"/"+name+"-campaign.png",fullPage:true});
   await page.locator("#campaign-resume").click();
   assert.match(await page.locator("#room-heading").innerText(),/Across the Brook/);
@@ -67,7 +67,7 @@ try{
    await page.locator("#campaign-clear").click();
    const chapter=index<4?"2":"3";
    await page.locator("#filter-chapter").selectOption(chapter);
-   assert.equal(await page.locator(".library-level").count(),chapter==="2"?4:2);
+   assert.equal(await page.locator(".library-level").count(),4);
    await page.locator(".library-level").nth(index<4?index:index-4).click();
    await page.locator("#room-canvas").waitFor();
    const initial=await page.locator("#room-stage").boundingBox();
@@ -86,6 +86,7 @@ try{
     if(id==="garden-ladder")assert.match(await page.locator("#object-result").innerText(),/upright and climbable/);
     if(id==="socket-beam"&&type==="translate")assert.match(await page.locator("#object-result").innerText(),/Hinge will dock/);
     if(id==="socket-beam"&&type==="rotate")assert.match(await page.locator("#object-permissions").innerText(),/\(docked\)/);
+    if(id==="brass-key"&&type==="rotate")assert.match(await page.locator("#object-result").innerText(),/Key will fit.*gate will open/);
     await page.screenshot({path:out+"/"+name+"-level"+(index+5)+"-cast"+(move+1)+".png",fullPage:true});
     await page.locator("#object-apply").click();
     assert.match(await page.locator("#tutorial-moves").innerText(),new RegExp("Moves: "+(move+1)));

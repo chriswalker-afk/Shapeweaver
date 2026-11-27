@@ -16,6 +16,7 @@ export function validateShapeSockets(room){
  for(const s of room.shapeSockets??[]){
   if(typeof s.id!=="string"||ids.has(s.id)||!Array.isArray(s.vertices)||!boundsContain(room.bounds,polygonBounds(s.vertices))||signedArea(s.vertices)<=GEOMETRY_EPS||!room.objects.some(o=>o.id===s.objectId&&!o.decorative&&o.permissions?.length)||!room.objects.some(g=>g.id===s.gateId&&g.kind==="linked-gate"&&g.permissions?.length===0))throw Error("Invalid shape socket: "+s.id);
   triangulate(s.vertices);
+  if(s.filled!==shapeSocketFilled(room,s))throw Error("Invalid shape socket state: "+s.id);
   if([...room.terrain,...room.hazards].some(o=>polygonsOverlap(s.vertices,o.vertices)))throw Error("Shape socket overlaps solid terrain or hazard: "+s.id);
   ids.add(s.id);
  }

@@ -125,3 +125,48 @@ test("third tutorial requires explicit positive factor and centre, previews, app
   c.inspector.showPreview({factor:1.5,cx:4,cy:3});assert.equal(els["object-apply"].hidden,true);c.destroy();
  }
 });
+
+test("fourth tutorial validates mirror equation, commits a magical transfer and completes two jumps",()=>{
+ for(const reduce of [false,true]){
+  const {els,view,controller:c,frame}=fixture(reduce),click=id=>els[id].fire("click");
+  c.setLevel("level4");c.setActive(true);assert.equal(c.room.id,"gatehouse-04");
+  assert.match(els["room-chapter"].textContent,/Level 4.*Reflection/);
+  assert.match(els["tutorial-guide"].textContent,/rescue the barrel/);
+  click("tutorial-hint");click("tutorial-hint");assert.match(els["tutorial-guide"].textContent,/midpoint/);
+  click("object-toggle");const p=worldToScreen(c.getCamera(),{x:4.5,y:4.2});
+  els["room-canvas"].fire("click",{clientX:p.x,clientY:p.y});
+  assert.equal(c.inspector.getState().selected,"missing-barrel");assert.equal(c.inspector.selectType("translate"),false);
+  els["object-spell"].value="reflect";els["object-spell"].fire("change");
+  const field=els["object-fields"].querySelectorAll().find(x=>x.name==="line");
+  field.value="x=2x";els["object-form"].fire("submit");assert.equal(c.inspector.getState().preview.code,"parameters");
+  assert.equal(els["object-apply"].disabled,true);
+  field.value="x=6";els["object-form"].fire("submit");assert.equal(c.inspector.getState().preview.code,"solid-overlap");
+  assert.equal(els["object-apply"].disabled,true);
+  field.value="x = 15";els["object-form"].fire("submit");assert.equal(els["object-apply"].disabled,false);
+  assert.equal(els["object-apply"].textContent,"Apply reflection");
+  field.value="x=14.5";click("object-apply");assert.equal(c.getRecords().length,0);
+  assert.equal(c.inspector.getState().preview.request.line.value,14.5);
+  field.value="x=15";els["object-fields"].fire("input");assert.equal(els["object-apply"].disabled,true);
+  els["object-form"].fire("submit");click("object-apply");
+  assert.deepEqual(c.getRecords(),[{objectId:"missing-barrel",type:"reflect",line:"x = 15"}]);
+  assert.deepEqual(c.room.objects[0].vertices,[[27,5.5],[24,5.5],[24,3],[27,3]]);
+  assert.deepEqual(c.room.objects[0].vertexIds,["D","C","B","A"]);
+  assert.equal(els["object-toggle"].disabled,!reduce);
+  if(!reduce){assert.equal(c.setObjectMode(true),false);assert.equal(c.setPicking(true),false);}
+  frame(55);assert.equal(els["object-toggle"].disabled,false);assert.equal(c.getPlayer().x,10);
+  // Each animation frame advances two physics ticks after the initial frame.
+  // An exact odd-tick approach isn't necessary: the jump window is forgiving.
+  const down=code=>view.fire("keydown",{code}),up=code=>view.fire("keyup",{code});
+  down("ArrowRight");frame(88);down("Space");frame(30);up("Space");up("ArrowRight");frame(20);
+  assert.equal(c.getPlayer().grounded,true);assert.ok(Math.abs(c.getPlayer().y-5.5)<.04);
+  down("ArrowRight");down("Space");frame(28);up("Space");frame(72);up("ArrowRight");
+  assert.equal(c.getPlayer().completed,true);assert.equal(c.getPlayer().respawns,0);
+  assert.match(els["tutorial-guide"].textContent,/using 1 reflection/);
+  click("reset-practice");assert.deepEqual(c.room.objects[0].vertices,[[3,3],[6,3],[6,5.5],[3,5.5]]);
+  assert.equal(c.room.objects[0].vertexIds,undefined);assert.equal(c.getRecords().length,0);
+  c.setLevel("level3");assert.match(els["room-chapter"].textContent,/Level 3.*Enlargement/);
+  c.setLevel("room");click("object-toggle");c.inspector.selectObject("wedge");c.inspector.selectType("reflect");
+  c.inspector.showPreview({line:"x=5.2"});assert.equal(els["object-apply"].hidden,true);
+  c.destroy();
+ }
+});

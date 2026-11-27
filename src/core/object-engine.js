@@ -10,6 +10,7 @@ export function validateObjectDefinitions(room){
   for(const o of room.objects){
     if(o.decorative){if(o.permissions?.length)throw new Error("Decorative objects cannot be selected");continue;}
     triangulate(o.vertices);
+    if(o.vertexIds!==undefined&&(!Array.isArray(o.vertexIds)||o.vertexIds.length!==o.vertices.length||new Set(o.vertexIds).size!==o.vertexIds.length||o.vertexIds.some(id=>typeof id!=="string"||!id.length)))throw new Error("Invalid vertex IDs: "+o.id);
     if(!Array.isArray(o.permissions)||new Set(o.permissions).size!==o.permissions.length||o.permissions.some(t=>!TYPES.includes(t)))throw new Error("Invalid permissions: "+o.id);
     if(!["supported","hinged","enchanted"].includes(o.support))throw new Error("Invalid support mode: "+o.id);
     if(o.support==="hinged"&&(!Array.isArray(o.hinge)||o.hinge.length!==2||!o.hinge.every(Number.isFinite)||!o.permissions.every(t=>t==="rotate")||pointPolygonDistance(o.hinge,o.vertices)>GEOMETRY_EPS))throw new Error("Invalid hinge: "+o.id);
@@ -33,8 +34,8 @@ function playerOnObject(object,player){
   const box=playerBox(player),probe={...box,minY:box.minY-.035,maxY:box.maxY-.035};
   return !polygonIntersectsBox(object.vertices,box)&&polygonIntersectsBox(object.vertices,probe);
 }
-/** Shared final-pose validator; spell-specific sweep/path validation is NOT yet implemented.
- * The result is never a commit authorisation. Future Apply must revalidate current state and path. */
+/** Shared final-pose validator. Apply must revalidate through the chosen spell-specific
+ * validator, which defines whether travel is continuous or a magical transfer. */
 export function previewObject(room,player,id,type,raw){
   const object=selectableObjects(room).find(o=>o.id===id);
   if(!object)return failure("not-selectable","Choose an interactive object.");

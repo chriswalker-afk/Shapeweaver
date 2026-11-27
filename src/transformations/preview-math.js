@@ -60,14 +60,15 @@ export function transformPoint(p,request){
 }
 /** Preserve vertex IDs even when reflection reverses winding. */
 export function referencePoints(object){
-  return object.vertices.map((p,i)=>({id:i<26?String.fromCharCode(65+i):"V"+(i+1),point:[...p]}))
+  return object.vertices.map((p,i)=>({id:object.vertexIds?.[i]??(i<26?String.fromCharCode(65+i):"V"+(i+1)),point:[...p]}))
     .concat(object.hinge?[{id:object.vertices.length>=8?"Hinge":"H",point:[...object.hinge]}]:[]);
 }
 export function previewGeometry(object,request){
   const points=referencePoints(object).map(ref=>({id:ref.id,point:transformPoint(ref.point,request)}));
   const vertices=points.slice(0,object.vertices.length).map(ref=>[...ref.point]);
-  if(signedArea(vertices)<0)vertices.reverse();
-  return {vertices,points,hinge:object.hinge?points.at(-1).point:null};
+  const vertexIds=points.slice(0,object.vertices.length).map(ref=>ref.id);
+  if(signedArea(vertices)<0){vertices.reverse();vertexIds.reverse();}
+  return {vertices,vertexIds,points,hinge:object.hinge?points.at(-1).point:null};
 }
 export function isIdentity(object,geometry){
   return referencePoints(object).every((ref,i)=>Math.hypot(ref.point[0]-geometry.points[i].point[0],ref.point[1]-geometry.points[i].point[1])<=GEOMETRY_EPS);

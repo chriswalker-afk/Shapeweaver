@@ -97,6 +97,21 @@ function object(ctx,camera,item,art) {
       ctx.fillStyle="#b77b4d";ctx.fill();
     }
     ctx.restore();outline(ctx,camera,item.vertices,"#8e5b42",2);
+  }else if(item.kind==="barrel"&&item.vertices.length===4&&(!item.vertexIds||["A","B","C","D"].every(id=>item.vertexIds.includes(id)))){
+    const ids=item.vertexIds??["A","B","C","D"];
+    const a=xy(camera,item.vertices[ids.indexOf("A")]),b=xy(camera,item.vertices[ids.indexOf("B")]),d=xy(camera,item.vertices[ids.indexOf("D")]);
+    const ux=b.x-a.x,uy=b.y-a.y,vx=d.x-a.x,vy=d.y-a.y,w=Math.hypot(ux,uy),h=Math.hypot(vx,vy);
+    ctx.save();polygon(ctx,camera,item.vertices);ctx.clip();
+    ctx.translate(a.x,a.y);ctx.rotate(Math.atan2(uy,ux));
+    if(typeof ctx.scale==="function")ctx.scale(1,Math.sign(ux*vy-uy*vx));
+    ctx.fillStyle="#b48960";ctx.fillRect(0,0,w,h);
+    if(art.timber)ctx.drawImage(art.timber,0,0,w,h);
+    ctx.strokeStyle="#74513f";ctx.lineWidth=Math.max(1,w*.025);
+    for(const u of [.18,.38,.62,.82]){ctx.beginPath();ctx.moveTo(w*u,0);ctx.quadraticCurveTo(w*u+(u-.5)*w*.12,h*.5,w*u,h);ctx.stroke();}
+    ctx.fillStyle="#817d86";for(const v of [.14,.77])ctx.fillRect(0,v*h,w,h*.10);
+    ctx.fillStyle="#e5c390";ctx.beginPath();ctx.ellipse(w*.27,h*.58,w*.075,h*.09,0,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle="#674b40";ctx.lineWidth=1.4;ctx.stroke();
+    ctx.restore();outline(ctx,camera,item.vertices,"#513d46",2);
   }else if(item.kind==="gate"&&item.vertices.length===4){
     // Align timber grain and metal straps to the gate itself, not the camera-aligned AABB.
     const a=xy(camera,item.vertices[0]),b=xy(camera,item.vertices[3]),d=xy(camera,item.vertices[1]);
@@ -183,7 +198,10 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   for(const item of room.hazards)hazard(ctx,camera,item,art);
   for(const item of room.terrain)terrain(ctx,camera,item,art);
   for(const item of room.ladders??[])ladder(ctx,camera,item);
-  for(const item of room.objects)object(ctx,camera,item,art);
+  for(const item of room.objects){
+    if(item.reflectionOpacity!==undefined){ctx.save();ctx.globalAlpha=item.reflectionOpacity;object(ctx,camera,item,art);ctx.restore();}
+    else object(ctx,camera,item,art);
+  }
   for(const item of room.checkpoints??[])checkpoint(ctx,camera,item,player.checkpoint===item.id);
   for(const item of room.decor)decorate(ctx,camera,item);
   portal(ctx,camera,room.exit,art);apprentice(ctx,camera,player,art,reducedMotion);

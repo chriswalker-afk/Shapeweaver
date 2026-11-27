@@ -28,3 +28,6 @@ Actual rotation is available in Level 2, with complete signed-arc validation and
 
 ## PR09 update
 Actual positive enlargement is available in Level 3, with a full homothetic swept-volume check and the shared atomic transaction. Fractions and positive decimals are supported within each object's per-cast range. Reflection remains preview-only. See [enlargement tutorial](enlargement-tutorial.md).
+
+## PR10 update
+Reflection commits in Level 4 using a destination-only safety validator: the transfer is magical, not a swept solid. Vertex IDs now persist through CCW winding reversal and subsequent casts. All four tutorial spells use the common transaction boundary. Practice remains preview-only.

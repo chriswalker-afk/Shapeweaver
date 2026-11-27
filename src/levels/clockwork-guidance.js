@@ -2,6 +2,7 @@ import {polygonBounds} from "../geometry/world.js";
 import {dockedSocket} from "../mechanisms/hinge-sockets.js";
 import {referencePoints} from "../transformations/preview-math.js";
 import {previewRotation} from "../transformations/rotation.js";
+import {clockworkFinaleSituation} from "./clockwork-finale-guidance.js";
 const round=n=>Number(n.toFixed(8)),near=(a,b)=>Math.abs(a-b)<1e-7,point=p=>"("+p.map(round).join(", ")+")";
 const state=(config,ready,reasoning,worked,raw)=>({config,ready,reasoning,worked,raw});
 const traverse="Walk towards the bridge, jump onto the plank and continue across to the portal.";
@@ -21,6 +22,7 @@ function rotateHint(room,o,objective,obstacle){
  raw?"Rotate "+raw.angle+"° "+raw.direction+" about "+point(h)+".":"The orientation is already rightward. Try translation or use Undo if the arc is obstructed.",raw);
 }
 export function clockworkSituation(room){
+ if(room.id==="clockwork-11"||room.id==="clockwork-12")return clockworkFinaleSituation(room);
  const o=room.objects[0],b=polygonBounds(o.vertices),h=o.hinge;
  const rightward=near(b.minX,h[0])&&near(b.minY,h[1])&&near(b.maxX-h[0],12)&&near(b.maxY-h[1],.5);
  if(room.id==="clockwork-09"){

@@ -131,6 +131,15 @@ function object(ctx,camera,item,art) {
       for(let y=b.y;y<b.y+b.h;y+=camera.scale*1.2){ctx.fillStyle="#bca878";ctx.fillRect(b.x,y,b.w,Math.max(2,camera.scale*.1));}
       outline(ctx,camera,item.vertices,"#394c42",2);
     }
+  }else if(item.kind==="key"){
+    const b=screenBounds(camera,item.vertices);
+    polygon(ctx,camera,item.vertices);ctx.fillStyle="#c79e5e";ctx.fill();
+    ctx.save();ctx.clip();const metal=ctx.createLinearGradient(b.x,b.y,b.x+b.w,b.y+b.h);
+    metal.addColorStop(0,"#f1d49b");metal.addColorStop(.48,"#c79b59");metal.addColorStop(1,"#92683d");
+    ctx.fillStyle=metal;ctx.fillRect(b.x,b.y,b.w,b.h);
+    ctx.lineWidth=Math.max(2,camera.scale*.14);ctx.strokeStyle="#f5dbaa";polygon(ctx,camera,item.vertices);ctx.stroke();
+    for(const vertex of item.vertices){const p=xy(camera,vertex);ctx.fillStyle="#725747";ctx.beginPath();ctx.arc(p.x,p.y,Math.max(1,camera.scale*.09),0,Math.PI*2);ctx.fill();}
+    ctx.restore();outline(ctx,camera,item.vertices,"#59463e",1.6);
   }else if(item.material==="cheese"){
     polygon(ctx,camera,item.vertices);ctx.fillStyle="#e7b45f";ctx.fill();ctx.save();ctx.clip();
     const b=screenBounds(camera,item.vertices);
@@ -140,8 +149,8 @@ function object(ctx,camera,item,art) {
       ctx.strokeStyle="#f6d38b";ctx.lineWidth=1;ctx.stroke();
     }
     // Highlight the walkable sloping edge, within the collision silhouette.
-    const a=xy(camera,item.vertices[0]),c=xy(camera,item.vertices[2]);
-    ctx.strokeStyle="#ffe0a2";ctx.lineWidth=Math.max(2,camera.scale*.13);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(c.x,c.y);ctx.stroke();
+    ctx.strokeStyle="#ffe0a2";ctx.lineWidth=Math.max(2,camera.scale*.13);
+    for(const [i,a] of item.vertices.entries()){const c=item.vertices[(i+1)%item.vertices.length];if(Math.abs(a[0]-c[0])>1e-7&&Math.abs(a[1]-c[1])>1e-7){const p=xy(camera,a),q=xy(camera,c);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();}}
     ctx.restore();outline(ctx,camera,item.vertices,"#8e5b42",1.4);
   }else if(item.kind==="barrel"&&item.vertices.length===4&&(!item.vertexIds||["A","B","C","D"].every(id=>item.vertexIds.includes(id)))){
     const ids=item.vertexIds??["A","B","C","D"];
@@ -233,6 +242,22 @@ function drawSockets(ctx,camera,room){
     const p=worldToScreen(camera,socket),r=Math.max(5,camera.scale*.34),colour=held?"#c7e9a4":"#f4c675";
     ctx.save();ctx.fillStyle="#423b39";ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle=colour;ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.arc(p.x,p.y,r*.47,0,Math.PI*2);ctx.stroke();ctx.restore();
     worldLabel(ctx,camera,socket.x,socket.y-.8,held?"S · DOCKED":"S · SOCKET",colour);
+  }
+}
+function drawShapeSockets(ctx,camera,room,foreground=false){
+  for(const slot of room.shapeSockets??[]){
+    const b=polygonBounds(slot.vertices),g=room.objects.find(o=>o.id===slot.gateId),gb=polygonBounds(g.vertices);
+    const colour=slot.filled?"#c7e9a4":"#e9bd7b",s=camera.scale;
+    ctx.save();polygon(ctx,camera,slot.vertices);
+    if(!foreground){ctx.fillStyle="#292e39c9";ctx.fill();}
+    else {
+      ctx.strokeStyle=colour;ctx.lineWidth=2;ctx.setLineDash(slot.filled?[]:[5,3]);ctx.stroke();
+      const p=worldToScreen(camera,{x:b.maxX,y:b.maxY}),q=worldToScreen(camera,{x:(gb.minX+gb.maxX)/2,y:gb.maxY-.5});
+      ctx.strokeStyle=colour;ctx.lineWidth=Math.max(1,s*.045);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,q.y);ctx.lineTo(q.x,q.y);ctx.stroke();ctx.setLineDash([]);
+      worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.55,slot.filled?"KEY FITS":"LOCK RECESS",colour);
+      worldLabel(ctx,camera,(gb.minX+gb.maxX)/2,gb.minY+4,g.open?"OPEN":"LOCKED",colour);
+    }
+    ctx.restore();
   }
 }
 function drawPlates(ctx,camera,room){
@@ -329,11 +354,13 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   for(const item of room.terrain)terrain(ctx,camera,item,art);
   drawPlates(ctx,camera,room);
   drawSockets(ctx,camera,room);
+  drawShapeSockets(ctx,camera,room);
   for(const item of room.ladders??[])ladder(ctx,camera,item);
   for(const item of room.objects){
     if(item.reflectionOpacity!==undefined){ctx.save();ctx.globalAlpha=item.reflectionOpacity;object(ctx,camera,item,art);ctx.restore();}
     else object(ctx,camera,item,art);
   }
+  drawShapeSockets(ctx,camera,room,true);
   for(const item of room.checkpoints??[])checkpoint(ctx,camera,item,player.checkpoint===item.id);
   for(const item of room.decor)decorate(ctx,camera,item);
   portal(ctx,camera,room.exit,art);apprentice(ctx,camera,player,art,reducedMotion);

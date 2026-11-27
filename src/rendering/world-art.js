@@ -1,3 +1,4 @@
+import {plateGroups} from "../mechanisms/pressure-plates.js";
 import { polygonBounds } from "../geometry/world.js";
 import { worldToScreen } from "./camera.js";
 import {SPELL_COLOURS} from "./cast-effects.js";
@@ -286,16 +287,28 @@ function drawShapeSockets(ctx,camera,room,foreground=false){
   }
 }
 function drawPlates(ctx,camera,room){
-  for(const plate of room.plates??[]){
-    const p=worldToScreen(camera,plate),g=room.objects.find(o=>o.id===plate.gateId),b=polygonBounds(g.vertices),q=worldToScreen(camera,{x:(b.minX+b.maxX)/2,y:plate.y});
-    const s=camera.scale,colour=plate.pressed?"#c7ef9d":"#f1c37b";
-    ctx.save();ctx.strokeStyle=colour;ctx.lineWidth=Math.max(1.5,s*.07);ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(p.x+plate.width*s/2,p.y+4);ctx.lineTo(p.x+plate.width*s/2,p.y+s*.7);ctx.lineTo(q.x,q.y+s*.7);ctx.lineTo(q.x,q.y+4);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle="#665947";ctx.fillRect(p.x,p.y+1,plate.width*s,Math.max(4,s*.19));
-    ctx.fillStyle=colour;ctx.fillRect(p.x+1,p.y+1,plate.width*s-2,Math.max(2,s*.10));
-    worldLabel(ctx,camera,plate.x+plate.width/2,plate.y-.6,plate.pressed?"PLATE HELD":"WEIGHT PLATE",colour);
-    worldLabel(ctx,camera,(b.minX+b.maxX)/2,plate.y+3.8,g.open?"OPEN":"CLOSED",colour);ctx.restore();
+  for(const group of plateGroups(room)){
+    const g=room.objects.find(o=>o.id===group.gateId),b=polygonBounds(g.vertices);
+    for(const [i,plate] of group.plates.entries()){
+      const p=worldToScreen(camera,plate),q=worldToScreen(camera,{x:(b.minX+b.maxX)/2,y:plate.y});
+      const s=camera.scale,colour=plate.pressed?"#c7ef9d":"#f1c37b",lane=s*(.72+i*.65);
+      ctx.save();ctx.strokeStyle=colour;ctx.lineWidth=Math.max(1.5,s*.07);ctx.setLineDash([4,3]);ctx.beginPath();
+      ctx.moveTo(p.x+plate.width*s/2,p.y+4);ctx.lineTo(p.x+plate.width*s/2,p.y+lane);ctx.lineTo(q.x,q.y+lane);ctx.lineTo(q.x,q.y+4);ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle="#665947";ctx.fillRect(p.x,p.y+1,plate.width*s,Math.max(4,s*.19));
+      ctx.fillStyle=colour;ctx.fillRect(p.x+1,p.y+1,plate.width*s-2,Math.max(2,s*.10));
+      const label=group.total>1?(plate.label??"Plate "+(i+1)).toUpperCase()+" · "+(plate.pressed?"HELD":"FREE"):(plate.pressed?"PLATE HELD":"WEIGHT PLATE");
+      worldLabel(ctx,camera,plate.x+plate.width/2,plate.y-.45,label,colour);ctx.restore();
+    }
   }
 }
+function drawPlateGateStates(ctx,camera,room){
+  for(const group of plateGroups(room)){
+    const g=room.objects.find(o=>o.id===group.gateId),b=polygonBounds(g.vertices);
+    const label=(group.total>1?group.held+"/"+group.total+" HELD · ":"")+(g.open?"OPEN":"CLOSED");
+    worldLabel(ctx,camera,(b.minX+b.maxX)/2,Math.min(b.maxY-.55,b.minY+4),label,g.open?"#c7ef9d":"#f1c37b");
+  }
+}
+
 function sceneDetails(ctx,camera,room){
   // Architecture behind the playable silhouettes, never added to collision geometry.
   const rect=(x,y,w,h,colour)=>{const p=worldToScreen(camera,{x,y:y+h});ctx.fillStyle=colour;ctx.fillRect(p.x,p.y,w*camera.scale,h*camera.scale);};
@@ -386,12 +399,14 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
     if(item.reflectionOpacity!==undefined){ctx.save();ctx.globalAlpha=item.reflectionOpacity;object(ctx,camera,item,art);ctx.restore();}
     else object(ctx,camera,item,art);
   }
+  drawPlateGateStates(ctx,camera,room);
   drawShapeSockets(ctx,camera,room,true);
   for(const item of room.checkpoints??[])checkpoint(ctx,camera,item,player.checkpoint===item.id);
   for(const item of room.decor)decorate(ctx,camera,item);
   portal(ctx,camera,room.exit,art);apprentice(ctx,camera,player,art,reducedMotion);
   if(room.id==="gardens-06"){const m=room.objects.find(o=>o.kind==="mushroom"),b=polygonBounds(m.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.65,"SPRING CAP","#f9dcb4");}
   if(room.id==="riverworks-13")worldLabel(ctx,camera,42,1.5,"CENTRAL PIER","#f7d7a1");
+  if(room.id==="riverworks-16")worldLabel(ctx,camera,3.5,8,"STORAGE SHELF","#f7d7a1");
   if(room.id==="riverworks-14")worldLabel(ctx,camera,6,5.6,"STORAGE RACK","#f7d7a1");
   if(room.id==="clockwork-10")worldLabel(ctx,camera,21.5,6.65,"LOW ARCH","#f1d09b");
   if(room.tutorial){objectRunes(ctx,camera,room);worldLabel(ctx,camera,room.exit.x,room.exit.y+room.exit.height+.35,"EXIT","#ffe2a5");}

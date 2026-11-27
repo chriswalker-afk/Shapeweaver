@@ -534,3 +534,41 @@ test("staircase retains support, undo rebuilds climb geometry and three casts pr
  assert.equal(c.getResult(),null);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });
+
+test("both sluice plates stay held, gate opens only with both and results continue to Diagonal Dock",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level15");assert.match(els["room-chapter"].textContent,/Chapter IV.*Reflection.*Translation/);
+ assert.deepEqual(c.room.plates.map(p=>p.pressed),[false,false]);
+ assert.equal(cast(f,"sluice-barrel","reflect",{line:"x=10"}).ok,true);
+ assert.deepEqual(c.room.plates.map(p=>p.pressed),[true,false]);assert.equal(c.room.objects.find(o=>o.id==="sluice-gate").open,false);
+ assert.equal(cast(f,"sluice-crate","translate",{dx:6,dy:0}).ok,true);
+ assert.deepEqual(c.room.plates.map(p=>p.pressed),[true,true]);assert.equal(c.room.objects.find(o=>o.id==="sluice-gate").open,true);
+ assert.equal(c.undoCast(),true);assert.deepEqual(c.room.plates.map(p=>p.pressed),[true,false]);
+ c.resetPlayer();assert.deepEqual(c.room.plates.map(p=>p.pressed),[false,false]);
+ assert.equal(cast(f,"sluice-barrel","reflect",{line:"x=10"}).ok,true);
+ assert.equal(cast(f,"sluice-crate","translate",{dx:6,dy:0}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ frame(2);view.fire("keydown",{code:"ArrowRight"});frame(50);
+ view.fire("keydown",{code:"Space"});frame(63);view.fire("keyup",{code:"Space"});frame(75);
+ view.fire("keydown",{code:"Space"});frame(63);view.fire("keyup",{code:"Space"});frame(225);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().moves,2);assert.equal(c.getResult().stars,3);assert.equal(c.getResult().returns,0);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level16");assert.equal(c.room.id,"riverworks-16");
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+test("diagonal reflection creates a supporting bracket, premature translation is free, and final level completes",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level16");
+ assert.equal(cast(f,"dock-span","translate",{dx:-12,dy:0}).code,"bearing-unsupported");
+ assert.equal(c.getAttemptSummary().moves,0);
+ assert.equal(cast(f,"diagonal-bracket","reflect",{line:"y=x"}).ok,true);
+ assert.equal(cast(f,"dock-span","translate",{dx:-12,dy:0}).ok,true);
+ assert.equal(cast(f,"diagonal-bracket","reflect",{line:"y=x"}).code,"bearing-unsupported");
+ assert.equal(c.inspector.getState().active,true);els["object-close"].fire("click");assert.equal(c.inspector.getState().active,false);
+ assert.equal(c.getTutorialState().step,"Traverse");assert.equal(c.getAttemptSummary().moves,2);
+ frame(2);view.fire("keydown",{code:"ArrowRight"});frame(63);
+ view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(50);
+ view.fire("keydown",{code:"Space"});frame(63);view.fire("keyup",{code:"Space"});frame(300);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,2);assert.equal(c.getResult().returns,0);
+ assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});

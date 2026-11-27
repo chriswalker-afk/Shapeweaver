@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR22 — The Riverworks: Levels 13–14. Fourteen released puzzles, two-ended bridge bearings, dependent staircase supports, workshop-replayed solution fixtures and blue-green dockyard scenery. Next: PR23 Levels 15–16.
+PR23 — The Riverworks: Levels 15–16. Sixteen released puzzles, simultaneous pressure plates, visible linked counts, diagonal reflection of an irregular dock bracket, dependent upper span, workshop replay fixtures. Next: PR24 Levels 17–18.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR22 — The Riverworks: Levels 13–14. Fourteen released puzzles, two-ended br
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Riverworks mechanisms](docs/riverworks-mechanisms.md) — simultaneous pressure plates, diagonal mirror lines and compound dock supports.
 - [Riverworks opening](docs/riverworks.md) — Levels 13–14, structural supports and verified replay routes.
 - [Internal level workshop](docs/internal-workshop.md) — authoring, validation and replay workflow.
 - [First campaign audit](docs/first-campaign-audit.md) — replay evidence, difficulty review and remaining classroom QA.

@@ -10,6 +10,7 @@ import {LADDER_SOLUTION,ABOVE_SOLUTION} from "../src/levels/garden-finale.js";
 import {HINGE_SOLUTION,SQUEEZE_SOLUTION} from "../src/levels/clockwork-gallery.js";
 import {WEDGE_SOLUTION,KEY_SOLUTION} from "../src/levels/clockwork-finale.js";
 import {BRIDGE_BUILDERS_SOLUTION,BROKEN_STAIRCASE_SOLUTION} from "../src/levels/riverworks.js";
+import {DOUBLE_TROUBLE_SOLUTION,DIAGONAL_DOCK_SOLUTION} from "../src/levels/riverworks-mechanisms.js";
 import {createPhysicsWorld} from "../src/physics/collision.js";
 import {createPlayer,stepPlayer} from "../src/physics/platformer.js";
 import {commitTranslation} from "../src/transformations/translation.js";
@@ -39,7 +40,9 @@ export const RECORDED_ROUTES=deepFreeze([
  [10,SQUEEZE_SOLUTION,[[345,1,0],[120,1,1],[600,1,0]]],
  [11,WEDGE_SOLUTION,walk(1000)],[12,KEY_SOLUTION,walk(1000)],
  [13,BRIDGE_BUILDERS_SOLUTION,[[455,1,0],[120,1,1],[800,1,0]]],
- [14,BROKEN_STAIRCASE_SOLUTION,[[410,1,0],[60,1,1],[75,0,0],[75,1,1],[55,1,0],[1,0,1],[290,0,0,1],[1,1,1],[350,1,0]]]
+ [14,BROKEN_STAIRCASE_SOLUTION,[[410,1,0],[60,1,1],[75,0,0],[75,1,1],[55,1,0],[1,0,1],[290,0,0,1],[1,1,1],[350,1,0]]],
+ [15,DOUBLE_TROUBLE_SOLUTION,[[100,1,0],[125,1,1],[150,1,0],[125,1,1],[450,1,0]]],
+ [16,DIAGONAL_DOCK_SOLUTION,[[125,1,0],[120,1,1],[100,1,0],[125,1,1],[600,1,0]]]
 ].map(([number,casts,route])=>({number,casts,route})));
 export function replayRoute(world,route){
  let player=createPlayer(world),ticks=0;

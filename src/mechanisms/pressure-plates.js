@@ -16,6 +16,27 @@ export function platePressed(room,plate){
   });
  });
 }
+/** Derive grouped pressure-plate contact for feedback and rendering. */
+export function plateGroups(room){
+ const groups=new Map();
+ for(const plate of room.plates??[]){
+  if(!groups.has(plate.gateId))groups.set(plate.gateId,[]);
+  groups.get(plate.gateId).push({...plate,pressed:platePressed(room,plate)});
+ }
+ return [...groups].map(([gateId,plates])=>({gateId,plates,held:plates.filter(p=>p.pressed).length,total:plates.length}));
+}
+export function multiPlateEffects(before,after){
+ const previous=new Map(plateGroups(before).map(g=>[g.gateId,g])),effects=[];
+ for(const group of plateGroups(after)){
+  if(group.total<2)continue;
+  const old=previous.get(group.gateId);
+  const changed=group.plates.map((p,i)=>({p,i})).filter(({p})=>old?.plates.find(q=>q.id===p.id)?.pressed!==p.pressed);
+  if(!changed.length)continue;
+  for(const {p,i} of changed)effects.push((p.label??"Plate "+(i+1))+(p.pressed?" will be held.":" will be released."));
+  effects.push(group.held+"/"+group.total+" linked plates will be held.");
+ }
+ return effects;
+}
 /** Pure derived state. All linked plates must be held for a gate to open.
  * The immutable room snapshot carries open/closed state for undo/reset. */
 export function resolveMechanisms(room){

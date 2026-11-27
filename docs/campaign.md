@@ -104,3 +104,6 @@ Levels 11–12 are implemented: reflect and enlarge a brass wedge about an exter
 
 ## PR22 — The Riverworks opening
 Levels 13–14 are implemented. Bridge Builders requires two supported spans across a central pier; Broken Staircase combines two stacked platforms and a hinged ladder. See [Riverworks](riverworks.md).
+
+## PR23 — The Riverworks mechanisms
+Levels 15–16 introduce simultaneous linked pressure plates and diagonal reflection of a concave dock bracket that supports a translated upper span. See [Riverworks mechanisms](riverworks-mechanisms.md).

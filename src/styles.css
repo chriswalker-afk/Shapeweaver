@@ -202,3 +202,12 @@ h1,h2,h3 { font-family: var(--display); }
 .object-preview-note { color:#d4c1d0; }
 @media(max-height:520px) and (orientation:landscape){.object-panel{gap:.2rem;padding:.25rem .45rem}.object-panel button,.object-panel input,.object-panel select{min-height:29px;padding:.2rem .35rem}.object-panel input{width:5rem}}
 @media(max-width:650px) and (orientation:portrait){.object-top label{flex:1 1 9rem}.object-top select{width:100%}.object-panel{padding:.35rem .45rem}.object-preview-note{flex-basis:100%}}
+
+/* PR07: actual tutorial controls and vertically stacked mathematical vector entry. */
+.tutorial-tools { display:flex; gap:.35rem;align-items:center;white-space:nowrap;font-size:.76rem;color:#f3dfb8; }
+#tutorial-guide { color:#f2dfb9; line-height:1.4; }
+.vector-entry { display:grid;gap:.2rem;border-inline:2px solid #e4c393;border-radius:12px;padding:.2rem .5rem; }
+.vector-entry label { display:grid;grid-template-columns:6.25rem 5rem;gap:.35rem; }
+.vector-entry input { width:5rem;text-align:center; }
+#object-apply:disabled { opacity:.45;cursor:default; }
+@media(max-height:520px) and (orientation:landscape){.vector-entry{gap:.1rem;padding:.1rem .35rem}.vector-entry label{grid-template-columns:6rem 4.2rem}.vector-entry input{width:4.2rem}}

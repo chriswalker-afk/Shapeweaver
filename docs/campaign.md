@@ -77,3 +77,6 @@ For each level record: stable ID, title, chapter, intended learning goal, prereq
 
 ## Future expansions
 Inverted Kingdom (negative scale factors and more signed coordinates), Shattered Dimension (composition), Illusionist's Tower (describe existing transformations), Daily Portal, Architect's Workshop and Grandmaster Trials. These do not delay the main 36-level release.
+
+## Level 1 implementation (PR07)
+Across the Brook now has data in `src/levels/across-the-brook.js`, with a recorded one-translation route. The 10-unit brook requires a bridge under current movement tuning; the beam is translated horizontally to rest on both banks. The precise intended vector is guidance, not a required-answer check. See [translation tutorial](translation-tutorial.md) for replay and caveats.

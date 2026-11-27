@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR06 — interactive object engine. Explore the Gatehouse practice room, move the apprentice and open Objects to select props remotely, inspect coordinates and preview permitted transformations. Ghosts check final pose only; no spell can be applied yet. Next: PR07 translation and Level 1.
+PR07 — Translation and Level 1: Across the Brook. Play the first tutorial using a signed column vector, preview the complete travel path, apply a legal translation and traverse the resulting bridge. The separate practice room still supports preview-only inspection. Next: PR08 rotation and Level 2.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR06 — interactive object engine. Explore the Gatehouse practice room, move th
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Translation tutorial](docs/translation-tutorial.md) — sweep, apply transaction, animation and verified Level 1 replay.
 - [Interactive object engine](docs/object-engine.md) — permissions, selection, reference geometry, previews and final-pose validation.
 - [Platformer engine](docs/platformer-engine.md) — movement, collision, ladder, checkpoint and replay contract.
 - [Coordinate system](docs/coordinate-system.md) — grid, true axes, adaptive rulers, zoom and point picking.

@@ -1,4 +1,7 @@
 import { GATEHOUSE_PREVIEW, validateRoom } from "../levels/gatehouse-preview.js";
+import { ACROSS_THE_BROOK, brookHint } from "../levels/across-the-brook.js";
+import { previewTranslation, commitTranslation, translatedFrame } from "../transformations/translation.js";
+import { FIXED_DT } from "../physics/platformer.js";
 import { createCamera, panCamera, zoomCamera, MAX_ZOOM, ZOOM_STEP } from "../rendering/camera.js";
 import { loadWorldArt, renderWorld } from "../rendering/world-art.js";
 import { mountViewport } from "../rendering/viewport.js";
@@ -16,23 +19,27 @@ export function mountRoomPreview(document,view) {
   const canvas=document.getElementById("room-canvas"),host=document.getElementById("room-stage");
   const status=document.getElementById("room-status");
   if(!canvas||!host||!status)return null;
-  const room=validateRoom(GATEHOUSE_PREVIEW);
+  let initialRoom=validateRoom(GATEHOUSE_PREVIEW),room=initialRoom;
   const $=id=>document.getElementById(id);
-  const physics=createPhysicsWorld(room);
+  let physics=createPhysicsWorld(room),animation=null,records=[],hintStage=0;
   let player=createPlayer(physics),active=false,lastEvent=null,objectMode=false,inspector=null;
   const playStatus=$("play-status"),followButton=$("follow-toggle"),movementPanel=$("movement-controls");
+  const guide=$("tutorial-guide"),hintButton=$("tutorial-hint"),moves=$("tutorial-moves"),tutorialTools=$("tutorial-tools");
   const reducedMotion=()=>Boolean(view.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   let follow=true;
-  const input=mountMovementInput(document,view,()=>active&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
+  const input=mountMovementInput(document,view,()=>active&&!animation&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
   const loop=createFixedLoop(view,()=>{
-    if(!active||picking||objectMode||document.hidden)return;
+    if(!active||document.hidden)return;
+    if(animation){animation.elapsed+=FIXED_DT;if(animation.elapsed>=animation.duration){animation=null;if(playStatus)playStatus.textContent="Translation applied. Walk towards the brook and jump onto the beam.";updateGuide();}return;}
+    if(picking||objectMode)return;
     const next=stepPlayer(physics,player,input.sample());
     player=next;
     if(next.event&&next.event!==lastEvent){
       if(next.event==="respawn"||next.event==="exit"||next.event==="reset-required")input.clear();
-      if(playStatus)playStatus.textContent=next.event==="respawn"?"Returned to a safe checkpoint.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?"Gatehouse practice complete! Reset to play again.":"No safe respawn. Reset the room.";
+      if(playStatus)playStatus.textContent=next.event==="respawn"?"Returned to a safe checkpoint.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?(room.tutorial?"Level 1 complete! You crossed the brook. Reset to try again.":"Gatehouse practice complete! Reset to play again."):"No safe respawn. Reset the room.";
     }
     lastEvent=next.event;
+    if(next.event==="exit")updateGuide();
   },()=>viewport?.resize());
   const controls=Object.fromEntries(["overview","inspect","left","right","up","down","zoom-in","zoom-out"].map(id=>[id,$("camera-"+id)]));
   const gridButton=$("grid-toggle"),axesButton=$("axes-toggle"),pickButton=$("pick-toggle"),panel=$("coordinate-panel");
@@ -40,7 +47,11 @@ export function mountRoomPreview(document,view) {
   let camera=null,mode="overview",focus=null,zoom=null,viewport=null,plan=null;
   let grid=true,axes=true,picking=false,snap=1,point=null;
   const images=loadWorldArt(view,()=>viewport?.resize());
-  inspector=mountObjectInspector(document,room,()=>player,()=>redraw(),setObjectMode);
+  inspector=mountObjectInspector(document,room,()=>player,()=>redraw(),setObjectMode,{
+    canApply:()=>Boolean(room.tutorial&&!animation&&!player.completed&&!player.blockedRespawn),
+    preview:(id,raw)=>previewTranslation(room,player,id,raw),
+    apply:applySpell
+  });
   function updateControls(){
     controls.overview?.setAttribute("aria-pressed",String(mode==="overview"));
     controls.inspect?.setAttribute("aria-pressed",String(mode==="inspect"));
@@ -61,16 +72,19 @@ export function mountRoomPreview(document,view) {
     if(controls["zoom-out"])controls["zoom-out"].disabled=camera.zoom<=1+e;
     const gridStatus=grid&&plan?" · Grid "+plan.minorStep+(plan.minorStep===1?" unit":" units"):"";
     const zoomLabel=Number(camera.zoom.toFixed(2));
-    const label=(mode==="overview"?"Full room":"Inspect · "+zoomLabel+"× fit")+gridStatus+" · "+(picking||objectMode?"Movement paused":"Practice room");
+    const label=(mode==="overview"?"Full room":"Inspect · "+zoomLabel+"× fit")+gridStatus+" · "+(animation?"Casting translation":picking||objectMode?"Movement paused":room.tutorial?"Level 1":"Practice room");
     if(status.textContent!==label)status.textContent=label;
     followButton?.setAttribute("aria-pressed",String(follow));
-    if(movementPanel)movementPanel.hidden=picking||objectMode;
+    if(movementPanel)movementPanel.hidden=picking||objectMode||Boolean(animation);
+    if(pickButton)pickButton.disabled=Boolean(animation);
+    if($("object-toggle"))$("object-toggle").disabled=Boolean(animation);
   }
   viewport=mountViewport(canvas,host,view,(ctx,metrics)=>{
-    const target=active&&follow&&!picking&&!objectMode&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
+    const target=active&&follow&&!animation&&!picking&&!objectMode&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
     camera=createCamera(room.bounds,metrics.width,metrics.height,mode,target,zoom);
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
-    renderWorld(ctx,metrics,camera,room,images.art,player,reducedMotion());
+    const frame=animation?translatedFrame(room,animation.transition,animation.elapsed/animation.duration):room;
+    renderWorld(ctx,metrics,camera,frame,images.art,player,reducedMotion());
     plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});
     if(objectMode&&inspector){const s=inspector.getState();drawObjectOverlay(ctx,camera,room.bounds,s.objects,s.selected,s.preview);}
     updateControls();
@@ -92,12 +106,13 @@ export function mountRoomPreview(document,view) {
     redraw();return true;
   }
   function setPicking(value){
+    if(animation)return false;
     picking=Boolean(value);if(picking&&objectMode){objectMode=false;inspector?.setActive(false);}input.clear();redraw();
     if(message)message.textContent=point?formatCoordinate(point):"Click or tap the room, or enter coordinates.";
     return picking;
   }
   function setObjectMode(value){
-    if(!inspector)return false;
+    if(!inspector||animation)return false;
     objectMode=Boolean(value);
     if(objectMode)picking=false;
     inspector.setActive(objectMode);input.clear();redraw();
@@ -138,19 +153,55 @@ export function mountRoomPreview(document,view) {
   });
   function setActive(value){
     active=Boolean(value);input.clear();
-    if(active){viewport?.resize();loop.start();}else{loop.stop();objectMode=false;inspector?.setActive(false);}
+    if(active){viewport?.resize();loop.start();}else{loop.stop();animation=null;objectMode=false;inspector?.setActive(false);}
+  }
+  function updateGuide(){
+    const tutorial=Boolean(room.tutorial);
+    if(tutorialTools)tutorialTools.hidden=!tutorial;
+    if(guide){
+      guide.hidden=!tutorial;
+      if(tutorial){
+        guide.textContent=player.completed?"Well done! You reached the portal using "+records.length+" translation"+(records.length===1?"":"s")+".":animation?"The beam is moving.":hintStage?brookHint(room,hintStage):records.length?"Check the new position. Walk towards the brook, jump onto the beam and reach the portal. You can cast again from safe ground if needed.":"Your goal: bridge the brook and reach the portal. Open Objects, select the timber beam, and choose Translation.";
+      }
+    }
+    if(moves)moves.textContent="Moves: "+records.length;
+    if(hintButton){hintButton.textContent=hintStage===3?"Hide hint":hintStage?"Next hint":"Hint";hintButton.disabled=Boolean(animation)||player.completed;}
+  }
+  function applySpell(id,raw){
+    if(!room.tutorial||!objectMode||animation)return {ok:false,code:"unavailable",message:"Translation is not available now."};
+    const tx=commitTranslation(room,player,id,raw);
+    if(!tx.ok)return tx;
+    // Commit geometry + collision index together; animation is presentation only.
+    room=tx.room;physics=tx.physics;records=[...records,tx.record];hintStage=0;
+    objectMode=false;inspector?.setActive(false);inspector?.replaceRoom(room);input.clear();
+    if(!reducedMotion())animation={transition:tx.transition,elapsed:0,duration:.65};
+    if(playStatus)playStatus.textContent=animation?"Translation applied. Move and jump when the beam is ready.":"Translation applied. Walk towards the brook and jump onto the beam.";
+    updateGuide();redraw();canvas.focus?.({preventScroll:true});return tx;
   }
   function resetPlayer(){
-    player=createPlayer(physics);lastEvent=null;input.clear();follow=true;objectMode=false;inspector?.setActive(false);
-    if(playStatus)playStatus.textContent="Practice restarted.";
-    redraw();
+    room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);
+    animation=null;records=[];hintStage=0;lastEvent=null;input.clear();follow=true;objectMode=false;picking=false;point=null;
+    inspector?.setActive(false);inspector?.replaceRoom(room);
+    if(xInput)xInput.value="";if(yInput)yInput.value="";
+    if(message)message.textContent="No point selected";
+    if(playStatus)playStatus.textContent=room.tutorial?"Arrows / WASD · Space to jump":"Practice restarted.";
+    updateGuide();redraw();
   }
+  function setLevel(key){
+    initialRoom=validateRoom(key==="level1"?ACROSS_THE_BROOK:GATEHOUSE_PREVIEW);
+    mode="overview";zoom=null;focus=null;
+    const heading=$("room-heading"),chapter=$("room-chapter");
+    if(heading)heading.textContent=initialRoom.title;
+    if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter I · Level 1 · Translation":"Chapter I · Interactive object practice";
+    resetPlayer();
+  }
+  on(hintButton,"click",()=>{hintStage=(hintStage+1)%4;updateGuide();});
   on(followButton,"click",()=>{follow=!follow;redraw();});
   on($("reset-practice"),"click",()=>{resetPlayer();canvas.focus?.({preventScroll:true});});
   // Click the stage to return keyboard focus to gameplay after inspecting controls.
   on(host,"click",()=>{if(!picking&&!objectMode)canvas.focus?.({preventScroll:true});});
-  updateControls();
-  return {room,setActive,resetPlayer,setObjectMode,inspector,getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
+  updateControls();updateGuide();
+  return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,getRecords:()=>records.slice(),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
     getCamera:()=>camera,getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),
     refresh:()=>viewport?.resize(),
     destroy(){loop.stop();input.destroy();inspector?.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};

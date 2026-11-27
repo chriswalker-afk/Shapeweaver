@@ -34,7 +34,7 @@
           <p class="tagline">Reshape the world. Find your way.</p>
           <div class="ornament" aria-hidden="true"><span></span><b>◆</b><span></span></div>
           <p class="intro">Four spells. A forgotten kingdom. A path only you can create.</p>
-          <div class="title-actions"><button type="button" class="gold-button" id="open-room">Explore the Gatehouse <span aria-hidden="true">›</span></button><button type="button" class="secondary-title-button" id="open-spellbook">Open the spellbook</button></div>
+          <div class="title-actions"><button type="button" class="gold-button" id="open-level1">Level 1 · Across the Brook <span aria-hidden="true">›</span></button><button type="button" class="secondary-title-button" id="open-room">Practice room</button><button type="button" class="secondary-title-button" id="open-spellbook">Open the spellbook</button></div>
           <p class="preview-note" id="app-status" role="status">Loading the development scaffold…</p>
           <noscript><p class="preview-note">Enable JavaScript to open the spellbook.</p></noscript>
         </div>
@@ -54,12 +54,12 @@
             <div class="spell-sigil"><img id="spell-image" src="./assets/ui/translate.svg" alt=""></div>
             <div class="spell-text"><h3 id="spell-name">Translation</h3><p id="spell-description">Move without turning or resizing.</p><div class="spell-example"><span class="column-vector" id="translation-vector" role="img" aria-label="Column vector 4, negative 2"><span aria-hidden="true">4</span><span aria-hidden="true">−2</span></span><span id="spell-example">Four units right, two units down.</span></div></div>
           </div>
-          <p class="book-footer">Spellbook preview · Interactive puzzles arrive in later stages.</p>
+          <p class="book-footer">Translation is now playable in Level 1. Other spells follow in later stages.</p>
         </div>
       </section>
       <section class="room-view" id="room-view" aria-labelledby="room-heading" hidden>
         <header class="room-toolbar">
-          <div class="room-heading"><p>Chapter I · Interactive object practice</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
+          <div class="room-heading"><p id="room-chapter">Chapter I · Interactive object practice</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
           <div class="camera-controls" aria-label="Camera and coordinate tools">
             <button type="button" id="camera-overview" aria-pressed="true">Full room</button>
             <button type="button" id="camera-inspect" aria-pressed="false">Inspect</button>
@@ -80,6 +80,7 @@
             <button type="button" id="pick-toggle" aria-pressed="false" aria-controls="coordinate-panel">Pick point</button>
             <button type="button" id="object-toggle" aria-pressed="false" aria-controls="object-panel">Objects</button>
           </div>
+          <div id="tutorial-tools" class="tutorial-tools" hidden><span id="tutorial-moves">Moves: 0</span><button type="button" id="tutorial-hint" class="room-back">Hint</button></div>
           <button type="button" id="follow-toggle" class="room-back" aria-pressed="true">Follow</button>
           <button type="button" id="reset-practice" class="room-back">Reset</button>
           <button type="button" class="room-back" id="close-room">← Title</button>
@@ -108,7 +109,8 @@
           <form id="object-form" class="object-form" novalidate hidden>
             <div id="object-fields" class="object-fields"></div>
             <button type="submit" class="preview-action">Preview</button><button type="button" id="object-clear">Clear</button>
-            <span class="object-preview-note">Preview only · Apply arrives in later stages</span>
+            <button type="button" id="object-apply" class="preview-action" hidden disabled>Apply translation</button>
+            <span class="object-preview-note" id="object-preview-note">Preview only</span>
           </form>
           <output id="object-result" role="status" aria-live="polite"></output>
         </section>
@@ -120,7 +122,7 @@
             <button type="button" data-move="down" aria-label="Climb down">↓</button>
             <button type="button" data-move="jump" class="jump-control">Jump</button>
           </div>
-          <div class="play-info"><span id="room-status">Loading practice room…</span><span id="play-status" role="status">Arrows / WASD · Space to jump · Up/down on ladders</span></div>
+          <div class="play-info"><span id="room-status">Loading practice room…</span><span id="play-status" role="status">Arrows / WASD · Space to jump · Up/down on ladders</span><span id="tutorial-guide" hidden></span></div>
         </footer>
       </section>
     </section>

@@ -309,6 +309,75 @@ function drawPlateGateStates(ctx,camera,room){
   }
 }
 
+function sceneDetails(ctx,camera,room){
+  // Architecture behind the playable silhouettes, never added to collision geometry.
+  const rect=(x,y,w,h,colour)=>{const p=worldToScreen(camera,{x,y:y+h});ctx.fillStyle=colour;ctx.fillRect(p.x,p.y,w*camera.scale,h*camera.scale);};
+  if(room.id==="gardens-06")rect(0,3,7,5,"#253c35c9");
+  if(room.id==="gatehouse-04"){
+    rect(0,3,7,5,"#34293dc9");
+    for(const x of [1,3.5,6])rect(x,3,.12,5,"#78657980");
+    rect(0,7.55,7,.14,"#ae927462");
+  }
+  if(room.id==="gatehouse-02"){
+    rect(12.2,3,.5,5.5,"#6b5b7177");rect(19.3,3,.5,5.5,"#6b5b7177");
+    rect(12.2,7.7,7.6,.5,"#71607555");
+  }
+  if(room.id==="gatehouse-03"){
+    rect(26,12,.35,2,"#87758766");rect(33,12,.35,2,"#87758766");
+  }
+}
+function worldLabel(ctx,camera,x,y,label,colour){
+  const p=worldToScreen(camera,{x,y});
+  if(p.x<22||p.x>camera.width-22||p.y<10||p.y>camera.height-10)return;
+  ctx.save();ctx.font="700 11px system-ui, sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.lineWidth=3.2;ctx.lineJoin="round";ctx.strokeStyle="#272034";ctx.strokeText(label,p.x,p.y);ctx.fillStyle=colour;ctx.fillText(label,p.x,p.y);ctx.restore();
+}
+function objectRunes(ctx,camera,room){
+  for(const o of room.objects){
+    if(o.decorative||!o.permissions?.length||o.reflectionOpacity!==undefined)continue;
+    const b=polygonBounds(o.vertices),p=worldToScreen(camera,{x:(b.minX+b.maxX)/2,y:b.maxY});
+    const y=p.y-8;
+    if(p.x<8||p.x>camera.width-8||y<6||y>camera.height-6)continue;
+    ctx.save();ctx.beginPath();ctx.moveTo(p.x,y-4);ctx.lineTo(p.x+4,y);ctx.lineTo(p.x,y+4);ctx.lineTo(p.x-4,y);ctx.closePath();
+    ctx.fillStyle=SPELL_COLOURS[o.permissions[0]]??"#f5d69a";ctx.fill();ctx.strokeStyle="#34273e";ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+  }
+}
+function portal(ctx,camera,exit,art) {
+  const p=worldToScreen(camera,exit),w=exit.width*camera.scale,h=exit.height*camera.scale;
+  const glow=ctx.createRadialGradient(p.x,p.y-h*.5,0,p.x,p.y-h*.5,h);
+  glow.addColorStop(0,"#ffce8780");glow.addColorStop(1,"#ffce8700");
+  ctx.fillStyle=glow;ctx.fillRect(p.x-h,p.y-h*1.5,h*2,h*2);
+  if(art.portal)ctx.drawImage(art.portal,p.x-w/2,p.y-h,w,h);
+  else{ctx.fillStyle="#efc47f";ctx.beginPath();ctx.moveTo(p.x-w/2,p.y);ctx.lineTo(p.x-w/2,p.y-h*.63);ctx.quadraticCurveTo(p.x-w/2,p.y-h,p.x,p.y-h);ctx.quadraticCurveTo(p.x+w/2,p.y-h,p.x+w/2,p.y-h*.63);ctx.lineTo(p.x+w/2,p.y);ctx.closePath();ctx.fill();}
+}
+function ladder(ctx,camera,l) {
+  const a=worldToScreen(camera,{x:l.x-l.width/2,y:l.top}),b=worldToScreen(camera,{x:l.x+l.width/2,y:l.bottom});
+  const s=camera.scale;
+  ctx.strokeStyle="#513d46";ctx.lineWidth=Math.max(3,s*.13);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(a.x,b.y);ctx.moveTo(b.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  ctx.strokeStyle="#d0a477";ctx.lineWidth=Math.max(1.5,s*.075);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(a.x,b.y);ctx.moveTo(b.x,a.y);ctx.lineTo(b.x,b.y);
+  for(let y=l.bottom+.2;y<l.top;y+=.38){const p=worldToScreen(camera,{x:l.x,y});ctx.moveTo(a.x,p.y);ctx.lineTo(b.x,p.y);}
+  ctx.stroke();
+}
+function checkpoint(ctx,camera,c,active){
+  const p=worldToScreen(camera,c),s=camera.scale;
+  ctx.strokeStyle="#664b4f";ctx.lineWidth=Math.max(1.5,s*.055);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,p.y-s*.85);ctx.stroke();
+  ctx.fillStyle=active?"#efcb85":"#88749f";ctx.beginPath();ctx.moveTo(p.x,p.y-s*.85);ctx.lineTo(p.x+s*.5,p.y-s*.7);ctx.lineTo(p.x,p.y-s*.55);ctx.closePath();ctx.fill();
+}
+function apprentice(ctx,camera,player,art,reducedMotion) {
+  const p=worldToScreen(camera,player),h=camera.scale*1.72,w=h*120/168;
+  // Foot anchor is fixed. Small pose-dependent lean/stretch is purely cosmetic.
+  const animated=!reducedMotion&&(player.pose==="walk"||player.pose==="climb");
+  const gait=animated?Math.sin(player.phase??0):0;
+  const lean=reducedMotion?0:player.pose==="jump"?-.08:player.pose==="walk" ? .055*gait : 0;
+  const stretch=1+(animated ? .025*gait : 0);
+  ctx.save();ctx.translate(p.x,p.y);
+  if(typeof ctx.scale==="function")ctx.scale(player.facing===-1?-1:1,stretch);
+  ctx.rotate(lean);
+  if(art.apprentice)ctx.drawImage(art.apprentice,-w*.5,-h*157/168,w,h);
+  else{ctx.fillStyle="#9670b3";ctx.fillRect(-w*.3,-h*.55,w*.6,h*.55);ctx.beginPath();ctx.arc(0,-h*.72,w*.3,0,Math.PI*2);ctx.fill();}
+  ctx.restore();
+}
+
+/** A deterministic scene draw. Art never modifies the room or collision polygons. */
 export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,reducedMotion=false) {
   ctx.setTransform(metrics.scaleX,0,0,metrics.scaleY,0,0);
   const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===4?"#31596d":room.chapter===3?"#34434e":room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===4?"#b4d0ca":room.chapter===3?"#a6a99b":room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);

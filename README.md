@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR08 — Rotation and Level 2: The Stubborn Gate. Play the first two tutorials with explicit mathematical parameters, full-path previews and actual transformations. The separate practice room remains preview-only. Next: PR09 enlargement and Level 3.
+PR09 — Enlargement and Level 3: A Little Cheesy. Play the first three Gatehouse tutorials with explicit mathematical parameters, full-path previews and actual transformations. Grow or shrink the cheese wedge into a usable ramp. The practice room is still preview-only. Next: PR10 reflection and Level 4.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR08 — Rotation and Level 2: The Stubborn Gate. Play the first two tutorials w
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Enlargement tutorial](docs/enlargement-tutorial.md) — positive homothety sweep, scale animation and verified ramp traversal.
 - [Rotation tutorial](docs/rotation-tutorial.md) — signed arc validation, shared commit boundary and verified Level 2 replay.
 - [Translation tutorial](docs/translation-tutorial.md) — sweep, apply transaction, animation and verified Level 1 replay.
 - [Interactive object engine](docs/object-engine.md) — permissions, selection, reference geometry, previews and final-pose validation.

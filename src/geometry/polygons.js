@@ -61,7 +61,7 @@ export function triangulate(vertices){
   if(cross(...ring)<=GEOMETRY_EPS)throw new Error("Degenerate triangle");
   out.push(ring);return out;
 }
-function convexOverlap(a,b){
+export function convexOverlap(a,b){
   for(const ring of [a,b])for(let i=0;i<ring.length;i++){
     const p=ring[i],q=ring[(i+1)%ring.length],dx=q[0]-p[0],dy=q[1]-p[1],len=Math.hypot(dx,dy);
     const project=v=>(-dy*v[0]+dx*v[1])/len;

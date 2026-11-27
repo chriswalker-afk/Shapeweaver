@@ -89,3 +89,39 @@ test("second tutorial validates angle, direction and exact centre; applies, anim
   c.destroy();
  }
 });
+
+test("third tutorial requires explicit positive factor and centre, previews, applies and traverses",()=>{
+ for(const reduce of [false,true]){
+  const {els,view,controller:c,frame}=fixture(reduce),click=id=>els[id].fire("click");
+  c.setLevel("level3");c.setActive(true);assert.equal(c.room.id,"gatehouse-03");
+  assert.match(els["room-chapter"].textContent,/Level 3.*Enlargement/);
+  assert.match(els["tutorial-guide"].textContent,/high ledge/);
+  click("tutorial-hint");click("tutorial-hint");assert.match(els["tutorial-guide"].textContent,/3 units high/);
+  click("object-toggle");const p=worldToScreen(c.getCamera(),{x:24,y:4});
+  els["room-canvas"].fire("click",{clientX:p.x,clientY:p.y});
+  assert.equal(c.inspector.getState().selected,"cheesy-wedge");assert.equal(c.inspector.selectType("rotate"),false);
+  els["object-spell"].value="enlarge";els["object-spell"].fire("change");
+  const fields=Object.fromEntries(els["object-fields"].querySelectorAll().map(x=>[x.name,x]));
+  fields.factor.value="3";fields.cx.value="25";fields.cy.value="";
+  els["object-form"].fire("submit");assert.equal(c.inspector.getState().preview.code,"parameters");assert.equal(els["object-apply"].disabled,true);
+  fields.cy.value="3";fields.factor.value="4";els["object-form"].fire("submit");
+  assert.equal(c.inspector.getState().preview.code,"scale-limit");assert.equal(els["object-apply"].disabled,true);
+  fields.factor.value="3";els["object-form"].fire("submit");assert.equal(els["object-apply"].disabled,false);
+  assert.equal(els["object-apply"].textContent,"Apply enlargement");
+  fields.factor.value="2";click("object-apply");assert.equal(c.getRecords().length,0);assert.equal(c.inspector.getState().preview.request.factor,2);
+  fields.factor.value="3";els["object-fields"].fire("input");assert.equal(els["object-apply"].disabled,true);
+  els["object-form"].fire("submit");click("object-apply");
+  assert.deepEqual(c.getRecords(),[{objectId:"cheesy-wedge",type:"enlarge",factor:3,centre:[25,3]}]);
+  assert.deepEqual(c.room.objects[0].vertices,[[7,3],[25,3],[25,12]]);
+  assert.equal(els["object-toggle"].disabled,!reduce);
+  if(!reduce){assert.equal(c.setObjectMode(true),false);assert.equal(c.setPicking(true),false);}
+  frame(55);assert.equal(els["object-toggle"].disabled,false);assert.equal(c.getPlayer().x,2);
+  view.fire("keydown",{code:"ArrowRight"});frame(460);view.fire("keyup",{code:"ArrowRight"});
+  assert.equal(c.getPlayer().completed,true);assert.equal(c.getPlayer().respawns,0);
+  assert.match(els["tutorial-guide"].textContent,/using 1 enlargement/);
+  click("reset-practice");assert.deepEqual(c.room.objects[0].vertices,[[19,3],[25,3],[25,6]]);assert.equal(c.getRecords().length,0);assert.equal(c.getPlayer().completed,false);
+  c.setLevel("level2");assert.match(els["room-chapter"].textContent,/Level 2.*Rotation/);
+  c.setLevel("room");click("object-toggle");c.inspector.selectObject("wedge");c.inspector.selectType("enlarge");
+  c.inspector.showPreview({factor:1.5,cx:4,cy:3});assert.equal(els["object-apply"].hidden,true);c.destroy();
+ }
+});

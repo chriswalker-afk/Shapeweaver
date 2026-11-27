@@ -1,6 +1,8 @@
 import { GATEHOUSE_PREVIEW, validateRoom } from "../levels/gatehouse-preview.js";
 import { ACROSS_THE_BROOK, brookHint } from "../levels/across-the-brook.js";
 import { STUBBORN_GATE, gateHint } from "../levels/stubborn-gate.js";
+import { LITTLE_CHEESY, cheesyHint } from "../levels/little-cheesy.js";
+import { previewEnlargement, commitEnlargement, enlargedFrame } from "../transformations/enlargement.js";
 import { previewRotation, commitRotation, rotatedFrame } from "../transformations/rotation.js";
 import { previewTranslation, commitTranslation, translatedFrame } from "../transformations/translation.js";
 import { FIXED_DT } from "../physics/platformer.js";
@@ -16,6 +18,24 @@ import {mountObjectInspector} from "./object-inspector.js";
 import {drawObjectOverlay} from "../rendering/object-overlay.js";
 import { SNAP_STEPS,pickCoordinate,parseCoordinate,formatCoordinate,clientToScreen } from "../geometry/coordinates.js";
 
+// Keep spell dispatch and tutorial copy data-driven as new transformation types arrive.
+const TUTORIALS=Object.freeze({
+  translate:{label:"Translation",preview:previewTranslation,commit:commitTranslation,frame:translatedFrame,duration:.65,hint:brookHint,
+    objective:"Your goal: bridge the brook and reach the portal. Open Objects, select the timber beam, and choose Translation.",
+    casting:"The beam is moving.",after:"Check the new position. Walk towards the brook, jump onto the beam and reach the portal. You can cast again from safe ground if needed.",
+    ready:"Translation applied. Walk towards the brook and jump onto the beam.",finished:"You crossed the brook."},
+  rotate:{label:"Rotation",preview:previewRotation,commit:commitRotation,frame:rotatedFrame,duration:.75,hint:gateHint,
+    objective:"Your goal: open the gate and reach the portal. Open Objects, select the hinged gate, and choose Rotation. Read the hinge coordinates, angle and direction.",
+    casting:"The gate is turning.",after:"Check the gate position. Walk beneath it towards the portal if the passage is clear. You can cast again from safe ground.",
+    ready:"Rotation applied. Walk beneath the open gate if the passage is clear.",finished:"You passed the gate."},
+  enlarge:{label:"Enlargement",preview:previewEnlargement,commit:commitEnlargement,frame:enlargedFrame,duration:.8,hint:cheesyHint,
+    objective:"Your goal: reach the high ledge. Open Objects, select the cheese wedge, and choose Enlargement. Compare the heights and choose a scale factor and centre.",
+    casting:"The cheese is changing size.",after:"Check the ramp height and position. Walk up it towards the portal. You can resize again from safe ground if needed.",
+    ready:"Enlargement applied. Walk up the ramp if it reaches the ledge.",finished:"You reached the high ledge."}
+});
+const LEVELS=Object.freeze({level1:ACROSS_THE_BROOK,level2:STUBBORN_GATE,level3:LITTLE_CHEESY});
+const tutorialType=room=>room.tutorial?(room.tutorial.spell??"translate"):null;
+
 /** Movement practice room, coordinate inspection, and deterministic simulation. */
 export function mountRoomPreview(document,view) {
   const canvas=document.getElementById("room-canvas"),host=document.getElementById("room-stage");
@@ -27,10 +47,10 @@ export function mountRoomPreview(document,view) {
   let player=createPlayer(physics),active=false,lastEvent=null,objectMode=false,inspector=null;
   const playStatus=$("play-status"),followButton=$("follow-toggle"),movementPanel=$("movement-controls");
   const guide=$("tutorial-guide"),hintButton=$("tutorial-hint"),moves=$("tutorial-moves"),tutorialTools=$("tutorial-tools");
-  const spellType=()=>room.tutorial?(room.tutorial.spell??"translate"):null;
-  const isGate=()=>spellType()==="rotate";
-  const actionLabel=()=>isGate()?"Rotation":"Translation";
-  const readyMessage=()=>isGate()?"Rotation applied. Walk beneath the open gate if the passage is clear.":"Translation applied. Walk towards the brook and jump onto the beam.";
+  const spellType=()=>tutorialType(room);
+  const tutorial=()=>TUTORIALS[spellType()];
+  const actionLabel=()=>tutorial()?.label??"Transformation";
+  const readyMessage=()=>tutorial()?.ready??"Transformation applied.";
   const reducedMotion=()=>Boolean(view.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   let follow=true;
   const input=mountMovementInput(document,view,()=>active&&!animation&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
@@ -42,7 +62,7 @@ export function mountRoomPreview(document,view) {
     player=next;
     if(next.event&&next.event!==lastEvent){
       if(next.event==="respawn"||next.event==="exit"||next.event==="reset-required")input.clear();
-      if(playStatus)playStatus.textContent=next.event==="respawn"?"Returned to a safe checkpoint.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?(room.tutorial?"Level "+room.number+" complete! "+(isGate()?"You passed the gate.":"You crossed the brook.")+" Reset to try again.":"Gatehouse practice complete! Reset to play again."):"No safe respawn. Reset the room.";
+      if(playStatus)playStatus.textContent=next.event==="respawn"?"Returned to a safe checkpoint.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?(room.tutorial?"Level "+room.number+" complete! "+tutorial().finished+" Reset to try again.":"Gatehouse practice complete! Reset to play again."):"No safe respawn. Reset the room.";
     }
     lastEvent=next.event;
     if(next.event==="exit")updateGuide();
@@ -55,7 +75,7 @@ export function mountRoomPreview(document,view) {
   const images=loadWorldArt(view,()=>viewport?.resize());
   inspector=mountObjectInspector(document,room,()=>player,()=>redraw(),setObjectMode,{
     canApply:type=>Boolean(type===spellType()&&!animation&&!player.completed&&!player.blockedRespawn),
-    preview:(type,id,raw)=>type==="rotate"?previewRotation(room,player,id,raw):previewTranslation(room,player,id,raw),
+    preview:(type,id,raw)=>TUTORIALS[type].preview(room,player,id,raw),
     apply:applySpell
   });
   function updateControls(){
@@ -89,7 +109,7 @@ export function mountRoomPreview(document,view) {
     const target=active&&follow&&!animation&&!picking&&!objectMode&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
     camera=createCamera(room.bounds,metrics.width,metrics.height,mode,target,zoom);
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
-    const frame=animation?(animation.type==="rotate"?rotatedFrame:translatedFrame)(room,animation.transition,animation.elapsed/animation.duration):room;
+    const frame=animation?TUTORIALS[animation.type].frame(room,animation.transition,animation.elapsed/animation.duration):room;
     renderWorld(ctx,metrics,camera,frame,images.art,player,reducedMotion());
     plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});
     if(objectMode&&inspector){const s=inspector.getState();drawObjectOverlay(ctx,camera,room.bounds,s.objects,s.selected,s.preview);}
@@ -162,12 +182,12 @@ export function mountRoomPreview(document,view) {
     if(active){viewport?.resize();loop.start();}else{loop.stop();animation=null;objectMode=false;inspector?.setActive(false);}
   }
   function updateGuide(){
-    const tutorial=Boolean(room.tutorial);
-    if(tutorialTools)tutorialTools.hidden=!tutorial;
+    const config=tutorial();
+    if(tutorialTools)tutorialTools.hidden=!config;
     if(guide){
-      guide.hidden=!tutorial;
-      if(tutorial){
-        guide.textContent=player.completed?"Well done! You reached the portal using "+records.length+" "+actionLabel().toLowerCase()+(records.length===1?"":"s")+".":animation?(isGate()?"The gate is turning.":"The beam is moving."):hintStage?(isGate()?gateHint:brookHint)(room,hintStage):records.length?(isGate()?"Check the gate position. Walk beneath it towards the portal if the passage is clear. You can cast again from safe ground.":"Check the new position. Walk towards the brook, jump onto the beam and reach the portal. You can cast again from safe ground if needed."):(isGate()?"Your goal: open the gate and reach the portal. Open Objects, select the hinged gate, and choose Rotation. Read the hinge coordinates, angle and direction.":"Your goal: bridge the brook and reach the portal. Open Objects, select the timber beam, and choose Translation.");
+      guide.hidden=!config;
+      if(config){
+        guide.textContent=player.completed?"Well done! You reached the portal using "+records.length+" "+config.label.toLowerCase()+(records.length===1?"":"s")+".":animation?config.casting:hintStage?config.hint(room,hintStage):records.length?config.after:config.objective;
       }
     }
     if(moves)moves.textContent="Moves: "+records.length;
@@ -175,12 +195,12 @@ export function mountRoomPreview(document,view) {
   }
   function applySpell(type,id,raw){
     if(type!==spellType()||!room.tutorial||!objectMode||animation)return {ok:false,code:"unavailable",message:"That spell is not available now."};
-    const tx=(type==="rotate"?commitRotation:commitTranslation)(room,player,id,raw);
+    const tx=TUTORIALS[type].commit(room,player,id,raw);
     if(!tx.ok)return tx;
     // Commit geometry + collision index together; animation is presentation only.
     room=tx.room;physics=tx.physics;records=[...records,tx.record];hintStage=0;
     objectMode=false;inspector?.setActive(false);inspector?.replaceRoom(room);input.clear();
-    if(!reducedMotion())animation={type,transition:tx.transition,elapsed:0,duration:type==="rotate" ? .75 : .65};
+    if(!reducedMotion())animation={type,transition:tx.transition,elapsed:0,duration:TUTORIALS[type].duration};
     if(playStatus)playStatus.textContent=animation?actionLabel()+" applied. Wait for the object to settle.":readyMessage();
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return tx;
   }
@@ -194,11 +214,11 @@ export function mountRoomPreview(document,view) {
     updateGuide();redraw();
   }
   function setLevel(key){
-    initialRoom=validateRoom(key==="level1"?ACROSS_THE_BROOK:key==="level2"?STUBBORN_GATE:GATEHOUSE_PREVIEW);
+    initialRoom=validateRoom(Object.hasOwn(LEVELS,key)?LEVELS[key]:GATEHOUSE_PREVIEW);
     mode="overview";zoom=null;focus=null;
     const heading=$("room-heading"),chapter=$("room-chapter");
     if(heading)heading.textContent=initialRoom.title;
-    if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter I · Level "+initialRoom.number+" · "+(initialRoom.tutorial.spell==="rotate"?"Rotation":"Translation"):"Chapter I · Interactive object practice";
+    if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter I · Level "+initialRoom.number+" · "+TUTORIALS[tutorialType(initialRoom)].label:"Chapter I · Interactive object practice";
     resetPlayer();
   }
   on(hintButton,"click",()=>{hintStage=(hintStage+1)%4;updateGuide();});

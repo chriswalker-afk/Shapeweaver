@@ -21,6 +21,7 @@ export function validateObjectDefinitions(room){
     if(!["supported","hinged","enchanted"].includes(o.support))throw new Error("Invalid support mode: "+o.id);
     if(o.support==="hinged"&&(!Array.isArray(o.hinge)||o.hinge.length!==2||!o.hinge.every(Number.isFinite)||!o.permissions.every(t=>t==="rotate")||pointPolygonDistance(o.hinge,o.vertices)>GEOMETRY_EPS))throw new Error("Invalid hinge: "+o.id);
     if((o.dockable||o.pivotOnly)&&(!Array.isArray(o.hinge)||o.hinge.length!==2||!o.hinge.every(Number.isFinite)||pointPolygonDistance(o.hinge,o.vertices)>GEOMETRY_EPS||!o.permissions.includes("rotate")||o.support==="hinged"||o.dockable&&(!o.permissions.includes("translate")||o.decorative)))throw new Error("Invalid mobile pivot: "+o.id);
+    if(o.fixedCentre!==undefined&&(!Array.isArray(o.fixedCentre)||o.fixedCentre.length!==2||!o.fixedCentre.every(Number.isFinite)||o.support!=="enchanted"||o.hinge||o.dockable||o.pivotOnly||o.permissions.length!==1||o.permissions[0]!=="rotate"||pointPolygonDistance(o.fixedCentre,o.vertices)<=GEOMETRY_EPS||o.fixedCentre[0]<room.bounds.minX||o.fixedCentre[0]>room.bounds.maxX||o.fixedCentre[1]<room.bounds.minY||o.fixedCentre[1]>room.bounds.maxY))throw new Error("Invalid external centre: "+o.id);
     if(o.permissions.includes("enlarge")&&(!Array.isArray(o.scaleRange)||o.scaleRange.length!==2||!o.scaleRange.every(Number.isFinite)||o.scaleRange[0]<=0||o.scaleRange[1]<o.scaleRange[0]))throw new Error("Invalid scale range: "+o.id);
   }
   return room;
@@ -50,6 +51,7 @@ export function previewObject(room,player,id,type,raw){
   const request=parsePreviewRequest(type,raw);
   if(!request)return failure("parameters","Enter all required mathematical parameters.");
   if(object.support==="hinged"&&(request.type!=="rotate"||Math.hypot(request.centre[0]-object.hinge[0],request.centre[1]-object.hinge[1])>GEOMETRY_EPS))return failure("hinge","Use the fixed hinge as the centre of rotation.");
+  if(type==="rotate"&&object.fixedCentre&&!samePoint(request.centre,object.fixedCentre))return failure("external-centre","Use the marked external centre at its exact coordinates.");
   if(type==="rotate"&&object.dockable&&!dockedSocket(room,object))return failure("not-docked","Align the beam hinge with its socket using a translation before rotating.");
   if(type==="rotate"&&(object.dockable||object.pivotOnly)&&!samePoint(request.centre,object.hinge))return failure("hinge","Use the marked pivot H at its current coordinates as the centre of rotation.");
   if(type==="enlarge"&&(request.factor<object.scaleRange[0]||request.factor>object.scaleRange[1]))return failure("scale-limit","Scale factor must be between "+object.scaleRange[0]+" and "+object.scaleRange[1]+".");

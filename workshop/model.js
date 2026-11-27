@@ -38,6 +38,7 @@ export function prepareDraft(value){
    ids.add(o.id);count++;
    if(polygonGroups.has(group))require(Array.isArray(o.vertices)&&o.vertices.length>=3&&o.vertices.length<=48&&o.vertices.every(point),"Invalid vertices: "+o.id);
    if(o.hinge!==undefined)require(point(o.hinge),"Invalid hinge: "+o.id);
+   if(o.fixedCentre!==undefined)require(point(o.fixedCentre),"Invalid external centre: "+o.id);
    if(group==="ladders")require([o.x,o.width,o.bottom,o.top].every(finite)&&o.width>0&&o.top>o.bottom,"Invalid ladder: "+o.id);
    if(["checkpoints","decor","plates","sockets"].includes(group))require(xy(o),"Invalid point: "+o.id);
    if(group==="plates")require(finite(o.width)&&o.width>0&&finite(o.contact)&&o.contact>0&&o.contact<=o.width,"Invalid plate dimensions: "+o.id);
@@ -78,6 +79,7 @@ export function moveItem(room,group,id,dx,dy){
  const o=copy(old),round=n=>Number(n.toFixed(8));
  if(o.vertices)o.vertices=o.vertices.map(([x,y])=>[round(x+dx),round(y+dy)]);
  if(o.hinge)o.hinge=[round(o.hinge[0]+dx),round(o.hinge[1]+dy)];
+ if(o.fixedCentre)o.fixedCentre=[round(o.fixedCentre[0]+dx),round(o.fixedCentre[1]+dy)];
  if(finite(o.x))o.x=round(o.x+dx);
  if(finite(o.y))o.y=round(o.y+dy);
  if(group==="ladders"){o.bottom=round(o.bottom+dy);o.top=round(o.top+dy);}
@@ -88,7 +90,7 @@ export function removeItem(room,group,id){
  r[group]=r[group].filter(o=>o.id!==id);return prepareDraft(r);
 }
 export const PALETTE=Object.freeze([
- ["terrain","Terrain block"],["water","Water hazard"],["beam","Timber beam"],["bearing-beam","Two-ended bridge piece"],["dock-bracket","L-shaped dock piece"],["gate","Hinged gate"],["crate","Step crate"],["barrel","Weighted barrel"],["ladder","Transformable ladder"],["static-ladder","Fixed ladder"],["wedge","Wedge"],["mushroom","Spring mushroom"],["key","L-shaped key"],["linked-gate","Linked gate"],["plate","Pressure plate"],["hinge-socket","Hinge socket"],["shape-socket","Shape socket"],["checkpoint","Checkpoint"],["fern","Fern"],["lantern","Lantern"]
+ ["terrain","Terrain block"],["water","Water hazard"],["beam","Timber beam"],["bearing-beam","Two-ended bridge piece"],["waterwheel","Waterwheel rotor"],["orbit-beam","External-centre walkway"],["dock-bracket","L-shaped dock piece"],["gate","Hinged gate"],["crate","Step crate"],["barrel","Weighted barrel"],["ladder","Transformable ladder"],["static-ladder","Fixed ladder"],["wedge","Wedge"],["mushroom","Spring mushroom"],["key","L-shaped key"],["linked-gate","Linked gate"],["plate","Pressure plate"],["hinge-socket","Hinge socket"],["shape-socket","Shape socket"],["checkpoint","Checkpoint"],["fern","Fern"],["lantern","Lantern"]
 ]);
 export function addTemplate(room,type,x,y){
  require(PALETTE.some(p=>p[0]===type)&&finite(x)&&finite(y),"Invalid palette placement");
@@ -101,6 +103,8 @@ export function addTemplate(room,type,x,y){
  case "water":group="hazards";o={id,kind:"water",vertices:rect(4,1)};break;
  case "beam":o.vertices=rect(6,.5);break;
  case "bearing-beam":Object.assign(o,{kind:"beam",vertices:rect(6,.5),bearing:"both-ends"});break;
+ case "waterwheel":Object.assign(o,{kind:"waterwheel",vertices:rect(1,8),hinge:[x+.5,y+4],permissions:["rotate"],support:"hinged"});break;
+ case "orbit-beam":Object.assign(o,{kind:"orbit-beam",vertices:rect(6,.5),fixedCentre:[x+8,y+2],permissions:["rotate"],support:"enchanted"});break;
  case "dock-bracket":Object.assign(o,{kind:"beam",vertices:[[x,y],[x+6,y],[x+6,y+1.5],[x+4,y+1.5],[x+4,y+.5],[x,y+.5]],permissions:["reflect"]});break;
  case "gate":Object.assign(o,{vertices:rect(.5,4),hinge:[x,y+4],permissions:["rotate"],support:"hinged"});break;
  case "crate":o.vertices=rect(2,2);break;

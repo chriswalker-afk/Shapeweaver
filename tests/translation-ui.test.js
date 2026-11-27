@@ -555,7 +555,7 @@ test("both sluice plates stay held, gate opens only with both and results contin
  els["results-next"].fire("click");assert.equal(app.state.view,"level16");assert.equal(c.room.id,"riverworks-16");
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });
-test("diagonal reflection creates a supporting bracket, premature translation is free, and final level completes",()=>{
+test("diagonal reflection creates a supporting bracket, premature translation is free, and continues",()=>{
  const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
  app.identity.show("level16");
  assert.equal(cast(f,"dock-span","translate",{dx:-12,dy:0}).code,"bearing-unsupported");
@@ -568,6 +568,44 @@ test("diagonal reflection creates a supporting bracket, premature translation is
  frame(2);view.fire("keydown",{code:"ArrowRight"});frame(63);
  view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(50);
  view.fire("keydown",{code:"Space"});frame(63);view.fire("keyup",{code:"Space"});frame(300);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,2);assert.equal(c.getResult().returns,0);
+ assert.equal(els["results-next"].hidden,false);assert.equal(els["results-next"].disabled,false);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level17");assert.equal(c.room.id,"riverworks-17");
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+
+test("waterwheel rotates the entire rotor, enlargement completes the approach and results continue",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level17");
+ assert.equal(cast(f,"mill-rotor","rotate",{angle:90,direction:"clockwise",cx:31,cy:11}).code,"hinge");
+ assert.equal(c.getAttemptSummary().moves,0);
+ assert.equal(cast(f,"mill-rotor","rotate",{angle:90,direction:"clockwise",cx:32,cy:11}).ok,true);
+ assert.equal(cast(f,"mill-ramp","enlarge",{factor:3,cx:24,cy:3}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ frame(2);view.fire("keydown",{code:"ArrowRight"});frame(183);
+ view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(63);
+ view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(200);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,2);assert.equal(c.getResult().returns,0);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level18");assert.equal(c.room.id,"riverworks-18");
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+test("external centre is displayed, wrong centre is free, undo restores geometry, and chapter IV completes",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level18");c.setObjectMode(true);c.inspector.selectObject("orbit-walkway");
+ assert.match(els["object-permissions"].textContent,/Fixed external centre.*32.*11/);
+ assert.match(els["object-references"].textContent,/Centre.*32.*11/);
+ const rotate={angle:180,direction:"clockwise",cx:32,cy:11},translate={dx:14,dy:0};
+ assert.equal(cast(f,"orbit-walkway","rotate",{...rotate,cx:31}).code,"external-centre");
+ assert.equal(c.getAttemptSummary().moves,0);
+ assert.equal(cast(f,"orbit-walkway","rotate",rotate).ok,true);
+ assert.equal(c.undoCast(),true);assert.deepEqual(c.room.objects[0].vertices[0],[18,14]);
+ c.resetPlayer();
+ assert.equal(cast(f,"orbit-walkway","rotate",rotate).ok,true);
+ assert.equal(cast(f,"tower-span","translate",translate).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ frame(2);view.fire("keydown",{code:"ArrowRight"});frame(125);
+ view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(75);
+ view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(275);view.fire("keyup",{code:"ArrowRight"});
  assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,2);assert.equal(c.getResult().returns,0);
  assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();

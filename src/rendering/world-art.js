@@ -129,9 +129,8 @@ function object(ctx,camera,item,art) {
   }else if(item.kind==="waterwheel"){
     tilePolygon(ctx,camera,item.vertices,art.timber,"#ae825c",2.5,.65);
     outline(ctx,camera,item.vertices,"#58473e",2);
-    const h=item.hinge;
     ctx.save();polygon(ctx,camera,item.vertices);ctx.clip();
-    for(const v of item.vertices){if(Math.hypot(v[0]-h[0],v[1]-h[1])<camera.scale*.01)continue;const p=xy(camera,v);ctx.fillStyle="#e7c186";ctx.beginPath();ctx.arc(p.x,p.y,Math.max(1,camera.scale*.10),0,Math.PI*2);ctx.fill();}
+    for(const v of item.vertices){const p=xy(camera,v);ctx.fillStyle="#e7c186";ctx.beginPath();ctx.arc(p.x,p.y,Math.max(1,camera.scale*.10),0,Math.PI*2);ctx.fill();}
     ctx.restore();
   }else if(item.kind==="mushroom"){
     const b=screenBounds(camera,item.vertices),capHeight=b.h*.48;
@@ -433,8 +432,8 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   if(room.id==="riverworks-13")worldLabel(ctx,camera,42,1.5,"CENTRAL PIER","#f7d7a1");
   if(room.id==="riverworks-16")worldLabel(ctx,camera,3.5,8,"STORAGE SHELF","#f7d7a1");
   for(const o of room.objects){
-    if(o.fixedCentre)worldLabel(ctx,camera,o.fixedCentre[0],o.fixedCentre[1]+.55,"EXTERNAL CENTRE","#ffe1a7");
-    else if(o.kind==="waterwheel"&&o.hinge)worldLabel(ctx,camera,o.hinge[0],o.hinge[1]+.85,"AXLE","#ffe1a7");
+    if(!o.decorative&&o.fixedCentre)worldLabel(ctx,camera,o.fixedCentre[0],o.fixedCentre[1]+.55,"EXTERNAL CENTRE","#ffe1a7");
+    else if(!o.decorative&&o.kind==="waterwheel"&&o.hinge)worldLabel(ctx,camera,o.hinge[0],o.hinge[1]+.85,"AXLE","#ffe1a7");
   }
   if(room.id==="riverworks-14")worldLabel(ctx,camera,6,5.6,"STORAGE RACK","#f7d7a1");
   if(room.id==="clockwork-10")worldLabel(ctx,camera,21.5,6.65,"LOW ARCH","#f1d09b");

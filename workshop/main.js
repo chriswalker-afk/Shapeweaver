@@ -67,6 +67,7 @@ function drawDraft(room,metrics){
   const {group,id,item:o}=e,active=selection?.group===group&&selection?.id===id,bb=itemBounds(group,o),tl=screen(bb.minX,bb.maxY),br=screen(bb.maxX,bb.minY);
   ctx.beginPath();if(o.vertices){for(const [i,[x,y]] of o.vertices.entries()){const p=screen(x,y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y);}ctx.closePath();}else ctx.rect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
   ctx.fillStyle=colours[group];ctx.globalAlpha=group==="shapeSockets"?.35:.95;ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=active?3:1.2;ctx.strokeStyle=active?"#ffec9b":"#2c3339";if(group==="shapeSockets")ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
+  if(o.fixedCentre){const h=screen(...o.fixedCentre),c=screen((bb.minX+bb.maxX)/2,(bb.minY+bb.maxY)/2);ctx.setLineDash([4,3]);line(h,c,"#fce2a4");ctx.setLineDash([]);ctx.fillStyle="#fce2a4";ctx.beginPath();ctx.arc(h.x,h.y,4,0,Math.PI*2);ctx.fill();}
   if(o.hinge){const h=screen(...o.hinge);ctx.fillStyle="#fce2a4";ctx.beginPath();ctx.arc(h.x,h.y,4,0,Math.PI*2);ctx.fill();}
   if(active&&o.vertices)for(const [x,y] of o.vertices){const p=screen(x,y);ctx.fillStyle="#ffec9b";ctx.fillRect(p.x-2.5,p.y-2.5,5,5);}
   if(active||["spawn","exit","plates","sockets","shapeSockets","checkpoints"].includes(group)){ctx.font="600 11px system-ui";ctx.fillStyle="#fff1d2";ctx.strokeStyle="#232433";ctx.lineWidth=3;const label=group==="spawn"?"START":group==="exit"?"EXIT":id;ctx.strokeText(label,tl.x+3,tl.y-5);ctx.fillText(label,tl.x+3,tl.y-5);}

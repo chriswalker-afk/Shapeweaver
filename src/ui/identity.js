@@ -15,6 +15,7 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
   const title = document.getElementById("title-view");
   const book = document.getElementById("spellbook-view");
   const room = document.getElementById("room-view");
+  const results = document.getElementById("results-view");
   const art = document.getElementById("title-art");
   const name = document.getElementById("spell-name");
   const description = document.getElementById("spell-description");
@@ -45,14 +46,15 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
   }
   function show(view) {
     const isRoom = ["room","level1","level2","level3","level4"].includes(view);
-    if (view !== "title" && view !== "spellbook" && !(isRoom && room)) return false;
+    if (view !== "title" && view !== "spellbook" && !(isRoom && room) && !(view === "results" && results)) return false;
     state.view = view;
     title.hidden = view !== "title";
     book.hidden = view !== "spellbook";
     if (room) room.hidden = !isRoom;
+    if (results) results.hidden = view !== "results";
     if (art) art.hidden = isRoom;
     onViewChange(view);
-    document.getElementById(view === "title" ? "open-spellbook" : isRoom ? "room-heading" : "spellbook-heading")?.focus();
+    document.getElementById(view === "title" ? "open-spellbook" : isRoom ? "room-heading" : view === "results" ? "results-heading" : "spellbook-heading")?.focus();
     return true;
   }
   for (const button of buttons) on(button, () => select(button.dataset.spell));

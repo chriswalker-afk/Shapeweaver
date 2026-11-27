@@ -1,17 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {mountRoomPreview} from "../src/ui/room-preview.js";
+import {startApp} from "../src/main.js";
 import {worldToScreen} from "../src/rendering/camera.js";
 function node(tag="div"){
  const listeners=new Map(),attributes={};
- return {tag,listeners,attributes,children:[],dataset:{},style:{},value:"",hidden:false,disabled:false,
+ return {tag,listeners,attributes,children:[],dataset:{},style:{setProperty(k,v){attributes[k]=v}},value:"",hidden:false,disabled:false,
   setAttribute(k,v){attributes[k]=v},append(...items){this.children.push(...items)},replaceChildren(...items){this.children=items},
   querySelectorAll(){return this.children.flatMap(c=>c.tag==="input"||c.tag==="select"?[c]:c.querySelectorAll())},
   addEventListener(k,v){listeners.set(k,v)},removeEventListener(k,v){if(listeners.get(k)===v)listeners.delete(k)},
-  fire(k,event={}){listeners.get(k)?.({preventDefault(){},...event})},focus(){}};
+  fire(k,event={}){listeners.get(k)?.({preventDefault(){},...event})},focus(){this.focused=true}};
 }
-function fixture(reduce){
- const ids="room-canvas room-stage room-status play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-moves reset-practice undo-cast return-safety recovery-count".split(" ");
+function fixture(reduce,withApp=false){
+ const ids="room-canvas room-stage room-status play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-moves reset-practice undo-cast return-safety recovery-count world app-status title-view spellbook-view title-art room-view spell-name spell-description spell-example spell-image spell-detail translation-vector open-spellbook close-spellbook spellbook-heading open-room open-level1 open-level2 open-level3 open-level4 close-room results-view results-heading results-level results-stars results-message results-stats results-thresholds results-best results-history results-empty results-replay results-next results-title".split(" ");
  const els=Object.fromEntries(ids.map(id=>[id,node()])),rect={left:0,top:0,width:1000,height:500};
  const ctx={save(){},restore(){},setTransform(){},createLinearGradient(){return{addColorStop(){}}},createRadialGradient(){return{addColorStop(){}}},
  fillRect(){},drawImage(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){},stroke(){},clip(){},rect(){},translate(){},rotate(){},ellipse(){},arc(){},strokeRect(){},quadraticCurveTo(){},strokeText(){},fillText(){},measureText(s){return{width:s.length*7}},setLineDash(){}};
@@ -20,9 +21,12 @@ function fixture(reduce){
  let time=0,id=0;const callbacks=new Map();
  view.requestAnimationFrame=fn=>{callbacks.set(++id,fn);return id};view.cancelAnimationFrame=i=>callbacks.delete(i);
  function frame(n=1){for(let i=0;i<n;i++){time+=1000/60;for(const [key,fn] of [...callbacks]){callbacks.delete(key);fn(time);}}}
- const document={...node(),getElementById:id=>els[id],createElement:tag=>node(tag),querySelectorAll:()=>[]};
- const controller=mountRoomPreview(document,view);
- return {els,view,controller,frame};
+ const document={...node(),getElementById:id=>els[id],createElement:tag=>node(tag),querySelector:()=>els["room-stage"],querySelectorAll:()=>[]};
+ els.world.getContext=()=>ctx;els["results-view"].hidden=true;els["room-view"].hidden=true;els["spellbook-view"].hidden=true;
+ const saved=new Map();view.localStorage={getItem:k=>saved.get(k)??null,setItem:(k,v)=>saved.set(k,v)};
+ const app=withApp?startApp(document,view):null;
+ const controller=app?.room??mountRoomPreview(document,view);
+ return {els,view,controller,frame,app,saved};
 }
 test("first tutorial selection, actual Apply, animation locks, reset, and separate practice",()=>{
  for(const reduce of [false,true]){
@@ -255,4 +259,48 @@ test("after portal completion, undo and return cannot alter the finished result"
  assert.equal(els["undo-cast"].disabled,true);assert.equal(els["return-safety"].disabled,true);
  assert.equal(c.undoCast(),false);assert.equal(c.recoverPlayer(),false);assert.equal(c.getAttemptSummary().moves,1);
  c.destroy();
+});
+
+test("actual completion routes to results once, replay and next level start clean attempts; best survives",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ const click=id=>els[id].fire("click");
+ const raw={angle:90,direction:"anticlockwise",cx:14,cy:8};
+ const openGate=()=>assert.equal(cast(f,"stubborn-gate","rotate",raw).ok,true);
+ const walk=()=>{view.fire("keydown",{code:"ArrowRight"});frame(300);view.fire("keyup",{code:"ArrowRight"});};
+ click("open-level2");assert.equal(app.state.view,"level2");assert.equal(c.getResult(),null);
+ openGate();assert.equal(c.undoCast(),true);openGate();
+ assert.equal(c.getResult(),null);assert.equal(app.bestResults.get("gatehouse-02"),null);
+ walk();
+ assert.equal(c.getPlayer().completed,true);assert.equal(app.state.view,"results");
+ assert.equal(app.state.playable,false);assert.equal(els["room-view"].hidden,true);assert.equal(els["results-view"].hidden,false);
+ assert.equal(els["results-heading"].focused,true);
+ const result=c.getResult();assert.equal(result,app.results.getResult());
+ assert.equal(result.stars,2);assert.equal(result.moves,2);assert.equal(result.undos,1);
+ assert.equal(result.entries[0].undone,true);assert.equal(result.entries[1].undone,false);
+ assert.equal(els["results-stars"].attributes["aria-label"],"2 out of 3 stars");
+ assert.equal(els["results-history"].children.length,2);
+ assert.match(els["results-history"].children[0].children[2].textContent,/Undone/);
+ assert.deepEqual(app.bestResults.get("gatehouse-02"),{moves:2,stars:2});
+ frame(100);assert.equal(c.getResult(),result);
+ click("results-replay");assert.equal(app.state.view,"level2");assert.equal(els["results-view"].hidden,true);
+ assert.equal(c.getResult(),null);assert.equal(c.getAttemptSummary().moves,0);
+ assert.equal(c.getPlayer().completed,false);assert.equal(app.results.getResult(),null);
+ assert.deepEqual(app.bestResults.get("gatehouse-02"),{moves:2,stars:2});
+ openGate();walk();assert.equal(c.getResult().stars,3);assert.deepEqual(app.bestResults.get("gatehouse-02"),{moves:1,stars:3});
+ click("results-next");assert.equal(app.state.view,"level3");assert.equal(c.room.id,"gatehouse-03");assert.equal(c.getResult(),null);assert.equal(c.getAttemptSummary().moves,0);
+ click("close-room");assert.equal(app.state.view,"title");assert.equal(app.bestResults.get("gatehouse-03"),null);
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+test("last available level completes without a nonexistent next level; returns to title",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ els["open-level4"].fire("click");
+ assert.equal(cast(f,"missing-barrel","reflect",{line:"x=15"}).ok,true);
+ const down=code=>view.fire("keydown",{code}),up=code=>view.fire("keyup",{code});
+ frame(2);down("ArrowRight");frame(88);down("Space");frame(30);up("Space");up("ArrowRight");frame(20);
+ down("ArrowRight");down("Space");frame(28);up("Space");frame(72);up("ArrowRight");
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);
+ assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
+ els["results-next"].fire("click");assert.equal(app.state.view,"results");
+ els["results-title"].fire("click");assert.equal(app.state.view,"title");assert.equal(els["results-view"].hidden,true);
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });

@@ -218,3 +218,38 @@ h1,h2,h3 { font-family: var(--display); }
 .recovery-controls button:disabled { opacity:.45;cursor:default; }
 #recovery-count { color:#d8c5e4;font-variant-numeric:tabular-nums; }
 @media(max-height:520px) and (orientation:landscape){.recovery-controls{gap:.15rem}.recovery-controls button{padding:.2rem .35rem}}
+
+/* PR12: completion is a dedicated view, not an overlay that consumes gameplay space. */
+.results-view { display:grid;place-items:center;min-width:0;padding:clamp(.65rem,2.8vw,2rem);background:#211c3178; }
+.results-sheet { display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.15fr);gap:.9rem 1.3rem;width:min(100%,58rem);min-width:0;padding:clamp(.9rem,2.4vw,1.9rem);border:1px solid #a78b6b;outline:1px solid #9c805b;outline-offset:3px;border-radius:.35rem;background:radial-gradient(ellipse at top,#40314e,#272033);box-shadow:0 12px 44px #171121b0;color:#f5e9d6; }
+.results-header,.results-actions { grid-column:1/-1; }
+.results-header { padding-bottom:.6rem;border-bottom:1px solid #886d58;text-align:center; }
+.results-header .eyebrow { margin-bottom:.2rem; }
+.results-header h2 { margin:0;font-size:clamp(1.5rem,3.5vw,2.4rem);color:#f5dca9; }
+.results-summary,.results-solution { min-width:0; }
+.results-stars { display:flex;align-items:center;justify-content:center;gap:.32em;font-size:clamp(2.5rem,5vw,4.1rem);line-height:1.15; }
+.earned-star { color:#efc474;text-shadow:0 2px 1px #8b653b,0 0 16px #e7b95e40; }
+.empty-star { color:#b5a4b6; }
+#results-message { margin:.25rem 0 .7rem;font-weight:650;text-align:center;color:#f2deb6;line-height:1.4; }
+.results-stats { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35rem;margin:.5rem 0; }
+.result-stat { border:1px solid #716078;background:#1e182b66;border-radius:.25rem;padding:.45rem .5rem;text-align:center; }
+.result-stat dt { color:#dfcdbf;font-size:.78rem; }
+.result-stat dd { margin:0;color:#f5dca9;font:700 1.45rem var(--display);font-variant-numeric:tabular-nums; }
+.results-note { color:#d7c8cc;font-size:.79rem;line-height:1.45;margin:.4rem 0; }
+.results-best { margin:.55rem 0 0;color:#f0cf94;font-size:.84rem;font-weight:650;line-height:1.4; }
+.results-solution { border-left:1px solid #766078;padding-left:1rem; }
+.results-solution h3 { margin:0;font-size:1.2rem;color:#f3dfb8; }
+.results-history { margin:.6rem 0 0;padding:.25rem .25rem .25rem 1.65rem;max-height:clamp(8rem,43dvh,26rem);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin; }
+.result-history-item { margin-bottom:.4rem;padding:.45rem .5rem;background:#211b2d88;border:1px solid #74617c;border-radius:.25rem; }
+.result-history-item::marker { color:#e4c393;font-variant-numeric:tabular-nums;font-weight:650; }
+.result-history-item img { float:left;margin:.05rem .55rem .15rem 0; }
+.result-history-detail { min-width:0;overflow-wrap:anywhere;font-size:.86rem; }
+.result-math { display:flex;align-items:center;flex-wrap:wrap;gap:.45rem;color:#f0dfc3;margin:.2rem 0;line-height:1.45; }
+.result-cast-state { display:block;margin-top:.18rem;color:#c6ddc9;font-size:.72rem; }
+.result-undone { border-style:dashed;background:#211b2d44; }
+.result-undone .result-cast-state { color:#e8c4a7; }
+.result-undone .result-history-detail { color:#d9c8d8; }
+.results-actions { display:flex;justify-content:flex-end;flex-wrap:wrap;gap:.5rem;border-top:1px solid #886d58;padding-top:.75rem; }
+.results-actions .gold-button { min-width:0; }
+@media(max-width:650px) and (orientation:portrait){.results-sheet{grid-template-columns:minmax(0,1fr);gap:.65rem}.results-solution{border-left:0;padding-left:0;border-top:1px solid #766078;padding-top:.7rem}.results-history{max-height:35dvh}.results-actions{justify-content:stretch}.results-actions button{flex:1 1 auto}.results-stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-height:520px) and (orientation:landscape){.results-view{padding:.45rem}.results-sheet{padding:.65rem .9rem;gap:.4rem .85rem}.results-header{padding-bottom:.3rem}.results-header h2{font-size:1.4rem}.results-stars{font-size:2.4rem}.results-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:.25rem}.result-stat{padding:.25rem}.result-stat dt{font-size:.68rem}.result-stat dd{font-size:1.15rem}.results-history{max-height:38dvh}.results-actions{padding-top:.35rem}.results-note{font-size:.73rem}}

@@ -123,3 +123,13 @@ test("title can open Level 4 directly",()=>{
  els["open-level4"].click();assert.equal(state.view,"level4");assert.equal(els["room-view"].hidden,false);assert.equal(els["room-heading"].focused,true);
  els["close-room"].click();els["open-level3"].click();assert.deepEqual(changes,["level4","title","level3"]);ui.destroy();
 });
+
+test("results is an exclusive view with completion heading focus",()=>{
+ const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","translation-vector","room-view","title-art","open-room","open-level2","close-room","room-heading","open-spellbook","results-view","results-heading"];
+ const els=Object.fromEntries(ids.map(id=>[id,element()]));
+ const state=createAppState(),changes=[],ui=mountIdentity({getElementById:id=>els[id],querySelectorAll:()=>[]},state,v=>changes.push(v));
+ ui.show("level2");ui.show("results");
+ assert.equal(state.view,"results");assert.equal(els["results-view"].hidden,false);assert.equal(els["room-view"].hidden,true);
+ assert.equal(els["title-view"].hidden,true);assert.equal(els["spellbook-view"].hidden,true);assert.equal(els["results-heading"].focused,true);
+ ui.show("title");assert.equal(els["results-view"].hidden,true);assert.deepEqual(changes,["level2","results","title"]);ui.destroy();
+});

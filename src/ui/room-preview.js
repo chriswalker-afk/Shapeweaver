@@ -10,6 +10,7 @@ import { previewTranslation, commitTranslation, translatedFrame } from "../trans
 import { FIXED_DT, MOTION } from "../physics/platformer.js";
 import {returnToSafety} from "../physics/recovery.js";
 import {createAttemptHistory,rememberSafePosition,recordCast,undoLastCast,attemptSummary} from "../core/attempt-history.js";
+import {completedResult} from "../core/level-results.js";
 import { createCamera, panCamera, zoomCamera, MAX_ZOOM, ZOOM_STEP } from "../rendering/camera.js";
 import { loadWorldArt, renderWorld } from "../rendering/world-art.js";
 import { mountViewport } from "../rendering/viewport.js";
@@ -45,13 +46,13 @@ const LEVELS=Object.freeze({level1:ACROSS_THE_BROOK,level2:STUBBORN_GATE,level3:
 const tutorialType=room=>room.tutorial?(room.tutorial.spell??"translate"):null;
 
 /** Movement practice room, coordinate inspection, and deterministic simulation. */
-export function mountRoomPreview(document,view) {
+export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   const canvas=document.getElementById("room-canvas"),host=document.getElementById("room-stage");
   const status=document.getElementById("room-status");
   if(!canvas||!host||!status)return null;
   let initialRoom=validateRoom(GATEHOUSE_PREVIEW),room=initialRoom;
   const $=id=>document.getElementById(id);
-  let physics=createPhysicsWorld(room),animation=null,history=createAttemptHistory(),hintStage=0;
+  let physics=createPhysicsWorld(room),animation=null,history=createAttemptHistory(),hintStage=0,result=null;
   let player=createPlayer(physics),active=false,lastEvent=null,objectMode=false,inspector=null;
   let lastSafe=rememberSafePosition(physics,player);
   const playStatus=$("play-status"),followButton=$("follow-toggle"),movementPanel=$("movement-controls");
@@ -77,6 +78,10 @@ export function mountRoomPreview(document,view) {
     }
     lastEvent=next.event;
     if(["exit","respawn","reset-required"].includes(next.event))updateGuide();
+    if(next.event==="exit"&&!result){
+      result=completedResult(room,player,history);
+      if(result)onComplete(result);
+    }
   },()=>viewport?.resize());
   const controls=Object.fromEntries(["overview","inspect","left","right","up","down","zoom-in","zoom-out"].map(id=>[id,$("camera-"+id)]));
   const gridButton=$("grid-toggle"),axesButton=$("axes-toggle"),pickButton=$("pick-toggle"),panel=$("coordinate-panel");
@@ -259,7 +264,7 @@ export function mountRoomPreview(document,view) {
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return true;
   }
   function resetPlayer(){
-    room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);history=createAttemptHistory();
+    room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);history=createAttemptHistory();result=null;
     lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
     if(playStatus)playStatus.textContent=room.tutorial?"Arrows / WASD · Space to jump":"Practice restarted.";
     updateGuide();redraw();
@@ -279,7 +284,7 @@ export function mountRoomPreview(document,view) {
   // Click the stage to return keyboard focus to gameplay after inspecting controls.
   on(host,"click",()=>{if(!picking&&!objectMode)canvas.focus?.({preventScroll:true});});
   updateControls();updateGuide();
-  return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
+  return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getResult:()=>result,getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
     getCamera:()=>camera,getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),
     refresh:()=>viewport?.resize(),
     destroy(){loop.stop();input.destroy();inspector?.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};

@@ -22,6 +22,7 @@ import {createFixedLoop} from "../core/fixed-loop.js";
 import {mountMovementInput} from "./movement-input.js";
 import {mountObjectInspector} from "./object-inspector.js";
 import {drawObjectOverlay,drawReflectionFlash} from "../rendering/object-overlay.js";
+import {castProgress,drawCastAura} from "../rendering/cast-effects.js";
 import { SNAP_STEPS,pickCoordinate,parseCoordinate,formatCoordinate,clientToScreen } from "../geometry/coordinates.js";
 
 // Keep spell dispatch and tutorial copy data-driven as new transformation types arrive.
@@ -127,10 +128,12 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     const target=active&&follow&&!animation&&!picking&&!objectMode&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
     camera=createCamera(room.bounds,metrics.width,metrics.height,mode,target,zoom);
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
-    const frame=animation?TUTORIALS[animation.type].frame(room,animation.transition,animation.elapsed/animation.duration):room;
+    const progress=animation?castProgress(animation.elapsed/animation.duration):0;
+    const frame=animation?TUTORIALS[animation.type].frame(room,animation.transition,progress):room;
     renderWorld(ctx,metrics,camera,frame,images.art,player,reducedMotion());
     plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});
-    if(animation?.type==="reflect")drawReflectionFlash(ctx,camera,room.bounds,animation.transition.line,animation.elapsed/animation.duration);
+    if(animation?.type==="reflect")drawReflectionFlash(ctx,camera,room.bounds,animation.transition.line,progress);
+    if(animation&&animation.type!=="reflect"&&!reducedMotion())drawCastAura(ctx,camera,frame.objects.find(o=>o.id===animation.transition.id),animation.type,progress);
     if(objectMode&&inspector){const s=inspector.getState();drawObjectOverlay(ctx,camera,room.bounds,s.objects,s.selected,s.preview);}
     updateControls();
   });

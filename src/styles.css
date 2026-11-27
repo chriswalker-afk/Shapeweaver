@@ -318,3 +318,5 @@ body:has(#room-view:not([hidden])) .game-viewport{border:0;border-radius:0;min-h
   .movement-controls .jump-control{margin-left:auto;min-width:84px}
   .play-info{text-align:left;flex:1 1 100%}
 }
+
+body:has(#room-view:not([hidden])) .game-viewport{overflow:visible}

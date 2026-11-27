@@ -1,5 +1,6 @@
 import { polygonBounds } from "../geometry/world.js";
 import { worldToScreen } from "./camera.js";
+import {SPELL_COLOURS} from "./cast-effects.js";
 
 export const WORLD_ASSETS=Object.freeze({
   distant:"environments/gatehouse-distant.svg",ruins:"environments/gatehouse-ruins.svg",
@@ -60,6 +61,9 @@ function terrain(ctx,camera,item,art) {
   if(item.material==="timber")tilePolygon(ctx,camera,item.vertices,art.timber,"#ab805b",3,.65);
   else tilePolygon(ctx,camera,item.vertices,art.stone,"#7b7480",2.4,1.5);
   outline(ctx,camera,item.vertices,"#4e495a",Math.max(1,camera.scale*.045));
+  // A narrow interior bevel separates collidable terrain from the distant ruins.
+  ctx.save();polygon(ctx,camera,item.vertices);ctx.clip();
+  ctx.strokeStyle="#d4c2a333";ctx.lineWidth=Math.max(1,camera.scale*.11);polygon(ctx,camera,item.vertices);ctx.stroke();ctx.restore();
   if (!item.grass)return;
   // CCW polygons: leftward edges face up. The grass trim does not add collision thickness.
   for(let i=0;i<item.vertices.length;i++){
@@ -95,8 +99,12 @@ function object(ctx,camera,item,art) {
     for(const [u,v,r] of [[.68,.72,.1],[.87,.52,.07],[.43,.86,.06]]) {
       ctx.beginPath();ctx.ellipse(b.x+b.w*u,b.y+b.h*v,b.w*r,b.h*r,.15,0,Math.PI*2);
       ctx.fillStyle="#b77b4d";ctx.fill();
+      ctx.strokeStyle="#f6d38b";ctx.lineWidth=1;ctx.stroke();
     }
-    ctx.restore();outline(ctx,camera,item.vertices,"#8e5b42",2);
+    // Highlight the walkable sloping edge, within the collision silhouette.
+    const a=xy(camera,item.vertices[0]),c=xy(camera,item.vertices[2]);
+    ctx.strokeStyle="#ffe0a2";ctx.lineWidth=Math.max(2,camera.scale*.13);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(c.x,c.y);ctx.stroke();
+    ctx.restore();outline(ctx,camera,item.vertices,"#8e5b42",1.4);
   }else if(item.kind==="barrel"&&item.vertices.length===4&&(!item.vertexIds||["A","B","C","D"].every(id=>item.vertexIds.includes(id)))){
     const ids=item.vertexIds??["A","B","C","D"];
     const a=xy(camera,item.vertices[ids.indexOf("A")]),b=xy(camera,item.vertices[ids.indexOf("B")]),d=xy(camera,item.vertices[ids.indexOf("D")]);
@@ -151,6 +159,37 @@ function decorate(ctx,camera,item) {
   }
   ctx.restore();
 }
+function sceneDetails(ctx,camera,room){
+  // Architecture behind the playable silhouettes, never added to collision geometry.
+  const rect=(x,y,w,h,colour)=>{const p=worldToScreen(camera,{x,y:y+h});ctx.fillStyle=colour;ctx.fillRect(p.x,p.y,w*camera.scale,h*camera.scale);};
+  if(room.id==="gatehouse-04"){
+    rect(0,3,7,5,"#34293dc9");
+    for(const x of [1,3.5,6])rect(x,3,.12,5,"#78657980");
+    rect(0,7.55,7,.14,"#ae927462");
+  }
+  if(room.id==="gatehouse-02"){
+    rect(12.2,3,.5,5.5,"#6b5b7177");rect(19.3,3,.5,5.5,"#6b5b7177");
+    rect(12.2,7.7,7.6,.5,"#71607555");
+  }
+  if(room.id==="gatehouse-03"){
+    rect(26,12,.35,2,"#87758766");rect(33,12,.35,2,"#87758766");
+  }
+}
+function worldLabel(ctx,camera,x,y,label,colour){
+  const p=worldToScreen(camera,{x,y});
+  if(p.x<22||p.x>camera.width-22||p.y<10||p.y>camera.height-10)return;
+  ctx.save();ctx.font="700 11px system-ui, sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.lineWidth=3.2;ctx.lineJoin="round";ctx.strokeStyle="#272034";ctx.strokeText(label,p.x,p.y);ctx.fillStyle=colour;ctx.fillText(label,p.x,p.y);ctx.restore();
+}
+function objectRunes(ctx,camera,room){
+  for(const o of room.objects){
+    if(o.decorative||!o.permissions?.length||o.reflectionOpacity!==undefined)continue;
+    const b=polygonBounds(o.vertices),p=worldToScreen(camera,{x:(b.minX+b.maxX)/2,y:b.maxY});
+    const y=p.y-8;
+    if(p.x<8||p.x>camera.width-8||y<6||y>camera.height-6)continue;
+    ctx.save();ctx.beginPath();ctx.moveTo(p.x,y-4);ctx.lineTo(p.x+4,y);ctx.lineTo(p.x,y+4);ctx.lineTo(p.x-4,y);ctx.closePath();
+    ctx.fillStyle=SPELL_COLOURS[o.permissions[0]]??"#f5d69a";ctx.fill();ctx.strokeStyle="#34273e";ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+  }
+}
 function portal(ctx,camera,exit,art) {
   const p=worldToScreen(camera,exit),w=exit.width*camera.scale,h=exit.height*camera.scale;
   const glow=ctx.createRadialGradient(p.x,p.y-h*.5,0,p.x,p.y-h*.5,h);
@@ -195,6 +234,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   ctx.save();
   const b=room.bounds,tl=worldToScreen(camera,{x:b.minX,y:b.maxY}),br=worldToScreen(camera,{x:b.maxX,y:b.minY});
   ctx.beginPath();ctx.rect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.clip();
+  sceneDetails(ctx,camera,room);
   for(const item of room.hazards)hazard(ctx,camera,item,art);
   for(const item of room.terrain)terrain(ctx,camera,item,art);
   for(const item of room.ladders??[])ladder(ctx,camera,item);
@@ -205,6 +245,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   for(const item of room.checkpoints??[])checkpoint(ctx,camera,item,player.checkpoint===item.id);
   for(const item of room.decor)decorate(ctx,camera,item);
   portal(ctx,camera,room.exit,art);apprentice(ctx,camera,player,art,reducedMotion);
+  if(room.tutorial){objectRunes(ctx,camera,room);worldLabel(ctx,camera,room.exit.x,room.exit.y+room.exit.height+.35,"EXIT","#ffe2a5");}
   ctx.restore();
   // Subtle vignette establishes the playable area without darkening the whole room.
   const v=ctx.createLinearGradient(0,0,0,metrics.height);v.addColorStop(0,"#28223930");v.addColorStop(.28,"#28223900");v.addColorStop(.82,"#28223900");v.addColorStop(1,"#28223950");

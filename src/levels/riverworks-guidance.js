@@ -3,6 +3,7 @@ import {bearingStatus} from "../mechanisms/structural-bearings.js";
 import {ladderSegment} from "../mechanisms/transformable-ladders.js";
 import {referencePoints} from "../transformations/preview-math.js";
 import {previewRotation} from "../transformations/rotation.js";
+import {riverworksMechanismSituation} from "./riverworks-mechanism-guidance.js";
 const near=(a,b)=>Math.abs(a-b)<1e-7,round=n=>Number(n.toFixed(8)),point=p=>"("+p.map(round).join(", ")+")";
 const state=(config,ready,reasoning,worked,raw)=>({config,ready,reasoning,worked,raw});
 function translation(room,o,target,objective,obstacle,object,traverse,ready=false){
@@ -14,6 +15,7 @@ function translation(room,o,target,objective,obstacle,object,traverse,ready=fals
  "Horizontal: "+target[0]+" − ("+round(a[0])+") = "+dx+". Vertical: "+target[1]+" − ("+round(a[1])+") = "+dy+". Enter column vector ("+dx+", "+dy+").",{dx,dy});
 }
 export function riverworksSituation(room){
+ if(room.id==="riverworks-15"||room.id==="riverworks-16")return riverworksMechanismSituation(room);
  const get=id=>room.objects.find(o=>o.id===id);
  if(room.id==="riverworks-13"){
   const a=get("west-span"),b=get("east-span"),pieces=[a,b];

@@ -119,7 +119,9 @@ const CHALLENGE_GOALS=deepFreeze({
  "clockwork-11":"Reach the high landing.",
  "clockwork-12":"Unlock the gate and reach the portal.",
  "riverworks-13":"Cross both channels of the river.",
- "riverworks-14":"Reach the upper works."
+ "riverworks-14":"Reach the upper works.",
+ "riverworks-15":"Release the sluice gate and reach the far portal.",
+ "riverworks-16":"Make a connected route between the docks."
 });
 export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
 const FIELD_GUIDES=Object.freeze({

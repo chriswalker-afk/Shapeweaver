@@ -1,4 +1,5 @@
 import {polygonBounds} from "../geometry/world.js";
+import {roomLadders,isSolidObject} from "../mechanisms/transformable-ladders.js";
 export const EPS=1e-7;
 export const PLAYER_SIZE=Object.freeze({width:.66,height:1.55});
 export function playerBox(p){
@@ -39,8 +40,8 @@ function compile(items){
 }
 /** Rebuild this static collision index when geometry changes in future object-engine PRs. */
 export function createPhysicsWorld(room){
-  return {room,bounds:room.bounds,solids:compile([...room.terrain,...room.objects.filter(o=>!o.decorative)]),hazards:compile(room.hazards),
-    ladders:room.ladders??[],checkpoints:room.checkpoints??[]};
+  return {room,bounds:room.bounds,solids:compile([...room.terrain,...room.objects.filter(isSolidObject)]),hazards:compile(room.hazards),
+    ladders:roomLadders(room),checkpoints:room.checkpoints??[]};
 }
 export function blocked(world,p){
   const b=playerBox(p),w=world.bounds;

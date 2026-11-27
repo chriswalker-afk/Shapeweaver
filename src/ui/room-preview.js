@@ -93,7 +93,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   function updateControls(){
     if(secondaryTools)secondaryTools.hidden=!toolsOpen;
     if(toolsButton){toolsButton.setAttribute("aria-expanded",String(toolsOpen));setText(toolsButton,toolsOpen?"View tools ▴":"View tools ▾");}
-    if(climbControls)climbControls.hidden=!(room.ladders?.length);
+    if(climbControls)climbControls.hidden=!(physics.ladders?.length);
     controls.overview?.setAttribute("aria-pressed",String(mode==="overview"));
     controls.inspect?.setAttribute("aria-pressed",String(mode==="inspect"));
     gridButton?.setAttribute("aria-pressed",String(grid));

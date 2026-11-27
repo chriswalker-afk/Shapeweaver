@@ -93,7 +93,22 @@ function hazard(ctx,camera,item,art) {
   ctx.stroke();
 }
 function object(ctx,camera,item,art) {
-  if(item.kind==="mushroom"){
+  if(item.kind==="ladder"){
+    // Rail and rung positions use the actual long and short edges, including
+    // intermediate rotated frames, not an axis-aligned decorative image.
+    const v=item.vertices.map(p=>xy(camera,p));
+    const len=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+    const [a,b,c,d]=len(v[0],v[1])>=len(v[1],v[2])?v:[v[1],v[2],v[3],v[0]];
+    const at=(p,q,t)=>({x:p.x+(q.x-p.x)*t,y:p.y+(q.y-p.y)*t});
+    const line=(p,q)=>{ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);};
+    const width=len(a,d),length=len(a,b),count=Math.max(2,Math.round(length/(camera.scale*.55)));
+    ctx.save();polygon(ctx,camera,item.vertices);ctx.clip();
+    ctx.lineCap="round";ctx.strokeStyle="#614b40";ctx.lineWidth=Math.max(2,width*.29);
+    ctx.beginPath();line(at(a,d,.13),at(b,c,.13));line(at(a,d,.87),at(b,c,.87));ctx.stroke();
+    ctx.strokeStyle="#dfb779";ctx.lineWidth=Math.max(1,width*.17);
+    ctx.beginPath();line(at(a,d,.13),at(b,c,.13));line(at(a,d,.87),at(b,c,.87));
+    for(let i=1;i<count;i++){line(at(a,b,i/count),at(d,c,i/count));}ctx.stroke();ctx.restore();
+  }else if(item.kind==="mushroom"){
     const b=screenBounds(camera,item.vertices),capHeight=b.h*.48;
     ctx.save();polygon(ctx,camera,item.vertices);ctx.clip();
     ctx.fillStyle="#e6cfa5";ctx.fillRect(b.x,b.y,b.w,b.h);

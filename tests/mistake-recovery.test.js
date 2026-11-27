@@ -47,10 +47,10 @@ test("multiple undo, branch after undo, and no move refund",()=>{
 test("airborne snapshot falls back to last valid grounded position, not the unsafe airborne pose",()=>{
  const w=createPhysicsWorld(ACROSS_THE_BROOK),p=createPlayer(w);
  const air={...p,x:10,y:6,grounded:false,vy:-5,buffer:.1};
- const last=rememberSafePosition(w,{...p,x:10,y:3});
+ const last=rememberSafePosition(w,{...p,x:10,y:3.5});
  const tx=cast(createAttemptHistory(),w,air,commitTranslation,"brook-beam",{dx:12,dy:0},last);
  const u=undoLastCast(tx.history,{...p,x:20,y:3.5,respawns:2});
- assert.ok(u.ok);assert.equal(u.player.x,10);assert.equal(u.player.y,3);assert.equal(u.player.vy,0);
+ assert.ok(u.ok);assert.equal(u.player.x,10);assert.equal(u.player.y,3.5);assert.equal(u.player.vy,0);
  assert.ok(isSafePosition(u.physics,u.player));assert.equal(u.player.buffer,0);
  assert.equal(rememberSafePosition(w,air,{x:20,y:1}),null);
  assert.equal(isSafePosition(w,{x:NaN,y:3}),false);

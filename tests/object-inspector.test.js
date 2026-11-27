@@ -36,7 +36,7 @@ test("inspector supports pointer/list selection, typed preview, stale-preview re
 test("ghost overlay balances canvas state and draws source and image reference labels",()=>{
   const room=GATEHOUSE_PREVIEW,camera=createCamera(room.bounds,1000,500);
   let depth=0;const labels=[];
-  const ctx={save(){depth++},restore(){depth--;assert.ok(depth>=0)},beginPath(){},rect(){},clip(){},moveTo(){},lineTo(){},closePath(){},stroke(){},fill(){},arc(){},strokeText(){},fillText(t){labels.push(t)},setLineDash(){}};
+  const ctx={save(){depth++},restore(){depth--;assert.ok(depth>=0)},beginPath(){},rect(){},clip(){},moveTo(){},lineTo(){},closePath(){},stroke(){},fill(){},arc(){},measureText(t){return {width:t.length*7}},strokeText(){},fillText(t){labels.push(t)},setLineDash(){}};
   const source=room.objects[0],geometry={vertices:source.vertices.map(([x,y])=>[x+14,y-3.65]),points:source.vertices.map(([x,y],i)=>({id:String.fromCharCode(65+i),point:[x+14,y-3.65]}))};
   drawObjectOverlay(ctx,camera,room.bounds,[source],source.id,{ok:true,objectId:source.id,request:{type:"translate"},geometry});
   assert.equal(depth,0);assert.ok(labels.includes("A"));assert.ok(labels.includes("A′"));

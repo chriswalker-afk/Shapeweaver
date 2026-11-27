@@ -43,7 +43,7 @@ PR00 is a direct bootstrap on main because an empty repository cannot host ordin
 
 Review gates: PR06 (playable test room, screen composition); PR14 (first classroom-ready chapter); PR20 (12-level progression); PR24 (construction); PR30 (advanced mechanics); PR34 (complete campaign); PR36 (release). In-game visual QA requires actual browser evidence or a clearly documented pending manual review. Avoid claiming tests run without results.
 
-## Immediate next task: PR01
+## Original bootstrap milestone: PR01
 - Start from main after PR00. Add index.html, src entry module, minimal CSS/app shell, development commands and repository structure; basic accessibility and responsive layout.
 - Choose lightweight build/serve approach with relative asset paths (GitHub Pages repository subpath); prefer vanilla JavaScript modules, Canvas 2D and DOM controls. No backend or student accounts.
 - Add deterministic smoke tests and CI workflow; no unnecessary dependencies. Set up Pages workflow to build/upload/deploy on appropriate events; if Pages configuration is missing, document activation rather than claim deployment.
@@ -51,3 +51,6 @@ Review gates: PR06 (playable test room, screen composition); PR14 (first classro
 
 ## Optional post-release PRs
 37 public drag-and-drop workshop; 38 successful playtest verification; 39 import/export versioned custom level files; 40 custom puzzle library; 41 cosmetics; 42 negative scale factor expansion; 43 Grandmaster challenges. Reassess numbering and scope after main release.
+
+## Current milestone: PR21
+The internal workshop is local development tooling, outside the public build. It provides precise room authoring, real-engine playtest and versioned replay bundles. PR22 uses it to design and verify Levels 13–14 (modular bridge pieces, central supports and structural staircase combinations). The public custom-level feature remains optional after the production release.

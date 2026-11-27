@@ -476,7 +476,7 @@ test("external enlargement and reflected reference points complete level 11",()=
  els["results-next"].fire("click");assert.equal(app.state.view,"level12");assert.equal(c.room.id,"clockwork-12");
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });
-test("key outline preview, geometric fit, undo/reset and final result",()=>{
+test("key outline preview, geometric fit, undo/reset and Riverworks navigation",()=>{
  const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
  app.identity.show("level12");
  c.setObjectMode(true);c.inspector.selectObject("brass-key");
@@ -491,6 +491,46 @@ test("key outline preview, geometric fit, undo/reset and final result",()=>{
  assert.equal(c.getTutorialState().step,"Traverse");
  frame(2);view.fire("keydown",{code:"ArrowRight"});frame(500);view.fire("keyup",{code:"ArrowRight"});
  assert.equal(app.state.view,"results");assert.equal(c.getResult().moves,2);assert.equal(c.getResult().stars,3);
- assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
+ assert.equal(els["results-next"].hidden,false);assert.equal(els["results-next"].disabled,false);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level13");assert.equal(c.room.id,"riverworks-13");
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+
+test("bridge construction allows two translations, rejects obstructed order and continues to staircase",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level13");assert.match(els["room-chapter"].textContent,/Chapter IV.*Translation/);
+ assert.equal(cast(f,"west-span","translate",{dx:26,dy:0}).ok,false);
+ assert.equal(c.getAttemptSummary().moves,0);
+ c.setObjectMode(true);c.inspector.selectObject("east-span");
+ assert.match(els["object-permissions"].textContent,/Both ends require support/);
+ assert.equal(cast(f,"east-span","translate",{dx:25,dy:0}).ok,true);
+ assert.equal(cast(f,"west-span","translate",{dx:26,dy:0}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ frame(2);view.fire("keydown",{code:"ArrowRight"});frame(228);
+ view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(400);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().moves,2);assert.equal(c.getResult().stars,3);assert.equal(c.getResult().returns,0);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level14");assert.equal(c.room.id,"riverworks-14");
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+test("staircase retains support, undo rebuilds climb geometry and three casts prepare the route",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level14");assert.equal(els["climb-controls"].hidden,true);
+ assert.equal(cast(f,"upper-step","translate",{dx:26,dy:0}).ok,false);
+ assert.equal(cast(f,"lower-step","translate",{dx:15,dy:0}).ok,true);
+ assert.equal(cast(f,"upper-step","translate",{dx:26,dy:0}).ok,true);
+ assert.equal(cast(f,"lower-step","translate",{dx:-15,dy:0}).code,"bearing-unsupported");
+ assert.equal(cast(f,"service-ladder","rotate",{angle:90,direction:"anticlockwise",cx:34,cy:15}).ok,true);
+ assert.equal(els["climb-controls"].hidden,false);assert.equal(c.getTutorialState().step,"Traverse");
+ assert.equal(c.undoCast(),true);assert.equal(els["climb-controls"].hidden,true);
+ c.resetPlayer();
+ assert.equal(cast(f,"lower-step","translate",{dx:15,dy:0}).ok,true);
+ assert.equal(cast(f,"upper-step","translate",{dx:26,dy:0}).ok,true);
+ assert.equal(cast(f,"service-ladder","rotate",{angle:90,direction:"anticlockwise",cx:34,cy:15}).ok,true);
+ assert.equal(c.getAttemptSummary().moves,3);assert.equal(els["climb-controls"].hidden,false);
+ // Align movement frames to the fixed-step recording. The exact physics
+ // traversal itself is tested independently by campaign-audit and workshop.
+ assert.equal(c.getTutorialState().step,"Traverse");
+ assert.equal(c.room.objects.find(o=>o.id==="upper-step").vertices[0][0],30);
+ assert.equal(c.getResult(),null);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });

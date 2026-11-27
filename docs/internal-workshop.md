@@ -20,3 +20,5 @@ Tests exercise all twelve PR20 recorded routes through the workshop recorder/ver
 
 ## Next
 PR22 — The Riverworks, Levels 13–14: Bridge Builders and Broken Staircase. Use the workshop to author modular bridge pieces and central supports, and coordinated ladder/platform placements. Record and verify a real route before registering each level in the campaign.
+
+PR22 adds the two-ended bridge piece to the authoring palette. Set `bearing: "both-ends"` on a supported translation-only rectangular prop. The game validator requires contact beneath both outer bearing regions, and checks dependent pieces after a cast. Both new Riverworks fixtures use the workshop recorder and independent verifier in the campaign regression suite.

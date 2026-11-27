@@ -101,3 +101,6 @@ Levels 9–10 require sequential transformations of a single beam/plank. The fix
 
 ## PR19 — Clockwork Gallery finale
 Levels 11–12 are implemented: reflect and enlarge a brass wedge about an external centre; enlarge and rotate a concave L-shaped key to match a lock outline. Both routes are verified. PR20 audits the first twelve levels.
+
+## PR22 — The Riverworks opening
+Levels 13–14 are implemented. Bridge Builders requires two supported spans across a central pier; Broken Staircase combines two stacked platforms and a hinged ladder. See [Riverworks](riverworks.md).

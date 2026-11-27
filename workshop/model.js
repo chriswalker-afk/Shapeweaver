@@ -88,7 +88,7 @@ export function removeItem(room,group,id){
  r[group]=r[group].filter(o=>o.id!==id);return prepareDraft(r);
 }
 export const PALETTE=Object.freeze([
- ["terrain","Terrain block"],["water","Water hazard"],["beam","Timber beam"],["gate","Hinged gate"],["crate","Step crate"],["barrel","Weighted barrel"],["ladder","Transformable ladder"],["static-ladder","Fixed ladder"],["wedge","Wedge"],["mushroom","Spring mushroom"],["key","L-shaped key"],["linked-gate","Linked gate"],["plate","Pressure plate"],["hinge-socket","Hinge socket"],["shape-socket","Shape socket"],["checkpoint","Checkpoint"],["fern","Fern"],["lantern","Lantern"]
+ ["terrain","Terrain block"],["water","Water hazard"],["beam","Timber beam"],["bearing-beam","Two-ended bridge piece"],["gate","Hinged gate"],["crate","Step crate"],["barrel","Weighted barrel"],["ladder","Transformable ladder"],["static-ladder","Fixed ladder"],["wedge","Wedge"],["mushroom","Spring mushroom"],["key","L-shaped key"],["linked-gate","Linked gate"],["plate","Pressure plate"],["hinge-socket","Hinge socket"],["shape-socket","Shape socket"],["checkpoint","Checkpoint"],["fern","Fern"],["lantern","Lantern"]
 ]);
 export function addTemplate(room,type,x,y){
  require(PALETTE.some(p=>p[0]===type)&&finite(x)&&finite(y),"Invalid palette placement");
@@ -100,6 +100,7 @@ export function addTemplate(room,type,x,y){
  case "terrain":group="terrain";o={id,label,material:"stone",grass:true,vertices:rect(4,1)};break;
  case "water":group="hazards";o={id,kind:"water",vertices:rect(4,1)};break;
  case "beam":o.vertices=rect(6,.5);break;
+ case "bearing-beam":Object.assign(o,{kind:"beam",vertices:rect(6,.5),bearing:"both-ends"});break;
  case "gate":Object.assign(o,{vertices:rect(.5,4),hinge:[x,y+4],permissions:["rotate"],support:"hinged"});break;
  case "crate":o.vertices=rect(2,2);break;
  case "barrel":Object.assign(o,{vertices:rect(2,2.5),permissions:["reflect","translate"],pressesPlates:true});break;

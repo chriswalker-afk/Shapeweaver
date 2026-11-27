@@ -16,6 +16,7 @@ const cases=[
  ["missing-barrel","reflect",{line:"x=15"}]
 ];
 const clockwork=[[["socket-beam","translate",{dx:"11",dy:"0"}],["socket-beam","rotate",{angle:"90",direction:"clockwise",cx:"17",cy:"3"}]],[["clearance-plank","rotate",{angle:"90",direction:"clockwise",cx:"6",cy:"3"}],["clearance-plank","translate",{dx:"17",dy:"0"}]],[["clockwork-wedge","reflect",{line:"x=13"}],["clockwork-wedge","enlarge",{factor:"3",cx:"10",cy:"3"}]],[["brass-key","enlarge",{factor:"2",cx:"8",cy:"5"}],["brass-key","rotate",{angle:"90",direction:"clockwise",cx:"13",cy:"8"}]]];
+const riverworks=[[["east-span","translate",{dx:"25",dy:"0"}],["west-span","translate",{dx:"26",dy:"0"}]],[["lower-step","translate",{dx:"15",dy:"0"}],["upper-step","translate",{dx:"26",dy:"0"}],["service-ladder","rotate",{angle:"90",direction:"anticlockwise",cx:"34",cy:"15"}]]];
 const gardens=[ [["garden-beam","translate",{dx:"12",dy:"0"}],["garden-hinge","rotate",{angle:"90",direction:"anticlockwise",cx:"37",cy:"8"}]], [["garden-barrel","reflect",{line:"x=9"}],["garden-mushroom","enlarge",{factor:"2",cx:"30",cy:"3"}]], [["garden-ladder","rotate",{angle:"90",direction:"anticlockwise",cx:"24",cy:"12"}],["ladder-crate","translate",{dx:"17",dy:"0"}]], [["mirror-platform","reflect",{line:"y=3"}],["garden-wedge","enlarge",{factor:"3",cx:"34",cy:"7"}]] ];
 try{
  for(const [name,width,height,touch] of [["desktop",1366,768,false],["small-desktop",1024,600,false],["landscape-phone",844,390,true],["portrait-phone",390,844,true]]){
@@ -25,8 +26,8 @@ try{
   await page.locator("#open-campaign").click();
   await page.locator("#campaign-view").waitFor();
   assert.equal(await page.locator(".chapter-card").count(),7);
-  assert.equal(await page.locator(".chapter-card:disabled").count(),4);
-  assert.equal(await page.locator(".library-level").count(),12);
+  assert.equal(await page.locator(".chapter-card:disabled").count(),3);
+  assert.equal(await page.locator(".library-level").count(),14);
   await page.locator("#filter-spell").selectOption("reflect");
   assert.equal(await page.locator(".library-level").count(),4);
   await page.locator(".library-level").filter({hasText:"The Missing Barrel"}).click();
@@ -34,7 +35,7 @@ try{
   await page.locator("#close-room").click();
   await page.locator("#open-campaign").click();
   await page.locator("#campaign-clear").click();
-  assert.equal(await page.locator(".library-level").count(),12);
+  assert.equal(await page.locator(".library-level").count(),14);
   await page.screenshot({path:out+"/"+name+"-campaign.png",fullPage:true});
   await page.locator("#campaign-resume").click();
   assert.match(await page.locator("#room-heading").innerText(),/Across the Brook/);
@@ -62,13 +63,13 @@ try{
    report.push({viewport:name,level:index+1,stageHeight:initial.height,inspectionHeight:inspected.height});
    await page.locator("#close-room").click();
   }
-  for(const [index,spells] of [...gardens,...clockwork].entries()){
+  for(const [index,spells] of [...gardens,...clockwork,...riverworks].entries()){
    await page.locator("#open-campaign").click();
    await page.locator("#campaign-clear").click();
-   const chapter=index<4?"2":"3";
+   const chapter=index<4?"2":index<8?"3":"4";
    await page.locator("#filter-chapter").selectOption(chapter);
-   assert.equal(await page.locator(".library-level").count(),4);
-   await page.locator(".library-level").nth(index<4?index:index-4).click();
+   assert.equal(await page.locator(".library-level").count(),chapter==="4"?2:4);
+   await page.locator(".library-level").nth(index%4).click();
    await page.locator("#room-canvas").waitFor();
    const initial=await page.locator("#room-stage").boundingBox();
    assert.ok(initial.height>=138);
@@ -87,7 +88,8 @@ try{
     await page.locator('#object-form button[type="submit"]').click();
     assert.equal(await page.locator("#object-apply").isEnabled(),true,name+" legal preview "+id);
     if(id==="garden-barrel")assert.match(await page.locator("#object-result").innerText(),/gate will open/);
-    if(id==="garden-ladder")assert.match(await page.locator("#object-result").innerText(),/upright and climbable/);
+    if(id==="garden-ladder"||id==="service-ladder")assert.match(await page.locator("#object-result").innerText(),/upright and climbable/);
+    if(["east-span","west-span","lower-step","upper-step"].includes(id))assert.match(await page.locator("#object-result").innerText(),/Both bearing ends will be supported/);
     if(id==="socket-beam"&&type==="translate")assert.match(await page.locator("#object-result").innerText(),/Hinge will dock/);
     if(id==="socket-beam"&&type==="rotate")assert.match(await page.locator("#object-permissions").innerText(),/\(docked\)/);
     if(id==="brass-key"&&type==="rotate")assert.match(await page.locator("#object-result").innerText(),/Key will fit.*gate will open/);
@@ -95,10 +97,10 @@ try{
     await page.screenshot({path:out+"/"+name+"-level"+(index+5)+"-cast"+(move+1)+".png",fullPage:true});
     await page.locator("#object-apply").click();
     assert.match(await page.locator("#tutorial-moves").innerText(),new RegExp("Moves: "+(move+1)));
-    if(id==="garden-ladder")assert.equal(await page.locator("#climb-controls").isVisible(),true);
+    if(id==="garden-ladder"||id==="service-ladder")assert.equal(await page.locator("#climb-controls").isVisible(),true);
    }
    await page.screenshot({path:out+"/"+name+"-level"+(index+5)+"-ready.png",fullPage:true});
-   report.push({viewport:name,level:index+5,stageHeight:initial.height,casts:2});
+   report.push({viewport:name,level:index+5,stageHeight:initial.height,casts:spells.length});
    await page.locator("#close-room").click();
   }
   assert.deepEqual(errors,[],name+" runtime errors");await page.close();

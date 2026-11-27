@@ -58,7 +58,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   const canUndo=()=>active&&!animation&&!player.completed&&history.stack.length>0;
   const tutorial=()=>TUTORIALS[roomSpells(room)[0]];
   const actionLabel=()=>TUTORIALS[animation?.type]?.label??"Transformation";
-  const readyMessage=()=>roomSpells(room).length>1?(situation?.ready?"Both obstacles are ready. "+situation.config.traverse:"Transformation applied. "+(situation?.config.objective??"Check the other obstacle.")):situation?.ready?(tutorial()?.ready??"Transformation applied."):"Transformation applied. Check the new position; revise if it does not solve the obstacle.";
+  const readyMessage=()=>roomSpells(room).length>1?(situation?.ready?"The route is ready. "+situation.config.traverse:"Transformation applied. "+(situation?.config.objective??"Check the other obstacle.")):situation?.ready?(tutorial()?.ready??"Transformation applied."):"Transformation applied. Check the new position; revise if it does not solve the obstacle.";
   const reducedMotion=()=>Boolean(view.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   let follow=true;
   const input=mountMovementInput(document,view,()=>active&&!animation&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
@@ -303,7 +303,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     mode="overview";zoom=null;focus=null;toolsOpen=false;
     const heading=$("room-heading"),chapter=$("room-chapter");
     if(heading)heading.textContent=initialRoom.title;
-    if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter "+(initialRoom.chapter===2?"II":"I")+" · Level "+initialRoom.number+" · "+roomSpells(initialRoom).map(t=>TUTORIALS[t].label).join(" + "):"Chapter I · Interactive object practice";
+    if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter "+(["","I","II","III","IV","V","VI","VII"][initialRoom.chapter]??String(initialRoom.chapter))+" · Level "+initialRoom.number+" · "+roomSpells(initialRoom).map(t=>TUTORIALS[t].label).join(" + "):"Chapter I · Interactive object practice";
     resetPlayer();
   }
   on(guidanceButton,"click",()=>setGuidance(!guidanceEnabled));

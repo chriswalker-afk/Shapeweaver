@@ -95,3 +95,6 @@ Levels 5–6 are implemented. Each has two different interactive objects and a v
 
 ## PR17 — Enchanted Gardens finale
 Levels 7–8 are implemented with two distinct objects per puzzle. A hinged ladder becomes climbable after rotation and requires a translated step crate. A horizontal reflection raises a platform above a recessed walkway, and enlargement provides the final ramp. Chapter II is fully released.
+
+## PR18 — Clockwork Gallery opening
+Levels 9–10 require sequential transformations of a single beam/plank. The fixed socket and low arch create different order dependencies. Both have verified two-cast physical routes.

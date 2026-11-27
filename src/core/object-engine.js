@@ -3,6 +3,7 @@ import {pointPolygonDistance,polygonsOverlap,triangulate,GEOMETRY_EPS} from "../
 import {playerBox,polygonIntersectsBox} from "../physics/collision.js";
 import {resolveMechanisms,obstructedGate} from "../mechanisms/pressure-plates.js";
 import {ladderSegment,isSolidObject} from "../mechanisms/transformable-ladders.js";
+import {dockedSocket,samePoint} from "../mechanisms/hinge-sockets.js";
 import {TYPES,parsePreviewRequest,previewGeometry,referencePoints,isIdentity} from "../transformations/preview-math.js";
 
 const name=o=>o.label??o.id;
@@ -17,6 +18,7 @@ export function validateObjectDefinitions(room){
     if(!Array.isArray(o.permissions)||new Set(o.permissions).size!==o.permissions.length||o.permissions.some(t=>!TYPES.includes(t)))throw new Error("Invalid permissions: "+o.id);
     if(!["supported","hinged","enchanted"].includes(o.support))throw new Error("Invalid support mode: "+o.id);
     if(o.support==="hinged"&&(!Array.isArray(o.hinge)||o.hinge.length!==2||!o.hinge.every(Number.isFinite)||!o.permissions.every(t=>t==="rotate")||pointPolygonDistance(o.hinge,o.vertices)>GEOMETRY_EPS))throw new Error("Invalid hinge: "+o.id);
+    if((o.dockable||o.pivotOnly)&&(!Array.isArray(o.hinge)||o.hinge.length!==2||!o.hinge.every(Number.isFinite)||pointPolygonDistance(o.hinge,o.vertices)>GEOMETRY_EPS||!o.permissions.includes("rotate")||o.support==="hinged"||o.dockable&&(!o.permissions.includes("translate")||o.decorative)))throw new Error("Invalid mobile pivot: "+o.id);
     if(o.permissions.includes("enlarge")&&(!Array.isArray(o.scaleRange)||o.scaleRange.length!==2||!o.scaleRange.every(Number.isFinite)||o.scaleRange[0]<=0||o.scaleRange[1]<o.scaleRange[0]))throw new Error("Invalid scale range: "+o.id);
   }
   return room;
@@ -46,6 +48,8 @@ export function previewObject(room,player,id,type,raw){
   const request=parsePreviewRequest(type,raw);
   if(!request)return failure("parameters","Enter all required mathematical parameters.");
   if(object.support==="hinged"&&(request.type!=="rotate"||Math.hypot(request.centre[0]-object.hinge[0],request.centre[1]-object.hinge[1])>GEOMETRY_EPS))return failure("hinge","Use the fixed hinge as the centre of rotation.");
+  if(type==="rotate"&&object.dockable&&!dockedSocket(room,object))return failure("not-docked","Align the beam hinge with its socket using a translation before rotating.");
+  if(type==="rotate"&&(object.dockable||object.pivotOnly)&&!samePoint(request.centre,object.hinge))return failure("hinge","Use the marked pivot H at its current coordinates as the centre of rotation.");
   if(type==="enlarge"&&(request.factor<object.scaleRange[0]||request.factor>object.scaleRange[1]))return failure("scale-limit","Scale factor must be between "+object.scaleRange[0]+" and "+object.scaleRange[1]+".");
   let geometry;
   try{
@@ -74,6 +78,7 @@ export function previewObject(room,player,id,type,raw){
     if(obstructedGate(candidate))return failure("gate-obstructed","A linked gate would close on an object. Clear the gate first.",extra);
     if(player&&candidate.objects.some(o=>o.kind==="linked-gate"&&!o.open&&polygonIntersectsBox(o.vertices,playerBox(player))))return failure("gate-obstructed","A linked gate would close on the apprentice. Move clear first.",extra);
   }
+  if(object.dockable){const socket=dockedSocket(room,object,geometry.hinge);extra.mechanismEffects=[...(extra.mechanismEffects??[]),socket?"Hinge will dock at "+(socket.label??socket.id)+". Rotation available.":"Hinge will be undocked. Rotation requires a socket."];}
   if(object.kind==="ladder")extra.mechanismEffects=[ladderSegment({...object,vertices:geometry.vertices})?"Ladder will be upright and climbable.":"Ladder will not be climbable in this orientation."];
   return {ok:true,code:"final-clear",scope:"final-pose",message:"Final position is clear. Travel path is not yet checked; Apply is unavailable.",...extra};
 }

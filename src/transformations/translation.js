@@ -35,5 +35,5 @@ export function commitTranslation(room,player,id,raw){
 export function translatedFrame(room,transition,progress){
   const t=Math.max(0,Math.min(1,progress));
   if(t===1)return room;
-  return {...room,objects:room.objects.map(o=>o.id!==transition.id?o:{...o,vertices:transition.from.map(([x,y])=>[x+transition.dx*t,y+transition.dy*t])})};
+  return {...room,objects:room.objects.map(o=>o.id!==transition.id?o:{...o,vertices:transition.from.map(([x,y])=>[x+transition.dx*t,y+transition.dy*t]),...(o.hinge?{hinge:[o.hinge[0]-transition.dx*(1-t),o.hinge[1]-transition.dy*(1-t)]}:{})})};
 }

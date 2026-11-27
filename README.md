@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR17 — Enchanted Gardens complete. Eight released puzzles, transformable ladders, dependent crate placement, horizontal reflection and two-cast routes. Next: PR18 The Clockwork Gallery, Levels 9–10.
+PR18 — The Clockwork Gallery: Levels 9–10. Ten released puzzles, dockable hinge sockets, marked mobile pivots, order-dependent clearance, and verified two-cast single-object routes. Next: PR19 Levels 11–12.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR17 — Enchanted Gardens complete. Eight released puzzles, transformable ladde
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Clockwork Gallery](docs/clockwork-gallery.md) — Levels 9–10, sequential spells and hinge socket rules.
 - [Garden finale](docs/garden-finale.md) — Levels 7–8, derived climb geometry and traversal QA.
 - [Enchanted Gardens](docs/enchanted-gardens.md) — Levels 5–6, mechanism rules and recorded traversal.
 - [Campaign and level library](docs/campaign-library.md) — chapter map, direct access, filtering and saved progress.

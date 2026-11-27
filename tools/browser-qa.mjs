@@ -20,6 +20,23 @@ try{
   const page=await browser.newPage({viewport:{width,height},hasTouch:touch,reducedMotion:"reduce"});
   const errors=[];page.on("pageerror",e=>errors.push(e.message));
   await page.goto(origin);await page.locator("#open-level1").waitFor();
+  await page.locator("#open-campaign").click();
+  await page.locator("#campaign-view").waitFor();
+  assert.equal(await page.locator(".chapter-card").count(),7);
+  assert.equal(await page.locator(".chapter-card:disabled").count(),6);
+  assert.equal(await page.locator(".library-level").count(),4);
+  await page.locator("#filter-spell").selectOption("reflect");
+  assert.equal(await page.locator(".library-level").count(),1);
+  await page.locator(".library-level").click();
+  assert.match(await page.locator("#room-heading").innerText(),/The Missing Barrel/);
+  await page.locator("#close-room").click();
+  await page.locator("#open-campaign").click();
+  await page.locator("#campaign-clear").click();
+  assert.equal(await page.locator(".library-level").count(),4);
+  await page.screenshot({path:out+"/"+name+"-campaign.png",fullPage:true});
+  await page.locator("#campaign-resume").click();
+  assert.match(await page.locator("#room-heading").innerText(),/Across the Brook/);
+  await page.locator("#close-room").click();
   for(const [index,[id,type,fields]] of cases.entries()){
    await page.locator("#open-level"+(index+1)).click();
    await page.locator("#room-canvas").waitFor();

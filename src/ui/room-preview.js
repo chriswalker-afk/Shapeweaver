@@ -133,8 +133,8 @@ export function mountRoomPreview(document,view) {
     redraw();
   }
   on(followButton,"click",()=>{follow=!follow;redraw();});
-  on($("reset-practice"),"click",resetPlayer);
-  // After toolbar button actions, return focus to the room so arrow keys and Space work.
+  on($("reset-practice"),"click",()=>{resetPlayer();canvas.focus?.({preventScroll:true});});
+  // Click the stage to return keyboard focus to gameplay after inspecting controls.
   on(host,"click",()=>{if(!picking)canvas.focus?.({preventScroll:true});});
   updateControls();
   return {room,setActive,resetPlayer,getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,

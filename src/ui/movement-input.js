@@ -13,10 +13,10 @@ export function mountMovementInput(document,view,enabled,onChange=()=>{}){
   }
   function release(source){if(held.delete(source))onChange();}
   function clear(){held.clear();jump=false;onChange();}
-  function editable(target){return Boolean(target?.closest?.("input, select, textarea, button, a, [contenteditable]"));}
+  function editable(target,code){return Boolean(target?.closest?.("input, select, textarea, [contenteditable]")||(code==="Space"&&target?.closest?.("button, a")));}
   on(view,"keydown",event=>{
     const action=KEY[event.code];
-    if(!action||!enabled()||editable(event.target)||event.altKey||event.ctrlKey||event.metaKey)return;
+    if(!action||!enabled()||editable(event.target,event.code)||event.altKey||event.ctrlKey||event.metaKey)return;
     event.preventDefault();
     if(!event.repeat)press("key:"+event.code,action);
   });

@@ -11,7 +11,7 @@ export function createPlayer(world){
     phase:0,pose:"idle",checkpoint:null,respawns:0,completed:false,blockedRespawn:false,event:null};
 }
 function reachableLadder(world,p){
-  return world.ladders.find(l=>Math.abs(p.x-l.x)<=l.width/2+PLAYER_SIZE.width/2+.06&&p.y<=l.top+.025&&p.y+PLAYER_SIZE.height>l.bottom+.025)??null;
+  return world.ladders.find(l=>Math.abs(p.x-l.x)<=l.width/2+PLAYER_SIZE.width/2+.06&&p.y<=l.top+.025&&p.y>=l.bottom-.06&&p.y+PLAYER_SIZE.height>l.bottom+.025)??null;
 }
 function respawn(world,p){
   const cp=world.checkpoints.find(c=>c.id===p.checkpoint);
@@ -41,7 +41,7 @@ function finishStep(world,p,previous){
 }
 /** Pure fixed-step simulation. Input jump is a one-shot press, not a held auto-repeat. */
 export function stepPlayer(world,previous,input={}){
-  if(previous.completed||previous.blockedRespawn)return previous;
+  if(previous.completed||previous.blockedRespawn)return previous.event?{...previous,event:null}:previous;
   const dt=FIXED_DT,p={...previous,event:null},move=axis(input.move),climb=axis(input.climb);
   p.grounded=supported(world,p);
   p.coyote=p.grounded?MOTION.coyote:Math.max(0,p.coyote-dt);
@@ -67,7 +67,7 @@ export function stepPlayer(world,previous,input={}){
   p.x=horizontal.x;p.y=horizontal.y;if(horizontal.hit)p.vx=0;
   // If the player walked off an edge, gravity begins immediately. Ground probe is not a teleport.
   p.grounded=!jumped&&p.vy<=0&&supported(world,p);
-  if(p.grounded){p.vy=0;}
+  if(p.grounded){p.vy=0;p.y=sweepAxis(world,p,"y",-.025).y;}
   else{
     p.vy=Math.max(-MOTION.terminalSpeed,p.vy-MOTION.gravity*dt);
     const vertical=sweepAxis(world,p,"y",p.vy*dt);

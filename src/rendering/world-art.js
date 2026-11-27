@@ -152,8 +152,8 @@ function apprentice(ctx,camera,player,art,reducedMotion) {
   // Foot anchor is fixed. Small pose-dependent lean/stretch is purely cosmetic.
   const animated=!reducedMotion&&(player.pose==="walk"||player.pose==="climb");
   const gait=animated?Math.sin(player.phase??0):0;
-  const lean=reducedMotion?0:player.pose==="jump"?-.08:player.pose==="walk"?.055*gait:0;
-  const stretch=1+(animated?.025*gait:0);
+  const lean=reducedMotion?0:player.pose==="jump"?-.08:player.pose==="walk" ? .055*gait : 0;
+  const stretch=1+(animated ? .025*gait : 0);
   ctx.save();ctx.translate(p.x,p.y);
   if(typeof ctx.scale==="function")ctx.scale(player.facing===-1?-1:1,stretch);
   ctx.rotate(lean);

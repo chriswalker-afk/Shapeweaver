@@ -9,7 +9,7 @@ import {returnToSafety} from "../physics/recovery.js";
 import {resolveMechanisms} from "../mechanisms/pressure-plates.js";
 import {createAttemptHistory,rememberSafePosition,recordCast,undoLastCast,attemptSummary} from "../core/attempt-history.js";
 import {completedResult} from "../core/level-results.js";
-import {HINT_STAGES,tutorialSituation,contextualGuide,tutorialHint} from "../levels/tutorial-guidance.js";
+import {HINT_STAGES,tutorialSituation,contextualGuide,tutorialHint,castStatusMessage} from "../levels/tutorial-guidance.js";
 import { createCamera, panCamera, zoomCamera, MAX_ZOOM, ZOOM_STEP } from "../rendering/camera.js";
 import { loadWorldArt, renderWorld } from "../rendering/world-art.js";
 import { mountViewport } from "../rendering/viewport.js";
@@ -58,7 +58,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   const canUndo=()=>active&&!animation&&!player.completed&&history.stack.length>0;
   const tutorial=()=>TUTORIALS[roomSpells(room)[0]];
   const actionLabel=()=>TUTORIALS[animation?.type]?.label??"Transformation";
-  const readyMessage=()=>roomSpells(room).length>1?(situation?.ready?"The route is ready. "+situation.config.traverse:"Transformation applied. "+(situation?.config.objective??"Check the other obstacle.")):situation?.ready?(tutorial()?.ready??"Transformation applied."):"Transformation applied. Check the new position; revise if it does not solve the obstacle.";
+  const readyMessage=()=>castStatusMessage(room,situation,guidanceEnabled,tutorial()?.ready);
   const reducedMotion=()=>Boolean(view.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   let follow=true;
   const input=mountMovementInput(document,view,()=>active&&!animation&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
@@ -131,7 +131,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});
     if(animation?.type==="reflect")drawReflectionFlash(ctx,camera,room.bounds,animation.transition.line,progress);
     if(animation&&animation.type!=="reflect"&&!reducedMotion())drawCastAura(ctx,camera,frame.objects.find(o=>o.id===animation.transition.id),animation.type,progress);
-    if(objectMode&&inspector){const s=inspector.getState();drawObjectOverlay(ctx,camera,room.bounds,s.objects,s.selected,s.preview);}
+    if(objectMode&&inspector){const s=inspector.getState();drawObjectOverlay(ctx,camera,room.bounds,s.objects,s.selected,s.preview,{shapeSockets:room.shapeSockets??[],gridPlan:plan,axes});}
     updateControls();
   });
   if(!viewport)status.textContent="Canvas 2D is unavailable in this browser.";

@@ -15,7 +15,7 @@ export function mountCampaign(document,best,navigate){
    const available=LEVELS.filter(l=>l.chapter===c.id),done=available.filter(l=>best.get(l.id)).length;
    const b=node("button",undefined,"chapter-card");b.type="button";b.disabled=!available.length;
    b.append(node("small","Chapter "+c.id),node("strong",c.title),node("span",available.length?done+" / "+available.length+" completed · "+(available.length===c.last-c.first+1?"Full chapter available":available.length+" of "+(c.last-c.first+1)+" planned available"):"Planned · Levels "+c.first+"–"+c.last));
-   if(available.length)b.addEventListener("click",()=>{ $("filter-chapter").value=String(c.id);render();});
+   if(available.length)b.addEventListener("click",()=>{for(const [,e] of filters)e.value="";$("filter-chapter").value=String(c.id);render();});
    return b;
   }));
   const levels=filterLevels(Object.fromEntries(filters.map(([k,e])=>[k,e.value])));

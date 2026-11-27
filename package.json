@@ -12,6 +12,7 @@
     "test": "node --test",
     "build": "node tools/build.mjs",
     "preview": "npm run build && node tools/serve.mjs --dist",
-    "check": "npm test && npm run build"
+    "check": "npm test && npm run build",
+    "audit:campaign": "node tools/campaign-audit.mjs"
   }
 }

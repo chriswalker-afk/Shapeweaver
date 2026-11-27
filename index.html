@@ -34,11 +34,21 @@
           <p class="tagline">Reshape the world. Find your way.</p>
           <div class="ornament" aria-hidden="true"><span></span><b>◆</b><span></span></div>
           <p class="intro">Four spells. A forgotten kingdom. A path only you can create.</p>
-          <div class="title-actions"><button type="button" class="gold-button" id="open-level1">Level 1 · Across the Brook <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level2">Level 2 · The Stubborn Gate <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level3">Level 3 · A Little Cheesy <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level4">Level 4 · The Missing Barrel <span aria-hidden="true">›</span></button><button type="button" class="secondary-title-button" id="open-room">Practice room</button><button type="button" class="secondary-title-button" id="open-spellbook">Open the spellbook</button></div>
+          <div class="title-actions"><button type="button" class="gold-button" id="open-campaign">Adventure &amp; puzzle library <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level1">Level 1 · Across the Brook <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level2">Level 2 · The Stubborn Gate <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level3">Level 3 · A Little Cheesy <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level4">Level 4 · The Missing Barrel <span aria-hidden="true">›</span></button><button type="button" class="secondary-title-button" id="open-room">Practice room</button><button type="button" class="secondary-title-button" id="open-spellbook">Open the spellbook</button></div>
           <p class="preview-note" id="app-status" role="status">Loading the development scaffold…</p>
           <noscript><p class="preview-note">Enable JavaScript to open the spellbook.</p></noscript>
         </div>
         <div class="chapter-marker"><span>Chapter I</span><strong>The Gatehouse</strong></div>
+      </section>
+      <section id="campaign-view" class="campaign-view" aria-labelledby="campaign-heading" hidden>
+        <header class="campaign-header"><div><p class="eyebrow">The journey begins</p><h2 id="campaign-heading" tabindex="-1">Adventure &amp; puzzle library</h2><p id="campaign-progress"></p></div><button id="campaign-resume" class="gold-button" type="button">Continue</button><button id="close-campaign" class="room-back" type="button">← Title</button></header>
+        <h3>Chapter map</h3><div id="campaign-map" class="campaign-map"></div>
+        <h3>Choose any released puzzle</h3><div class="library-filters">
+          <label>Transformation <select id="filter-spell"><option value="">All</option><option value="translate">Translation</option><option value="rotate">Rotation</option><option value="enlarge">Enlargement</option><option value="reflect">Reflection</option></select></label>
+          <label>Mathematics <select id="filter-math"><option value="">All</option><option value="1">1 · Introductory</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label>
+          <label>Puzzle difficulty <select id="filter-puzzle"><option value="">All</option><option value="1">1 · Introductory</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label>
+          <label>Chapter <select id="filter-chapter"><option value="">All</option><option value="1">The Gatehouse</option></select></label><button id="campaign-clear" class="room-back" type="button">Clear filters</button>
+        </div><div id="campaign-levels" class="campaign-levels"></div>
       </section>
       <section class="spellbook-view" id="spellbook-view" aria-labelledby="spellbook-heading" hidden>
         <div class="spellbook">

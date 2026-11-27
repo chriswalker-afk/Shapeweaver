@@ -22,6 +22,7 @@ import {createFixedLoop} from "../core/fixed-loop.js";
 import {mountMovementInput} from "./movement-input.js";
 import {mountObjectInspector} from "./object-inspector.js";
 import {drawObjectOverlay,drawReflectionFlash} from "../rendering/object-overlay.js";
+import {castProgress,drawCastAura} from "../rendering/cast-effects.js";
 import { SNAP_STEPS,pickCoordinate,parseCoordinate,formatCoordinate,clientToScreen } from "../geometry/coordinates.js";
 
 // Keep spell dispatch and tutorial copy data-driven as new transformation types arrive.
@@ -50,6 +51,8 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   let player=createPlayer(physics),active=false,lastEvent=null,objectMode=false,inspector=null;
   let lastSafe=rememberSafePosition(physics,player);
   const playStatus=$("play-status"),followButton=$("follow-toggle"),movementPanel=$("movement-controls");
+  const toolsButton=$("room-tools-toggle"),secondaryTools=$("room-secondary-tools"),climbControls=$("climb-controls");
+  let toolsOpen=false;
   const guide=$("tutorial-guide"),hintButton=$("tutorial-hint"),moves=$("tutorial-moves"),tutorialTools=$("tutorial-tools");
   const guidanceButton=$("tutorial-guidance-toggle"),hintPanel=$("tutorial-hint-panel"),hintTitle=$("tutorial-hint-title"),hintText=$("tutorial-hint-text"),hintPrevious=$("tutorial-hint-previous"),hintNext=$("tutorial-hint-next"),hintClose=$("tutorial-hint-close");
   const canHint=()=>Boolean(active&&situation&&!animation&&!player.completed&&!player.blockedRespawn);
@@ -58,7 +61,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   const spellType=()=>tutorialType(room);
   const tutorial=()=>TUTORIALS[spellType()];
   const actionLabel=()=>tutorial()?.label??"Transformation";
-  const readyMessage=()=>tutorial()?.ready??"Transformation applied.";
+  const readyMessage=()=>situation?.ready?(tutorial()?.ready??"Transformation applied."):"Transformation applied. Check the new position; revise if it does not solve the obstacle.";
   const reducedMotion=()=>Boolean(view.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   let follow=true;
   const input=mountMovementInput(document,view,()=>active&&!animation&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
@@ -91,6 +94,9 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     apply:applySpell
   });
   function updateControls(){
+    if(secondaryTools)secondaryTools.hidden=!toolsOpen;
+    if(toolsButton){toolsButton.setAttribute("aria-expanded",String(toolsOpen));setText(toolsButton,toolsOpen?"View tools ▴":"View tools ▾");}
+    if(climbControls)climbControls.hidden=!(room.ladders?.length);
     controls.overview?.setAttribute("aria-pressed",String(mode==="overview"));
     controls.inspect?.setAttribute("aria-pressed",String(mode==="inspect"));
     gridButton?.setAttribute("aria-pressed",String(grid));
@@ -122,16 +128,18 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     const target=active&&follow&&!animation&&!picking&&!objectMode&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
     camera=createCamera(room.bounds,metrics.width,metrics.height,mode,target,zoom);
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
-    const frame=animation?TUTORIALS[animation.type].frame(room,animation.transition,animation.elapsed/animation.duration):room;
+    const progress=animation?castProgress(animation.elapsed/animation.duration):0;
+    const frame=animation?TUTORIALS[animation.type].frame(room,animation.transition,progress):room;
     renderWorld(ctx,metrics,camera,frame,images.art,player,reducedMotion());
     plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});
-    if(animation?.type==="reflect")drawReflectionFlash(ctx,camera,room.bounds,animation.transition.line,animation.elapsed/animation.duration);
+    if(animation?.type==="reflect")drawReflectionFlash(ctx,camera,room.bounds,animation.transition.line,progress);
+    if(animation&&animation.type!=="reflect"&&!reducedMotion())drawCastAura(ctx,camera,frame.objects.find(o=>o.id===animation.transition.id),animation.type,progress);
     if(objectMode&&inspector){const s=inspector.getState();drawObjectOverlay(ctx,camera,room.bounds,s.objects,s.selected,s.preview);}
     updateControls();
   });
   if(!viewport)status.textContent="Canvas 2D is unavailable in this browser.";
   const listeners=[];
-  function on(element,event,fn){if(!element)return;element.addEventListener(event,fn);listeners.push([element,event,fn]);}
+  function on(element,event,fn){if(!element?.addEventListener)return;element.addEventListener(event,fn);listeners.push([element,event,fn]);}
   function redraw(){viewport?.resize();if(!camera)updateControls();}
   function setMode(next){
     if(next!=="overview"&&next!=="inspect")return false;
@@ -145,8 +153,14 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(key==="grid")grid=Boolean(value);else if(key==="axes")axes=Boolean(value);else return false;
     redraw();return true;
   }
+  function setToolsOpen(value){
+    toolsOpen=Boolean(value);
+    if(!toolsOpen&&picking)setPicking(false);
+    redraw();return toolsOpen;
+  }
   function setPicking(value){
     if(animation)return false;
+    if(value)toolsOpen=true;
     picking=Boolean(value);if(picking&&objectMode){objectMode=false;inspector?.setActive(false);}input.clear();updateGuide();redraw();
     if(message)message.textContent=point?formatCoordinate(point):"Click or tap the room, or enter coordinates.";
     return picking;
@@ -183,6 +197,17 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   on(controls["zoom-in"],"click",()=>changeZoom(ZOOM_STEP));on(controls["zoom-out"],"click",()=>changeZoom(1/ZOOM_STEP));
   on(gridButton,"click",()=>setOverlay("grid",!grid));on(axesButton,"click",()=>setOverlay("axes",!axes));
   on(pickButton,"click",()=>setPicking(!picking));
+  on($("coordinate-close"),"click",()=>{setPicking(false);canvas.focus?.({preventScroll:true});});
+  on(toolsButton,"click",()=>setToolsOpen(!toolsOpen));
+  on(document,"keydown",event=>{
+    if(!active||event.code!=="Escape"||animation)return;
+    if(hintStage){setHintStage(0);hintButton?.focus?.({preventScroll:true});}
+    else if(picking){setPicking(false);canvas.focus?.({preventScroll:true});}
+    else if(objectMode)setObjectMode(false);
+    else if(toolsOpen){setToolsOpen(false);toolsButton?.focus?.({preventScroll:true});}
+    else return;
+    event.preventDefault?.();
+  });
   on(snapInput,"change",()=>setSnap(Number(snapInput.value)));
   on(form,"submit",event=>{event.preventDefault();enterPoint(xInput?.value,yInput?.value);});
   on($("coordinate-clear"),"click",clearPoint);
@@ -278,7 +303,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   }
   function setLevel(key){
     initialRoom=validateRoom(Object.hasOwn(LEVELS,key)?LEVELS[key]:GATEHOUSE_PREVIEW);
-    mode="overview";zoom=null;focus=null;
+    mode="overview";zoom=null;focus=null;toolsOpen=false;
     const heading=$("room-heading"),chapter=$("room-chapter");
     if(heading)heading.textContent=initialRoom.title;
     if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter I · Level "+initialRoom.number+" · "+TUTORIALS[tutorialType(initialRoom)].label:"Chapter I · Interactive object practice";
@@ -295,7 +320,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   // Click the stage to return keyboard focus to gameplay after inspecting controls.
   on(host,"click",()=>{if(!picking&&!objectMode)canvas.focus?.({preventScroll:true});});
   updateControls();updateGuide();
-  return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getResult:()=>result,setGuidance,setHintStage,getTutorialState:()=>({guidanceEnabled,hintStage,step:contextualGuide(room,player,inspector?.getState(),{casting:Boolean(animation),picking,canUndo:canUndo(),moves:history.entries.length,situation})?.step??null}),getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
+  return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getResult:()=>result,setToolsOpen,getToolsOpen:()=>toolsOpen,setGuidance,setHintStage,getTutorialState:()=>({guidanceEnabled,hintStage,step:contextualGuide(room,player,inspector?.getState(),{casting:Boolean(animation),picking,canUndo:canUndo(),moves:history.entries.length,situation})?.step??null}),getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
     getCamera:()=>camera,getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),
     refresh:()=>viewport?.resize(),
     destroy(){loop.stop();input.destroy();inspector?.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};

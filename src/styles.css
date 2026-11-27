@@ -266,3 +266,57 @@ h1,h2,h3 { font-family: var(--display); }
 .hint-actions button:disabled { opacity:.45;cursor:default; }
 @media(max-height:520px) and (orientation:landscape){#tutorial-guide{font-size:.7rem}.tutorial-hint-panel{padding:.25rem .45rem;gap:.25rem .5rem}#tutorial-hint-title,#tutorial-hint-text{font-size:.72rem}.hint-actions button{min-height:28px;padding:.18rem .35rem}}
 @media(max-width:650px) and (orientation:portrait){.hint-content{flex-basis:100%}.hint-actions{justify-content:flex-end;width:100%}.hint-actions button{min-height:40px}}
+
+/* PR14: gameplay owns the viewport. Secondary view controls are opt-in. */
+body:has(#room-view:not([hidden])) .app-header{display:none}
+body:has(#room-view:not([hidden])) .app-main{padding:0}
+body:has(#room-view:not([hidden])) .game-viewport{border:0;border-radius:0;min-height:0}
+.room-view{height:100dvh;min-height:360px;grid-template-rows:auto minmax(138px,1fr) auto auto;overflow:visible}
+.room-toolbar{gap:.25rem .45rem;padding:.3rem .6rem}
+.room-heading{flex:1 1 9rem;min-width:8rem}
+.room-heading h2{font-size:clamp(1rem,1.8vw,1.35rem)}
+.room-secondary-tools{flex:1 0 100%;display:flex;align-items:center;flex-wrap:wrap;gap:.25rem .5rem;padding:.25rem 0 0;border-top:1px solid #745b50}
+#room-tools-toggle[aria-expanded="true"]{border-color:#e6c18c;color:#f1d5a6}
+.primary-tools .object-primary{background:#e5bf88;color:#302438;border-color:#f6d9a2;font-weight:750}
+.primary-tools .object-primary[aria-pressed="true"]{background:#6f527f;color:#fff0d5;border-color:#e7c391}
+.room-stage{min-height:138px}
+.room-footer{align-items:center;gap:.2rem .6rem;padding:.3rem .6rem}
+.play-info{gap:.1rem;min-width:0}
+#room-status{color:#c8b7ca}
+.climb-controls{display:flex;gap:.28rem}
+.object-panel,.coordinate-panel{max-height:40dvh;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.tutorial-hint-panel{max-height:25dvh;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.room-footer:has(#tutorial-hint-panel:not([hidden])) #tutorial-guide{display:none}
+.object-top label{min-width:0}
+.object-top select{max-width:min(100%,18rem)}
+.object-panel input,.coordinate-panel input{font-size:16px}
+.object-panel button,.object-panel select,.coordinate-panel button,.coordinate-panel select{min-height:36px}
+@media(max-height:600px) and (orientation:landscape){
+  .room-view{min-height:360px}
+  .room-toolbar{gap:.18rem .3rem;padding:.2rem .4rem}
+  .room-heading{min-width:7rem;flex:1 1 8rem}
+  .room-heading p{display:none}
+  .room-heading h2{margin:0;font-size:1rem}
+  .room-back,.camera-controls button,.coordinate-controls button{min-height:32px;padding:.18rem .38rem;font-size:.74rem}
+  .room-footer{padding:.18rem .45rem;gap:.15rem .5rem}
+  .object-panel,.coordinate-panel{max-height:37dvh}
+  .object-panel button,.object-panel select,.coordinate-panel button,.coordinate-panel select{min-height:32px}
+  #tutorial-guide{font-size:.72rem}
+  .tutorial-tools,.recovery-controls{gap:.18rem}
+}
+@media(max-width:650px) and (orientation:portrait){
+  .room-view{min-height:530px}
+  .room-toolbar{gap:.25rem;padding:.3rem .4rem}
+  .room-toolbar>.room-heading{flex:1 0 100%}
+  .room-toolbar .room-back{order:0}
+  .room-toolbar>.coordinate-controls{flex:0 1 auto}
+  .room-toolbar>.tutorial-tools{flex:1 1 auto;justify-content:flex-end}
+  .room-toolbar .room-back,.coordinate-controls button,.camera-controls button{min-height:38px}
+  .room-secondary-tools .camera-controls{width:auto;justify-content:flex-start}
+  .room-footer{justify-content:space-between}
+  .movement-controls{width:100%;justify-content:flex-start}
+  .movement-controls .jump-control{margin-left:auto;min-width:84px}
+  .play-info{text-align:left;flex:1 1 100%}
+}
+
+body:has(#room-view:not([hidden])) .game-viewport{overflow:visible}

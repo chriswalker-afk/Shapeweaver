@@ -13,7 +13,7 @@
 <body>
   <header class="app-header">
     <a class="brand" href="./" aria-label="Shapeweaver home"><img src="./assets/ui/crest.svg" alt="" width="35" height="35"><span>Shapeweaver</span></a>
-    <span class="stage-label">Development preview</span>
+    <span class="stage-label">The Gatehouse · Chapter I</span>
   </header>
   <main class="app-main" id="app">
     <section class="game-viewport" aria-label="Shapeweaver development preview">
@@ -86,6 +86,19 @@
       <section class="room-view" id="room-view" aria-labelledby="room-heading" hidden>
         <header class="room-toolbar">
           <div class="room-heading"><p id="room-chapter">Chapter I · Interactive object practice</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
+          <div class="coordinate-controls primary-tools" role="group" aria-label="Puzzle tools">
+            <button type="button" id="grid-toggle" aria-pressed="true">Grid: on</button>
+            <button type="button" id="object-toggle" class="object-primary" aria-pressed="false" aria-controls="object-panel">Objects</button>
+          </div>
+          <button type="button" id="room-tools-toggle" class="room-back" aria-expanded="false" aria-controls="room-secondary-tools">View tools ▾</button>
+          <div id="tutorial-tools" class="tutorial-tools" hidden><span id="tutorial-moves">Moves: 0</span><button type="button" id="tutorial-guidance-toggle" class="room-back" aria-pressed="true">Guide: on</button><button type="button" id="tutorial-hint" class="room-back" aria-expanded="false" aria-controls="tutorial-hint-panel">Hints</button></div>
+          <div class="recovery-controls" role="group" aria-label="Mistake recovery">
+            <button type="button" id="undo-cast" class="room-back" title="Undo the last cast and restore a safe earlier position. Committed moves still count." disabled>Undo</button>
+            <button type="button" id="return-safety" class="room-back" title="Return to a safe checkpoint or start without changing the world or move count" aria-label="Return to safety">Return</button>
+            <button type="button" id="reset-practice" class="room-back" title="Start a fresh attempt: restore all objects and clear moves">Reset</button>
+          </div>
+          <button type="button" class="room-back" id="close-room">← Levels</button>
+          <div id="room-secondary-tools" class="room-secondary-tools" role="group" aria-label="View and coordinate tools" hidden>
           <div class="camera-controls" aria-label="Camera and coordinate tools">
             <button type="button" id="camera-overview" aria-pressed="true">Full room</button>
             <button type="button" id="camera-inspect" aria-pressed="false">Inspect</button>
@@ -100,23 +113,12 @@
               <button type="button" id="camera-down" aria-label="Pan down" disabled>↓</button>
             </div>
           </div>
-          <div class="coordinate-controls" role="group" aria-label="Coordinate overlay">
-            <button type="button" id="grid-toggle" aria-pressed="true">Grid: on</button>
-            <button type="button" id="axes-toggle" aria-pressed="true">Axes: on</button>
-            <button type="button" id="pick-toggle" aria-pressed="false" aria-controls="coordinate-panel">Pick point</button>
-            <button type="button" id="object-toggle" aria-pressed="false" aria-controls="object-panel">Objects</button>
+            <div class="coordinate-controls"><button type="button" id="axes-toggle" aria-pressed="true">Axes: on</button><button type="button" id="pick-toggle" aria-pressed="false" aria-controls="coordinate-panel">Pick point</button></div>
+            <button type="button" id="follow-toggle" class="room-back" aria-pressed="true">Follow</button>
           </div>
-          <div id="tutorial-tools" class="tutorial-tools" hidden><span id="tutorial-moves">Moves: 0</span><button type="button" id="tutorial-guidance-toggle" class="room-back" aria-pressed="true">Guide: on</button><button type="button" id="tutorial-hint" class="room-back" aria-expanded="false" aria-controls="tutorial-hint-panel">Hints</button></div>
-          <button type="button" id="follow-toggle" class="room-back" aria-pressed="true">Follow</button>
-          <div class="recovery-controls" role="group" aria-label="Mistake recovery">
-            <button type="button" id="undo-cast" class="room-back" title="Undo the last cast and restore a safe earlier position. Committed moves still count." disabled>Undo</button>
-            <button type="button" id="return-safety" class="room-back" title="Return to a safe checkpoint or start without changing the world or move count">Return to safety</button>
-            <button type="button" id="reset-practice" class="room-back" title="Start a fresh attempt: restore all objects and clear moves">Reset</button>
-          </div>
-          <button type="button" class="room-back" id="close-room">← Title</button>
         </header>
         <div class="room-stage" id="room-stage">
-          <canvas id="room-canvas" tabindex="0" aria-label="Gatehouse movement practice. Arrow keys or WASD to move and climb; Space or Z to jump. Coordinate picking and object inspection pause movement."></canvas>
+          <canvas id="room-canvas" tabindex="0" aria-label="Gatehouse puzzle. Arrow keys or WASD to move; Space or Z to jump. Coordinate picking and object inspection pause movement."></canvas>
         </div>
         <section id="coordinate-panel" class="coordinate-panel" aria-label="Coordinate picker" hidden>
           <label class="snap-field" for="coordinate-snap">Click snap <select id="coordinate-snap"><option value="1">1 unit</option><option value="0.5">½ unit</option><option value="0.1">0.1 unit</option></select></label>
@@ -126,6 +128,7 @@
             <button type="submit">Mark exact point</button>
             <button type="button" id="coordinate-clear">Clear</button>
           </form>
+          <button type="button" id="coordinate-close">Done picking</button>
           <output id="coordinate-result" role="status" aria-live="polite">Click or tap the room, or enter coordinates.</output>
         </section>
         <section id="object-panel" class="object-panel" aria-label="Object inspector and transformation previews" hidden>
@@ -148,8 +151,7 @@
           <div class="movement-controls" id="movement-controls" role="group" aria-label="Character movement">
             <button type="button" data-move="left" aria-label="Walk left">←</button>
             <button type="button" data-move="right" aria-label="Walk right">→</button>
-            <button type="button" data-move="up" aria-label="Climb up">↑</button>
-            <button type="button" data-move="down" aria-label="Climb down">↓</button>
+            <span class="climb-controls" id="climb-controls"><button type="button" data-move="up" aria-label="Climb up">↑</button><button type="button" data-move="down" aria-label="Climb down">↓</button></span>
             <button type="button" data-move="jump" class="jump-control">Jump</button>
           </div>
           <div class="play-info"><span id="room-status">Loading practice room…</span><span id="play-status" role="status">Arrows / WASD · Space to jump · Up/down on ladders</span><span id="recovery-count" hidden></span><span id="tutorial-guide" role="status" aria-live="polite" hidden></span></div>

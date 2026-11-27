@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR13 — Tutorials and hints. All four Gatehouse puzzles have a contextual guide and five optional, progressively revealing hints based on current object geometry. The worked solution is revealed only on request. Guidance can be turned off, with no scoring penalty. Next: PR14 Gatehouse polish.
+PR14 — Gatehouse polish. Gameplay-first layout, collapsible view tools, compact movement controls, improved mathematical labels, scene details and eased cast effects. The four original puzzle geometries and scoring rules are retained. Next: PR15 campaign and level library.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR13 — Tutorials and hints. All four Gatehouse puzzles have a contextual guide
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Gatehouse polish](docs/gatehouse-polish.md) — review scope, visual and replay QA.
 - [Tutorials and hints](docs/tutorials-and-hints.md) — contextual guidance, five-stage hints, live geometry and worked examples.
 - [Stars and results](docs/stars-and-results.md) — scoring, completion history, personal best and navigation.
 - [Mistake recovery](docs/mistake-recovery.md) — safe snapshots, recovery controls and attempt accounting.

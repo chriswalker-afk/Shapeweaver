@@ -13,13 +13,41 @@ function label(ctx,t,x,y,c){
 function dot(ctx,p,c,r=3){
   ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();ctx.strokeStyle="#211c31";ctx.lineWidth=1.3;ctx.stroke();
 }
-function markReferences(ctx,camera,refs,c,prime=""){
+/** Keep reference labels inside the visible room, with deterministic leader lines
+ * when the preferred position collides with another label. All dots stay exact. */
+export function placeReferenceLabels(points,rect,measure,occupied=[]){
+  const result=[];
+  for(const p of points){
+    if(p.x<rect.left-.1||p.x>rect.right+.1||p.y<rect.top-.1||p.y>rect.bottom+.1)continue;
+    const w=Math.max(12,measure(p.text)+4),h=14;
+    const offsets=[[7,-12],[-w-7,-12],[7,12],[-w-7,12],[-w/2,-24],[-w/2,24],[14,-25],[-w-14,-25],[14,25],[-w-14,25]];
+    const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+    let best=null;
+    for(const [dx,dy] of offsets){
+      const x=clamp(p.x+dx,rect.left+2,Math.max(rect.left+2,rect.right-w-2));
+      const y=clamp(p.y+dy,rect.top+8,Math.max(rect.top+8,rect.bottom-8));
+      const box={left:x,right:x+w,top:y-h/2,bottom:y+h/2};
+      const overlap=occupied.reduce((n,q)=>n+Math.max(0,Math.min(box.right,q.right)-Math.max(box.left,q.left))*Math.max(0,Math.min(box.bottom,q.bottom)-Math.max(box.top,q.top)),0);
+      const score=overlap*100+Math.hypot(x-p.x,y-p.y);
+      if(!best||score<best.score)best={...box,x,y,score};
+    }
+    occupied.push(best);result.push({...p,labelX:best.x,labelY:best.y});
+  }
+  return result;
+}
+function markReferences(ctx,camera,refs,c,prime="",rect,occupied){
   const groups=[];
   for(const r of refs){
     const p=screen(camera,r.point),group=groups.find(g=>Math.hypot(g.p.x-p.x,g.p.y-p.y)<.1);
     if(group)group.ids.push(r.id+prime);else groups.push({p,ids:[r.id+prime]});
   }
-  for(const g of groups){dot(ctx,g.p,c,g.ids.some(id=>id==="H"+prime||id==="Hinge"+prime)?5:3);label(ctx,g.ids.join("/"),g.p.x+5,g.p.y-9,c);}
+  ctx.font="600 11px system-ui, sans-serif";
+  const points=groups.map(g=>({...g.p,text:g.ids.join("/"),hinge:g.ids.some(id=>id==="H"+prime||id==="Hinge"+prime)}));
+  for(const p of placeReferenceLabels(points,rect,t=>ctx.measureText(t).width,occupied)){
+    dot(ctx,p,c,p.hinge?5:3);
+    if(Math.hypot(p.labelX-p.x,p.labelY-p.y)>19){ctx.strokeStyle=c;ctx.lineWidth=.8;line(ctx,p,{x:p.labelX,y:p.labelY});}
+    label(ctx,p.text,p.labelX,p.labelY,c);
+  }
 }
 function line(ctx,a,b){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
 function mirrorSegment(line,b){
@@ -33,13 +61,14 @@ export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview){
   ctx.save();
   const a=screen(camera,[bounds.minX,bounds.maxY]),b=screen(camera,[bounds.maxX,bounds.minY]);
   ctx.beginPath();ctx.rect(a.x,a.y,b.x-a.x,b.y-a.y);ctx.clip();
+  const rect={left:Math.max(0,a.x),top:Math.max(0,a.y),right:Math.min(camera.width,b.x),bottom:Math.min(camera.height,b.y)},occupied=[];
   for(const o of objects){
     const active=o.id===selected;
     path(ctx,camera,o.vertices);ctx.strokeStyle="#211c31";ctx.lineWidth=active?4:3;ctx.stroke();
     ctx.strokeStyle=active?"#ffe1a5":"#e9d6b2aa";ctx.lineWidth=active?2:1;ctx.stroke();
     if(!active)continue;
     const refs=referencePoints(o);
-    markReferences(ctx,camera,refs,"#ffe1a5");
+    markReferences(ctx,camera,refs,"#ffe1a5","",rect,occupied);
     if(!preview?.geometry||preview.objectId!==o.id)continue;
     const {request,geometry}=preview,c=preview.ok?COLOURS[request.type]:"#ff9b94";
     ctx.save();ctx.setLineDash?.([5,4]);ctx.lineWidth=1.5;ctx.strokeStyle=c;
@@ -84,7 +113,7 @@ export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview){
       dot(ctx,p,c,4);label(ctx,"Centre",p.x+6,p.y-9,c);
     }
     path(ctx,camera,geometry.vertices);ctx.fillStyle=preview.ok?"rgba(112,210,195,.24)":"rgba(255,110,104,.22)";ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2.2;ctx.stroke();ctx.restore();
-    markReferences(ctx,camera,geometry.points,c,"′");
+    markReferences(ctx,camera,geometry.points,c,"′",rect,occupied);
   }
   ctx.restore();
 }

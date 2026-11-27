@@ -12,7 +12,7 @@ function node(tag="div"){
   fire(k,event={}){listeners.get(k)?.({preventDefault(){},...event})},focus(){this.focused=true}};
 }
 function fixture(reduce,withApp=false){
- const ids="room-canvas room-stage room-status play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-guidance-toggle tutorial-hint-panel tutorial-hint-title tutorial-hint-text tutorial-hint-previous tutorial-hint-next tutorial-hint-close tutorial-moves reset-practice undo-cast return-safety recovery-count world app-status title-view spellbook-view title-art room-view spell-name spell-description spell-example spell-image spell-detail translation-vector open-spellbook close-spellbook spellbook-heading open-room open-level1 open-level2 open-level3 open-level4 close-room results-view results-heading results-level results-stars results-message results-stats results-thresholds results-best results-history results-empty results-replay results-next results-title".split(" ");
+ const ids="room-canvas room-stage room-status room-tools-toggle room-secondary-tools climb-controls coordinate-close play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-guidance-toggle tutorial-hint-panel tutorial-hint-title tutorial-hint-text tutorial-hint-previous tutorial-hint-next tutorial-hint-close tutorial-moves reset-practice undo-cast return-safety recovery-count world app-status title-view spellbook-view title-art room-view spell-name spell-description spell-example spell-image spell-detail translation-vector open-spellbook close-spellbook spellbook-heading open-room open-level1 open-level2 open-level3 open-level4 close-room results-view results-heading results-level results-stars results-message results-stats results-thresholds results-best results-history results-empty results-replay results-next results-title".split(" ");
  const els=Object.fromEntries(ids.map(id=>[id,node()])),rect={left:0,top:0,width:1000,height:500};
  const ctx={save(){},restore(){},setTransform(){},createLinearGradient(){return{addColorStop(){}}},createRadialGradient(){return{addColorStop(){}}},
  fillRect(){},drawImage(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){},stroke(){},clip(){},rect(){},translate(){},rotate(){},ellipse(){},arc(){},strokeRect(){},quadraticCurveTo(){},strokeText(){},fillText(){},measureText(s){return{width:s.length*7}},setLineDash(){}};
@@ -361,4 +361,17 @@ test("five-stage hints reveal only on request and never alter inspector fields, 
  click("tutorial-hint");click("reset-practice");assert.equal(c.getTutorialState().hintStage,0);
  click("tutorial-hint");assert.equal(c.recoverPlayer(),true);assert.equal(c.getTutorialState().hintStage,0);
  c.setLevel("room");assert.equal(els["tutorial-tools"].hidden,true);assert.equal(c.setHintStage(1),false);c.destroy();
+});
+
+test("compact view controls collapse safely, picking can always be closed, Escape dismisses interaction",()=>{
+ const f=fixture(true),{els,controller:c}=f,click=id=>els[id].fire("click");
+ c.setLevel("level1");c.setActive(true);
+ assert.equal(c.getToolsOpen(),false);assert.equal(els["room-secondary-tools"].hidden,true);
+ assert.equal(els["climb-controls"].hidden,true);
+ click("room-tools-toggle");assert.equal(els["room-secondary-tools"].hidden,false);
+ click("pick-toggle");assert.equal(c.getCoordinateState().picking,true);
+ click("room-tools-toggle");assert.equal(c.getCoordinateState().picking,false);assert.equal(els["coordinate-panel"].hidden,true);
+ c.setPicking(true);assert.equal(c.getToolsOpen(),true);click("coordinate-close");assert.equal(c.getCoordinateState().picking,false);
+ c.setLevel("room");assert.equal(els["climb-controls"].hidden,false);assert.equal(c.getToolsOpen(),false);
+ c.destroy();
 });

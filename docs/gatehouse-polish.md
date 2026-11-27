@@ -1,0 +1,7 @@
+# PR14 — Gatehouse polish
+
+Review of current renderer, controls and four tutorials. Keep their verified world geometry and motion constants unchanged to avoid breaking the learning progression. Secondary camera/axes/point tools are collapsed by default, opening the point picker exposes its close action, and Escape dismisses active help/inspection. The game area uses the available viewport; on short screens panels may scroll and the page can exceed the viewport rather than collapse the play area. Climb buttons appear only in rooms containing ladders. Object selection remains available at all sizes. Scene detail, spell-colour runes, exit labels, terrain bevels and smooth casting are cosmetic; coordinates and collision geometry are unchanged. Improved reference-label placement avoids overlaps when possible, while preserving the exact vertices.
+
+Regression checks cover four intended routes, sample untransformed jump attempts (not exhaustive proof of solvability or absence of shortcuts), label placement and input/control lifecycle. Browser QA is a separate Chromium workflow, recording initial/preview screenshots and canvas dimensions at four viewport sizes, with actual UI previews and applications. Human visual review, real-device multi-touch and classroom feedback are still required; passing smoke tests alone does not establish classroom readiness.
+
+Next PR15: chapter map, level library, direct access, filters and locally saved stars.

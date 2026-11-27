@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "path": "ui/crest.svg",
+      "role": "Brand mark and favicon",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR02; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "characters/apprentice.svg",
+      "role": "Initial right-facing character art; reference pose",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR02; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "environments/gatehouse-title.svg",
+      "role": "Illustrative title environment only; no collision geometry",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR02; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "ui/translate.svg",
+      "role": "Translation symbol",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR02; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "ui/rotate.svg",
+      "role": "Rotation symbol",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR02; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "ui/enlarge.svg",
+      "role": "Enlargement symbol",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR02; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "ui/reflect.svg",
+      "role": "Reflection symbol",
+      "provenance": "Original vector artwork authored for Shapeweaver in PR02; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    }
+  ]
+}

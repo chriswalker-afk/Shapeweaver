@@ -3,33 +3,61 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Shapeweaver — a mathematical transformation puzzle platformer.">
-  <meta name="theme-color" content="#221e2c">
+  <meta name="description" content="Shapeweaver — reshape the world through mathematical transformations.">
+  <meta name="theme-color" content="#211c31">
   <title>Shapeweaver</title>
+  <link rel="icon" href="./assets/ui/crest.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./src/styles.css">
   <script type="module" src="./src/main.js"></script>
 </head>
 <body>
   <header class="app-header">
-    <div class="brand">
-      <h1>Shapeweaver</h1>
-      <p>Reshape the world. Find your way.</p>
-    </div>
+    <a class="brand" href="./" aria-label="Shapeweaver home"><img src="./assets/ui/crest.svg" alt="" width="35" height="35"><span>Shapeweaver</span></a>
     <span class="stage-label">Development preview</span>
   </header>
   <main class="app-main" id="app">
-    <section class="game-viewport" aria-labelledby="viewport-title">
+    <section class="game-viewport" aria-label="Shapeweaver title and spellbook preview">
       <canvas id="world" aria-hidden="true"></canvas>
-      <div class="viewport-message">
-        <h2 id="viewport-title">The world is taking shape</h2>
-        <p id="app-status" role="status">Loading the development scaffold…</p>
-        <noscript><p>Enable JavaScript to load the game.</p></noscript>
+      <div class="title-art" aria-hidden="true">
+        <svg class="scene-composition" viewBox="0 0 1440 800" preserveAspectRatio="xMaxYMid slice" focusable="false" aria-hidden="true">
+          <image href="./assets/environments/gatehouse-title.svg" width="1440" height="800"/>
+          <image href="./assets/characters/apprentice.svg" x="965" y="407" width="105" height="147"/>
+        </svg>
+        <div class="scene-shade"></div>
+        <div class="fireflies"><i></i><i></i><i></i><i></i><i></i></div>
       </div>
+      <section class="title-view" id="title-view" aria-labelledby="viewport-title">
+        <div class="title-content">
+          <img class="title-crest" src="./assets/ui/crest.svg" alt="">
+          <p class="eyebrow">An adventure in mathematical magic</p>
+          <h1 id="viewport-title">Shapeweaver</h1>
+          <p class="tagline">Reshape the world. Find your way.</p>
+          <div class="ornament" aria-hidden="true"><span></span><b>◆</b><span></span></div>
+          <p class="intro">Four spells. A forgotten kingdom. A path only you can create.</p>
+          <button type="button" class="gold-button" id="open-spellbook">Open the spellbook <span aria-hidden="true">›</span></button>
+          <p class="preview-note" id="app-status" role="status">Loading the development scaffold…</p>
+          <noscript><p class="preview-note">Enable JavaScript to open the spellbook.</p></noscript>
+        </div>
+        <div class="chapter-marker"><span>Chapter I</span><strong>The Gatehouse</strong></div>
+      </section>
+      <section class="spellbook-view" id="spellbook-view" aria-labelledby="spellbook-heading" hidden>
+        <div class="spellbook">
+          <div class="book-header"><div><p class="eyebrow">The apprentice's field guide</p><h2 id="spellbook-heading" tabindex="-1">Four weaving spells</h2></div><button type="button" class="quiet-button" id="close-spellbook">← Title</button></div>
+          <p class="book-intro">Choose a spell to discover its mathematical parameters.</p>
+          <div class="spell-tabs" aria-label="Choose a transformation">
+            <button type="button" class="spell-tab" data-spell="translate" aria-pressed="true" style="--spell-colour:#4EADC3"><img src="./assets/ui/translate.svg" alt="" width="42" height="42"><span>Translation</span></button>
+            <button type="button" class="spell-tab" data-spell="rotate" aria-pressed="false" style="--spell-colour:#D5A044"><img src="./assets/ui/rotate.svg" alt="" width="42" height="42"><span>Rotation</span></button>
+            <button type="button" class="spell-tab" data-spell="enlarge" aria-pressed="false" style="--spell-colour:#65A77A"><img src="./assets/ui/enlarge.svg" alt="" width="42" height="42"><span>Enlargement</span></button>
+            <button type="button" class="spell-tab" data-spell="reflect" aria-pressed="false" style="--spell-colour:#A57ACB"><img src="./assets/ui/reflect.svg" alt="" width="42" height="42"><span>Reflection</span></button>
+          </div>
+          <div class="spell-detail" id="spell-detail" aria-live="polite">
+            <div class="spell-sigil"><img id="spell-image" src="./assets/ui/translate.svg" alt=""></div>
+            <div class="spell-text"><h3 id="spell-name">Translation</h3><p id="spell-description">Move without turning or resizing.</p><div class="spell-example"><span class="column-vector" id="translation-vector" role="img" aria-label="Column vector 4, negative 2"><span aria-hidden="true">4</span><span aria-hidden="true">−2</span></span><span id="spell-example">Four units right, two units down.</span></div></div>
+          </div>
+          <p class="book-footer">Spellbook preview · Interactive puzzles arrive in later stages.</p>
+        </div>
+      </section>
     </section>
-    <details class="development-info">
-      <summary>About this preview</summary>
-      <p>PR01 establishes the browser shell and canvas. The storybook artwork, movement, coordinate grid and transformation spells will be added in later development stages. This is not a playable puzzle yet.</p>
-    </details>
   </main>
 </body>
 </html>

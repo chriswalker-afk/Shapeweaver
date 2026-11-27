@@ -1,5 +1,3 @@
 # Asset library
 
-PR02 establishes original storybook artwork, asset provenance and chapter palettes. Later introduce characters, environments, objects, effects and audio subdirectories as needed. No production artwork is included in PR01. Keep asset geometry aligned with authoritative world-space collision shapes, and record sources/licences in an asset manifest.
-
-This directory is reserved for public game assets. Do not store private working files here.
+PR02 contains original SVG identity assets. They are intentionally separate and self-contained, no external images or fonts. See [manifest](manifest.json) for file provenance and [visual identity](../docs/visual-identity.md) for the style and intended use. The title illustration is a composition reference, not level geometry. PR03 will introduce separate scenery and terrain layers for playable rooms; later character poses should share the apprentice design. Do not store private working files here.

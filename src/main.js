@@ -1,5 +1,6 @@
 import { createAppState } from "./core/app-state.js";
 import { mountViewport } from "./rendering/viewport.js";
+import { mountIdentity } from "./ui/identity.js";
 
 /** Export startup separately so it can be tested without loading a browser. */
 export function startApp(document, view) {
@@ -10,9 +11,10 @@ export function startApp(document, view) {
   const state = createAppState();
   const viewport = mountViewport(canvas, host, view);
   status.textContent = viewport
-    ? "Scaffold ready. The first playable rooms will arrive in later development stages."
+    ? "Scaffold ready · Art and spellbook preview. Playable rooms are coming in later stages."
     : "Canvas is unavailable in this browser. The game requires Canvas 2D.";
-  return { state, viewport };
+  const identity = typeof document.querySelectorAll === "function" ? mountIdentity(document, state) : null;
+  return { state, viewport, identity };
 }
 
 if (typeof window !== "undefined" && typeof document !== "undefined") {

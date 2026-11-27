@@ -22,7 +22,7 @@ export function drawPlaceholder(context, metrics) {
 }
 
 /** Observe the actual viewport rather than relying on screen resolution. */
-export function mountViewport(canvas, host, view = globalThis.window) {
+export function mountViewport(canvas, host, view = globalThis.window, draw = drawPlaceholder) {
   const context = canvas.getContext("2d");
   if (!context) return null;
   function resize() {
@@ -31,7 +31,7 @@ export function mountViewport(canvas, host, view = globalThis.window) {
     if (!metrics) return;
     if (canvas.width !== metrics.pixelWidth) canvas.width = metrics.pixelWidth;
     if (canvas.height !== metrics.pixelHeight) canvas.height = metrics.pixelHeight;
-    drawPlaceholder(context, metrics);
+    draw(context, metrics);
   }
   const observer = typeof view.ResizeObserver === "function" ? new view.ResizeObserver(resize) : null;
   observer?.observe(host);

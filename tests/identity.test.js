@@ -63,3 +63,29 @@ test("spellbook opens, selects all spells, returns to title and cleans up", () =
   assert.equal(buttons.every(x => x.listeners.size === 0),true);
   assert.equal(elements["open-spellbook"].listeners.size,0);
 });
+
+test("title opens the room, refreshes the renderer and returns to the title", () => {
+  const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","open-spellbook","close-spellbook","spellbook-heading","translation-vector","room-view","title-art","open-room","close-room","room-heading"];
+  const elements=Object.fromEntries(ids.map(id=>[id,element()]));
+  elements["spellbook-view"].hidden=true;
+  elements["room-view"].hidden=true;
+  const buttons=SPELLS.map(spell=>element({spell:spell.id}));
+  const document={getElementById:id=>elements[id],querySelectorAll:()=>buttons};
+  const state=createAppState(), changes=[];
+  const ui=mountIdentity(document,state,next=>changes.push(next));
+  elements["open-room"].click();
+  assert.equal(state.view,"room");
+  assert.equal(elements["title-view"].hidden,true);
+  assert.equal(elements["spellbook-view"].hidden,true);
+  assert.equal(elements["room-view"].hidden,false);
+  assert.equal(elements["title-art"].hidden,true);
+  assert.equal(elements["room-heading"].focused,true);
+  elements["close-room"].click();
+  assert.equal(state.view,"title");
+  assert.equal(elements["room-view"].hidden,true);
+  assert.equal(elements["title-art"].hidden,false);
+  assert.equal(elements["title-view"].hidden,false);
+  assert.deepEqual(changes,["room","title"]);
+  ui.destroy();
+  assert.equal(elements["open-room"].listeners.size,0);
+});

@@ -108,3 +108,40 @@ h1,h2,h3 { font-family: var(--display); }
   .book-footer { margin-top: .35rem; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }
+
+/* PR03: the world has its own large canvas and compact, non-overlapping toolbar. */
+.title-actions { display:flex; flex-wrap:wrap; align-items:center; gap:.55rem; }
+.secondary-title-button { background:#31263eeb; color:#efd8ac; border:1px solid #b59a72; border-radius:.22rem; min-height:44px; padding:.6rem .9rem; font-weight:600; }
+.secondary-title-button:hover { background:#51405f; }
+.room-view { display:grid; grid-template-rows:auto minmax(0,1fr) auto; min-width:0; min-height:max(320px,calc(100dvh - 61px)); background:#211c31; }
+.room-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .7rem; padding:.45rem .75rem; background:#31263e; border-bottom:1px solid #9c805b; }
+.room-heading { flex:1 1 auto; min-width:9rem; }
+.room-heading p { margin:0; color:#dac3a4; font-size:.67rem; letter-spacing:.065em; }
+.room-heading h2 { font-size:clamp(1.05rem,2vw,1.45rem); line-height:1.1; margin:.12rem 0 0; color:#f4dbaa; }
+.camera-controls,.pan-controls { display:flex; flex-wrap:wrap; align-items:center; gap:.25rem; }
+.camera-controls button,.room-back { font-size:.78rem; padding:.4rem .6rem; min-height:34px; background:#211c31; border:1px solid #8c725e; border-radius:.22rem; color:#f3e4c7; }
+.camera-controls button[aria-pressed="true"] { background:#e6c18c; color:#302438; border-color:#f6d9a2; font-weight:700; }
+.pan-controls button { min-width:34px; }
+.camera-controls button:disabled { opacity:.45; cursor:default; }
+.camera-controls button:not(:disabled):hover,.room-back:hover { border-color:#f6d9a2; }
+.room-stage { position:relative; overflow:hidden; min-width:0; min-height:220px; background:#696177; }
+#room-canvas { display:block; position:absolute; inset:0; width:100%; height:100%; }
+.room-footer { display:flex; justify-content:space-between; gap:.3rem .8rem; flex-wrap:wrap; padding:.3rem .65rem; font-size:.72rem; line-height:1.35; color:#d5c5c6; background:#251e32; border-top:1px solid #745b50; }
+@media(max-width:650px) and (orientation:portrait) {
+  .room-view { min-height:max(490px,calc(100dvh - 55px)); }
+  .room-toolbar { padding:.45rem; }
+  .room-heading { flex-basis:calc(100% - 6rem); }
+  .room-back { order:-1; }
+  .camera-controls { width:100%; justify-content:center; }
+  .room-footer { font-size:.68rem; }
+}
+@media(max-height:520px) and (orientation:landscape) {
+  .room-view { min-height:max(240px,calc(100dvh - 44px)); }
+  .room-stage { min-height:150px; }
+  .room-toolbar { padding:.22rem .5rem; }
+  .room-heading p { display:none; }
+  .room-heading h2 { font-size:1rem; }
+  .camera-controls button,.room-back { min-height:30px; padding:.28rem .45rem; }
+  .room-footer { padding:.18rem .5rem; }
+  .secondary-title-button { min-height:38px; padding:.35rem .7rem; }
+}

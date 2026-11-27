@@ -1,6 +1,7 @@
 import { createAppState } from "./core/app-state.js";
 import { mountViewport } from "./rendering/viewport.js";
 import { mountIdentity } from "./ui/identity.js";
+import { mountRoomPreview } from "./ui/room-preview.js";
 
 /** Export startup separately so it can be tested without loading a browser. */
 export function startApp(document, view) {
@@ -11,10 +12,11 @@ export function startApp(document, view) {
   const state = createAppState();
   const viewport = mountViewport(canvas, host, view);
   status.textContent = viewport
-    ? "Scaffold ready · Art and spellbook preview. Playable rooms are coming in later stages."
+    ? "Scaffold ready · Explore the Gatehouse renderer preview or the spellbook."
     : "Canvas is unavailable in this browser. The game requires Canvas 2D.";
-  const identity = typeof document.querySelectorAll === "function" ? mountIdentity(document, state) : null;
-  return { state, viewport, identity };
+  const room = typeof view.Image === "function" ? mountRoomPreview(document, view) : null;
+  const identity = typeof document.querySelectorAll === "function" ? mountIdentity(document, state, next => { if (next === "room") room?.refresh(); }) : null;
+  return { state, viewport, identity, room };
 }
 
 if (typeof window !== "undefined" && typeof document !== "undefined") {

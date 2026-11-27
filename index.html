@@ -16,9 +16,9 @@
     <span class="stage-label">Development preview</span>
   </header>
   <main class="app-main" id="app">
-    <section class="game-viewport" aria-label="Shapeweaver title and spellbook preview">
+    <section class="game-viewport" aria-label="Shapeweaver development preview">
       <canvas id="world" aria-hidden="true"></canvas>
-      <div class="title-art" aria-hidden="true">
+      <div class="title-art" id="title-art" aria-hidden="true">
         <svg class="scene-composition" viewBox="0 0 1440 800" preserveAspectRatio="xMaxYMid slice" focusable="false" aria-hidden="true">
           <image href="./assets/environments/gatehouse-title.svg" width="1440" height="800"/>
           <image href="./assets/characters/apprentice.svg" x="965" y="407" width="105" height="147"/>
@@ -34,7 +34,7 @@
           <p class="tagline">Reshape the world. Find your way.</p>
           <div class="ornament" aria-hidden="true"><span></span><b>◆</b><span></span></div>
           <p class="intro">Four spells. A forgotten kingdom. A path only you can create.</p>
-          <button type="button" class="gold-button" id="open-spellbook">Open the spellbook <span aria-hidden="true">›</span></button>
+          <div class="title-actions"><button type="button" class="gold-button" id="open-room">Explore the Gatehouse <span aria-hidden="true">›</span></button><button type="button" class="secondary-title-button" id="open-spellbook">Open the spellbook</button></div>
           <p class="preview-note" id="app-status" role="status">Loading the development scaffold…</p>
           <noscript><p class="preview-note">Enable JavaScript to open the spellbook.</p></noscript>
         </div>
@@ -56,6 +56,26 @@
           </div>
           <p class="book-footer">Spellbook preview · Interactive puzzles arrive in later stages.</p>
         </div>
+      </section>
+      <section class="room-view" id="room-view" aria-labelledby="room-heading" hidden>
+        <header class="room-toolbar">
+          <div class="room-heading"><p>Chapter I · Renderer test room</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
+          <div class="camera-controls" aria-label="Camera inspection">
+            <button type="button" id="camera-overview" aria-pressed="true">Full room</button>
+            <button type="button" id="camera-inspect" aria-pressed="false">Inspect</button>
+            <div class="pan-controls" aria-label="Pan camera">
+              <button type="button" id="camera-left" aria-label="Pan left" disabled>←</button>
+              <button type="button" id="camera-right" aria-label="Pan right" disabled>→</button>
+              <button type="button" id="camera-up" aria-label="Pan up" disabled>↑</button>
+              <button type="button" id="camera-down" aria-label="Pan down" disabled>↓</button>
+            </div>
+          </div>
+          <button type="button" class="room-back" id="close-room">← Title</button>
+        </header>
+        <div class="room-stage" id="room-stage">
+          <canvas id="room-canvas" role="img" aria-label="Gatehouse renderer test room: apprentice on a stone bank, a river and central support, timber beam, cheese wedge, raised shelf, gate and portal. Static preview, not playable."></canvas>
+        </div>
+        <footer class="room-footer"><span id="room-status" role="status">Loading the renderer preview…</span><span>Movement and spells coming later</span></footer>
       </section>
     </section>
   </main>

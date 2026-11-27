@@ -11,9 +11,11 @@ export function getSpell(id) {
 }
 
 /** Title and spellbook are real views; no gameplay is simulated by this menu. */
-export function mountIdentity(document, state) {
+export function mountIdentity(document, state, onViewChange = () => {}) {
   const title = document.getElementById("title-view");
   const book = document.getElementById("spellbook-view");
+  const room = document.getElementById("room-view");
+  const art = document.getElementById("title-art");
   const name = document.getElementById("spell-name");
   const description = document.getElementById("spell-description");
   const example = document.getElementById("spell-example");
@@ -42,16 +44,21 @@ export function mountIdentity(document, state) {
     return true;
   }
   function show(view) {
-    if (view !== "title" && view !== "spellbook") return false;
+    if (view !== "title" && view !== "spellbook" && !(view === "room" && room)) return false;
     state.view = view;
     title.hidden = view !== "title";
     book.hidden = view !== "spellbook";
-    (view === "title" ? document.getElementById("open-spellbook") : document.getElementById("spellbook-heading"))?.focus();
+    if (room) room.hidden = view !== "room";
+    if (art) art.hidden = view === "room";
+    onViewChange(view);
+    document.getElementById(view === "title" ? "open-spellbook" : view === "room" ? "room-heading" : "spellbook-heading")?.focus();
     return true;
   }
   for (const button of buttons) on(button, () => select(button.dataset.spell));
   on(document.getElementById("open-spellbook"), () => show("spellbook"));
   on(document.getElementById("close-spellbook"), () => show("title"));
+  on(document.getElementById("open-room"), () => show("room"));
+  on(document.getElementById("close-room"), () => show("title"));
   select(state.selectedSpell);
   return { select, show, destroy() { for (const [element, fn] of listeners) element.removeEventListener("click", fn); } };
 }

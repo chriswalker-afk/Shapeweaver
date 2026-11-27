@@ -66,3 +66,6 @@ Four polished tutorial levels form the first classroom-ready milestone. Review g
 
 ## PR11 implementation note
 Undo restores the exact previous immutable room and a safe pre-cast player position (or validated prior safe point). The original committed move remains counted, with an undone marker in attempt history. Return to safety preserves current world and moves. Reset clears the whole attempt. See [mistake recovery](mistake-recovery.md).
+
+## PR12 implementation note
+Completion-only efficiency stars use each level's tested `efficientMoves` target and optional `twoStarMoves` allowance (default target + 2). The four current tutorials have targets of 1 move. A separate results screen lists all committed casts, including undone moves, and shows locally retained personal bests. No speed, fall, hint or undo action penalty beyond counting the original successful cast. See [stars and results](stars-and-results.md).

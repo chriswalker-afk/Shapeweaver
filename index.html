@@ -57,6 +57,32 @@
           <p class="book-footer">All four transformations are playable in Levels 1–4.</p>
         </div>
       </section>
+      <section class="results-view" id="results-view" aria-labelledby="results-heading" hidden>
+        <article class="results-sheet">
+          <header class="results-header">
+            <p id="results-level" class="eyebrow"></p>
+            <h2 id="results-heading" tabindex="-1">Level complete!</h2>
+          </header>
+          <section class="results-summary" aria-label="Efficiency rating">
+            <div id="results-stars" class="results-stars" role="img" aria-label="0 out of 3 stars"></div>
+            <p id="results-message"></p>
+            <dl id="results-stats" class="results-stats"></dl>
+            <p id="results-thresholds" class="results-note"></p>
+            <p id="results-best" class="results-best"></p>
+          </section>
+          <section class="results-solution" aria-labelledby="results-solution-heading">
+            <h3 id="results-solution-heading">Your mathematical solution</h3>
+            <p class="results-note">All committed transformations in order. Undone casts still count towards the rating.</p>
+            <ol id="results-history" class="results-history" tabindex="0" aria-label="Committed transformation history"></ol>
+            <p id="results-empty" class="results-note" hidden>No transformations were needed for this completed route.</p>
+          </section>
+          <nav class="results-actions" aria-label="After completing the level">
+            <button type="button" id="results-title" class="secondary-title-button">Back to levels</button>
+            <button type="button" id="results-replay" class="secondary-title-button">Replay level</button>
+            <button type="button" id="results-next" class="gold-button">Next level →</button>
+          </nav>
+        </article>
+      </section>
       <section class="room-view" id="room-view" aria-labelledby="room-heading" hidden>
         <header class="room-toolbar">
           <div class="room-heading"><p id="room-chapter">Chapter I · Interactive object practice</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>

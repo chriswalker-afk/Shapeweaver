@@ -42,7 +42,7 @@ export function mountResults(document,onNavigate){
     thresholds.textContent="3 stars: "+result.thresholds.threeStar+" or fewer · 2 stars: up to "+result.thresholds.twoStar+" · 1 star: any completed solution. No time, hint or fall penalty.";
     best.textContent=bestUpdate?(bestUpdate.improved?"Personal best! ":"Personal best: ")+starText(bestUpdate.best.stars)+" · "+moveText(bestUpdate.best.moves)+(bestUpdate.persisted?" · Saved on this browser":" · This session only"):"";
     list.replaceChildren(...result.entries.map(historyRow));
-    $("results-empty").hidden=result.entries.length!==0;
+    const empty=$("results-empty");if(empty)empty.hidden=result.entries.length!==0;
     next.hidden=!followingRoute;next.disabled=!followingRoute;
     next.textContent=followingRoute?"Next level →":"";
     replay.disabled=!route;

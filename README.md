@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR11 — Mistake recovery. All four tutorials support undo, safe return, reset, actionable validation feedback and retained move history. Practice remains preview-only with safe return/reset. Next: PR12 stars and results.
+PR12 — Stars and results. Finish a Gatehouse tutorial to earn efficiency stars and review all committed mathematical transformations, including undone casts. Best scores are retained locally when browser storage is available. Replay, continue or return to levels. Next: PR13 tutorials and hints.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR11 — Mistake recovery. All four tutorials support undo, safe return, reset, 
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Stars and results](docs/stars-and-results.md) — scoring, completion history, personal best and navigation.
 - [Mistake recovery](docs/mistake-recovery.md) — safe snapshots, recovery controls and attempt accounting.
 - [Reflection tutorial](docs/reflection-tutorial.md) — mirror equations, stable vertices, magical transfer and verified traversal.
 - [Enlargement tutorial](docs/enlargement-tutorial.md) — positive homothety sweep, scale animation and verified ramp traversal.

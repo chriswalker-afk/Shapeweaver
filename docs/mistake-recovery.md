@@ -10,3 +10,6 @@ Safety: destinations must be finite, dry, clear and supported in the exact resto
 Invalid previews and rejected commits leave the world, player and move history unchanged. Keep precise reason codes; show a red ghost where calculable, specific next action (e.g. move off the object, inspect the entire arc, choose a supported destination, correct the input format), and "No move used." Valid but unhelpful casts are accepted. Clear preview is free. No countdown or time penalty.
 
 Attempt summary exposes total committed moves, undone count, active move count, returns and ordered records with undone flags; the existing raw records accessor still returns all committed records. PR12 can use this for stars and mathematical history. No rating, persistent progress or redo in PR11. Completion locks undo and return until reset. Tests cover all four spells, rollback geometry/IDs, player safety, multiple undos, failed return and blocked respawn recovery, move accounting, stale UI and reset during animation. Actual browser visual/touch review remains outstanding.
+
+## PR12 update
+The immutable attempt summary now feeds completion-only star awards and formal mathematical history. Best completed moves and stars are stored locally, independently of the attempt reset. See [stars and results](stars-and-results.md).

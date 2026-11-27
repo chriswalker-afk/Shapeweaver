@@ -18,7 +18,7 @@ export function normalizeBasePath(base = "/") {
   return base;
 }
 
-export function createStaticServer({ root = projectRoot, basePath = "/" } = {}) {
+export function createStaticServer({ root = projectRoot, basePath = "/", workshop = false } = {}) {
   const base = normalizeBasePath(basePath);
   const rootPath = resolve(root);
   return createServer(async (req, res) => {
@@ -43,7 +43,7 @@ export function createStaticServer({ root = projectRoot, basePath = "/" } = {}) 
     const relative = pathname.slice(base.length) || "index.html";
     // Only source assets are served. Never expose .git, docs or arbitrary paths.
     if (relative.includes("\\") || relative.split("/").some(p => p.startsWith(".")) ||
-      !(relative === "index.html" || relative.startsWith("src/") || relative.startsWith("assets/"))) {
+      !(relative === "index.html" || relative.startsWith("src/") || relative.startsWith("assets/") || workshop && relative.startsWith("workshop/"))) {
       return reply(404, "Not found");
     }
     try {
@@ -65,6 +65,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("Invalid PORT");
   const basePath = normalizeBasePath(process.env.BASE_PATH ?? "/");
   const root = process.argv.includes("--dist") ? resolve(projectRoot, "dist") : projectRoot;
-  const server = createStaticServer({ root, basePath });
+  const server = createStaticServer({ root, basePath, workshop: !process.argv.includes("--dist") && process.argv.includes("--workshop") });
   server.listen(port, "127.0.0.1", () => console.log("Shapeweaver: http://127.0.0.1:" + port + basePath));
 }

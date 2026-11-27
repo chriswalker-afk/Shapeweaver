@@ -60,9 +60,13 @@
       <section class="room-view" id="room-view" aria-labelledby="room-heading" hidden>
         <header class="room-toolbar">
           <div class="room-heading"><p>Chapter I · Renderer test room</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
-          <div class="camera-controls" aria-label="Camera inspection">
+          <div class="camera-controls" aria-label="Camera and coordinate tools">
             <button type="button" id="camera-overview" aria-pressed="true">Full room</button>
             <button type="button" id="camera-inspect" aria-pressed="false">Inspect</button>
+            <div class="zoom-controls" role="group" aria-label="Zoom">
+              <button type="button" id="camera-zoom-out" aria-label="Zoom out" disabled>−</button>
+              <button type="button" id="camera-zoom-in" aria-label="Zoom in">+</button>
+            </div>
             <div class="pan-controls" aria-label="Pan camera">
               <button type="button" id="camera-left" aria-label="Pan left" disabled>←</button>
               <button type="button" id="camera-right" aria-label="Pan right" disabled>→</button>
@@ -70,11 +74,26 @@
               <button type="button" id="camera-down" aria-label="Pan down" disabled>↓</button>
             </div>
           </div>
+          <div class="coordinate-controls" role="group" aria-label="Coordinate overlay">
+            <button type="button" id="grid-toggle" aria-pressed="true">Grid: on</button>
+            <button type="button" id="axes-toggle" aria-pressed="true">Axes: on</button>
+            <button type="button" id="pick-toggle" aria-pressed="false" aria-controls="coordinate-panel">Pick point</button>
+          </div>
           <button type="button" class="room-back" id="close-room">← Title</button>
         </header>
         <div class="room-stage" id="room-stage">
-          <canvas id="room-canvas" role="img" aria-label="Gatehouse renderer test room: apprentice on a stone bank, a river and central support, timber beam, cheese wedge, raised shelf, gate and portal. Static preview, not playable."></canvas>
+          <canvas id="room-canvas" role="img" aria-label="Gatehouse renderer test room: apprentice on a stone bank, a river and central support, timber beam, cheese wedge, raised shelf, gate and portal. Static preview, not playable. The coordinate picker also supports typed x and y values."></canvas>
         </div>
+        <section id="coordinate-panel" class="coordinate-panel" aria-label="Coordinate picker" hidden>
+          <label class="snap-field" for="coordinate-snap">Click snap <select id="coordinate-snap"><option value="1">1 unit</option><option value="0.5">½ unit</option><option value="0.1">0.1 unit</option></select></label>
+          <form id="coordinate-form" class="coordinate-form" novalidate>
+            <label for="coordinate-x">x <input id="coordinate-x" type="number" step="any" inputmode="decimal" autocomplete="off" placeholder="x"></label>
+            <label for="coordinate-y">y <input id="coordinate-y" type="number" step="any" inputmode="decimal" autocomplete="off" placeholder="y"></label>
+            <button type="submit">Mark exact point</button>
+            <button type="button" id="coordinate-clear">Clear</button>
+          </form>
+          <output id="coordinate-result" role="status" aria-live="polite">Click or tap the room, or enter coordinates.</output>
+        </section>
         <footer class="room-footer"><span id="room-status" role="status">Loading the renderer preview…</span><span>Movement and spells coming later</span></footer>
       </section>
     </section>

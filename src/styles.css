@@ -145,3 +145,30 @@ h1,h2,h3 { font-family: var(--display); }
   .room-footer { padding:.18rem .5rem; }
   .secondary-title-button { min-height:38px; padding:.35rem .7rem; }
 }
+
+/* PR04: tools are compact, coordinate input opens only in picking mode. */
+.room-view { grid-template-rows:auto minmax(0,1fr) auto auto; }
+.room-stage { grid-row:2; }
+.coordinate-panel { grid-row:3; display:flex; flex-wrap:wrap; align-items:center; gap:.35rem .7rem; background:#2c2439; color:#f3e4c7; border-top:1px solid #9c805b; padding:.35rem .65rem; font-size:.77rem; }
+.room-footer { grid-row:4; }
+.zoom-controls,.coordinate-controls { display:flex; align-items:center; gap:.25rem; }
+.zoom-controls button { min-width:32px; }
+.coordinate-controls button,.coordinate-panel button,.coordinate-panel select,.coordinate-panel input { font:inherit; font-size:.76rem; min-height:34px; color:#f3e4c7; background:#211c31; border:1px solid #8c725e; border-radius:.22rem; padding:.32rem .48rem; }
+.coordinate-controls button[aria-pressed="true"] { background:#e6c18c; color:#302438; border-color:#f6d9a2; font-weight:700; }
+.coordinate-controls button:hover,.coordinate-panel button:hover { border-color:#f6d9a2; }
+.coordinate-form,.snap-field,.coordinate-form label { display:flex; align-items:center; flex-wrap:wrap; gap:.3rem; }
+.coordinate-panel input { width:4.6rem; font-variant-numeric:tabular-nums; }
+.coordinate-panel input::placeholder { color:#c2b4c5; }
+#coordinate-result { color:#eed9b8; font-variant-numeric:tabular-nums; flex:1 1 11rem; line-height:1.35; }
+@media(max-width:650px) and (orientation:portrait) {
+  .coordinate-controls { flex:1 1 auto; justify-content:center; flex-wrap:wrap; }
+  .coordinate-panel { gap:.25rem .45rem; padding:.3rem .45rem; }
+  .coordinate-panel input { width:4rem; }
+  #coordinate-result { flex-basis:100%; }
+}
+@media(max-height:520px) and (orientation:landscape) {
+  .room-toolbar { gap:.2rem .35rem; }
+  .coordinate-controls button,.coordinate-panel button,.coordinate-panel select,.coordinate-panel input { min-height:29px; padding:.22rem .35rem; }
+  .coordinate-panel { padding:.2rem .45rem; gap:.2rem .4rem; }
+  .coordinate-panel input { width:4rem; }
+}

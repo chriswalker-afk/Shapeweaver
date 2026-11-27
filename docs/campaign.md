@@ -92,3 +92,6 @@ The Missing Barrel places a barrel in a sealed store; reflection in x=15 puts it
 
 ## PR16 — Enchanted Gardens release
 Levels 5–6 are implemented. Each has two different interactive objects and a verified two-cast physical route. Chapter II remains partially released until PR17 adds Levels 7–8.
+
+## PR17 — Enchanted Gardens finale
+Levels 7–8 are implemented with two distinct objects per puzzle. A hinged ladder becomes climbable after rotation and requires a translated step crate. A horizontal reflection raises a platform above a recessed walkway, and enlargement provides the final ramp. Chapter II is fully released.

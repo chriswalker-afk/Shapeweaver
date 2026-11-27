@@ -1,5 +1,6 @@
 import {polygonBounds} from "../geometry/world.js";
 import {referencePoints} from "../transformations/preview-math.js";
+import {gardenFinaleSituation} from "./garden-finale-guidance.js";
 const round=x=>Number(x.toFixed(8));
 const point=p=>"("+p.map(round).join(", ")+")";
 const near=(a,b)=>Math.abs(a-b)<1e-7;
@@ -40,5 +41,5 @@ export function gardenSituation(room){
    "The mushroom height is "+round(height)+" units. A useful cap height above the floor is 2.5 units. Divide target height by current height. The base midpoint is "+point(base)+".",
    centre?"Scale factor "+factor+" about "+point(centre)+(near(factor,desired)?".":" is an intermediate step; recheck the height."):"The size is already correct but the position is not. Undo or reset to realign the base.",centre?{factor,cx:centre[0],cy:centre[1]}:null);
  }
- return null;
+ return gardenFinaleSituation(room);
 }

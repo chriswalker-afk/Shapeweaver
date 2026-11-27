@@ -2,6 +2,7 @@ import {polygonBounds,boundsContain,deepFreeze} from "../geometry/world.js";
 import {pointPolygonDistance,polygonsOverlap,triangulate,GEOMETRY_EPS} from "../geometry/polygons.js";
 import {playerBox,polygonIntersectsBox} from "../physics/collision.js";
 import {resolveMechanisms,obstructedGate} from "../mechanisms/pressure-plates.js";
+import {ladderSegment,isSolidObject} from "../mechanisms/transformable-ladders.js";
 import {TYPES,parsePreviewRequest,previewGeometry,referencePoints,isIdentity} from "../transformations/preview-math.js";
 
 const name=o=>o.label??o.id;
@@ -12,6 +13,7 @@ export function validateObjectDefinitions(room){
     if(o.decorative){if(o.permissions?.length)throw new Error("Decorative objects cannot be selected");continue;}
     triangulate(o.vertices);
     if(o.vertexIds!==undefined&&(!Array.isArray(o.vertexIds)||o.vertexIds.length!==o.vertices.length||new Set(o.vertexIds).size!==o.vertexIds.length||o.vertexIds.some(id=>typeof id!=="string"||!id.length)))throw new Error("Invalid vertex IDs: "+o.id);
+    if(o.kind==="ladder"&&(o.vertices.length!==4||!ladderSegment(o)&&!ladderSegment({...o,vertices:o.vertices.map(([x,y])=>[-y,x])})))throw new Error("Invalid rectangular ladder: "+o.id);
     if(!Array.isArray(o.permissions)||new Set(o.permissions).size!==o.permissions.length||o.permissions.some(t=>!TYPES.includes(t)))throw new Error("Invalid permissions: "+o.id);
     if(!["supported","hinged","enchanted"].includes(o.support))throw new Error("Invalid support mode: "+o.id);
     if(o.support==="hinged"&&(!Array.isArray(o.hinge)||o.hinge.length!==2||!o.hinge.every(Number.isFinite)||!o.permissions.every(t=>t==="rotate")||pointPolygonDistance(o.hinge,o.vertices)>GEOMETRY_EPS))throw new Error("Invalid hinge: "+o.id);
@@ -55,6 +57,8 @@ export function previewObject(room,player,id,type,raw){
   if(isIdentity(object,geometry))return failure("identity","This transformation does not change the object.",extra);
   const bounds=polygonBounds(geometry.vertices),b=room.bounds;
   if(!boundsContain({minX:b.minX-GEOMETRY_EPS,maxX:b.maxX+GEOMETRY_EPS,minY:b.minY-GEOMETRY_EPS,maxY:b.maxY+GEOMETRY_EPS},bounds))return failure("bounds","The preview extends outside the room.",extra);
+  const climb=ladderSegment(object);
+  if(player&&climb&&player.climbing&&Math.abs(player.x-climb.x)<=climb.width/2+.39&&player.y>=climb.bottom-.06&&player.y<=climb.top+.025)return failure("player-supported","Climb off this ladder before transforming it.",extra);
   if(playerOnObject(object,player))return failure("player-supported","Move the apprentice off this object before transforming it.",extra);
   if(player&&polygonIntersectsBox(geometry.vertices,playerBox(player)))return failure("player-overlap","The preview would overlap the apprentice.",extra);
   const solids=[...room.terrain,...room.objects.filter(o=>o.id!==id&&!o.decorative)];
@@ -62,7 +66,7 @@ export function previewObject(room,player,id,type,raw){
   for(const h of room.hazards)if(polygonsOverlap(geometry.vertices,h.vertices))return failure("hazard-overlap","The preview overlaps a hazard.",extra);
   if(object.support==="supported"){
     const down=geometry.vertices.map(([x,y])=>[x,y-.002]);
-    if(!solids.some(s=>polygonsOverlap(down,s.vertices)))return failure("unsupported","The preview has no support beneath it.",extra);
+    if(!solids.some(s=>(!room.objects.includes(s)||isSolidObject(s))&&polygonsOverlap(down,s.vertices)))return failure("unsupported","The preview has no support beneath it.",extra);
   }
   if(room.plates?.length){
     const candidate=resolveMechanisms({...room,objects:room.objects.map(o=>o.id===id?{...o,vertices:geometry.vertices}:o)});
@@ -70,6 +74,7 @@ export function previewObject(room,player,id,type,raw){
     if(obstructedGate(candidate))return failure("gate-obstructed","A linked gate would close on an object. Clear the gate first.",extra);
     if(player&&candidate.objects.some(o=>o.kind==="linked-gate"&&!o.open&&polygonIntersectsBox(o.vertices,playerBox(player))))return failure("gate-obstructed","A linked gate would close on the apprentice. Move clear first.",extra);
   }
+  if(object.kind==="ladder")extra.mechanismEffects=[ladderSegment({...object,vertices:geometry.vertices})?"Ladder will be upright and climbable.":"Ladder will not be climbable in this orientation."];
   return {ok:true,code:"final-clear",scope:"final-pose",message:"Final position is clear. Travel path is not yet checked; Apply is unavailable.",...extra};
 }
 export function createObjectEngine(room){

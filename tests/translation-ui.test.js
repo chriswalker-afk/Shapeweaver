@@ -375,7 +375,7 @@ test("compact view controls collapse safely, picking can always be closed, Escap
  c.destroy();
 });
 
-test("garden levels support separate spells, mechanism rollback and final-level results",()=>{
+test("garden levels support separate spells, mechanism rollback and continued chapter navigation",()=>{
  const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
  app.identity.show("level5");assert.match(els["room-chapter"].textContent,/Chapter II.*Translation \+ Rotation/);
  assert.equal(cast(f,"garden-hinge","rotate",{angle:90,direction:"anticlockwise",cx:37,cy:8}).ok,true);
@@ -394,6 +394,35 @@ test("garden levels support separate spells, mechanism rollback and final-level 
  assert.equal(c.getPlayer().grounded,true);assert.ok(Math.abs(c.getPlayer().y-5.5)<.05);
  down("ArrowRight");down("Space");frame(60);up("Space");frame(100);up("ArrowRight");
  assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,2);assert.equal(c.getResult().returns,0);
+ assert.deepEqual(c.getResult().entries.map(e=>e.type),["reflect","enlarge"]);
+ assert.equal(els["results-next"].hidden,false);assert.equal(els["results-next"].disabled,false);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level7");assert.equal(c.room.id,"gardens-07");assert.equal(c.getAttemptSummary().moves,0);
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+
+test("ladder orientation controls climbing availability and reset/undo rebuilds the segment",()=>{
+ const f=fixture(true,true),{controller:c,els,app}=f;
+ app.identity.show("level7");assert.equal(els["climb-controls"].hidden,true);
+ assert.equal(cast(f,"garden-ladder","rotate",{angle:90,direction:"anticlockwise",cx:24,cy:12}).ok,true);
+ assert.equal(els["climb-controls"].hidden,false);
+ assert.equal(c.undoCast(),true);assert.equal(els["climb-controls"].hidden,true);
+ assert.equal(cast(f,"ladder-crate","translate",{dx:17,dy:0}).ok,true);
+ assert.equal(cast(f,"garden-ladder","rotate",{angle:90,direction:"anticlockwise",cx:24,cy:12}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");assert.equal(els["climb-controls"].hidden,false);
+ c.resetPlayer();assert.equal(els["climb-controls"].hidden,true);assert.equal(c.getAttemptSummary().moves,0);
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+test("horizontal mirror and enlargement complete chapter II, with no nonexistent next level",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level8");assert.equal(c.room.id,"gardens-08");
+ assert.equal(cast(f,"mirror-platform","reflect",{line:"y=3"}).ok,true);
+ assert.equal(cast(f,"garden-wedge","enlarge",{factor:3,cx:34,cy:7}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ const down=code=>view.fire("keydown",{code}),up=code=>view.fire("keyup",{code});
+ frame(2);down("ArrowRight");frame(71);down("Space");frame(45);up("Space");up("ArrowRight");frame(10);
+ down("ArrowRight");down("Space");frame(45);up("Space");frame(225);up("ArrowRight");
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().moves,2);assert.equal(c.getResult().stars,3);
+ assert.equal(c.getResult().returns,0);
  assert.deepEqual(c.getResult().entries.map(e=>e.type),["reflect","enlarge"]);
  assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
  els["results-title"].fire("click");assert.equal(app.state.view,"title");

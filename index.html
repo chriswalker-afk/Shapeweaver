@@ -106,7 +106,7 @@
             <button type="button" id="pick-toggle" aria-pressed="false" aria-controls="coordinate-panel">Pick point</button>
             <button type="button" id="object-toggle" aria-pressed="false" aria-controls="object-panel">Objects</button>
           </div>
-          <div id="tutorial-tools" class="tutorial-tools" hidden><span id="tutorial-moves">Moves: 0</span><button type="button" id="tutorial-hint" class="room-back">Hint</button></div>
+          <div id="tutorial-tools" class="tutorial-tools" hidden><span id="tutorial-moves">Moves: 0</span><button type="button" id="tutorial-guidance-toggle" class="room-back" aria-pressed="true">Guide: on</button><button type="button" id="tutorial-hint" class="room-back" aria-expanded="false" aria-controls="tutorial-hint-panel">Hints</button></div>
           <button type="button" id="follow-toggle" class="room-back" aria-pressed="true">Follow</button>
           <div class="recovery-controls" role="group" aria-label="Mistake recovery">
             <button type="button" id="undo-cast" class="room-back" title="Undo the last cast and restore a safe earlier position. Committed moves still count." disabled>Undo</button>
@@ -152,7 +152,15 @@
             <button type="button" data-move="down" aria-label="Climb down">↓</button>
             <button type="button" data-move="jump" class="jump-control">Jump</button>
           </div>
-          <div class="play-info"><span id="room-status">Loading practice room…</span><span id="play-status" role="status">Arrows / WASD · Space to jump · Up/down on ladders</span><span id="recovery-count" hidden></span><span id="tutorial-guide" hidden></span></div>
+          <div class="play-info"><span id="room-status">Loading practice room…</span><span id="play-status" role="status">Arrows / WASD · Space to jump · Up/down on ladders</span><span id="recovery-count" hidden></span><span id="tutorial-guide" role="status" aria-live="polite" hidden></span></div>
+          <aside id="tutorial-hint-panel" class="tutorial-hint-panel" aria-labelledby="tutorial-hint-title" hidden>
+            <div class="hint-content" aria-live="polite"><strong id="tutorial-hint-title"></strong><p id="tutorial-hint-text"></p></div>
+            <div class="hint-actions" role="group" aria-label="Hint controls">
+              <button type="button" id="tutorial-hint-previous" class="room-back" disabled>Previous</button>
+              <button type="button" id="tutorial-hint-next" class="room-back">Next hint</button>
+              <button type="button" id="tutorial-hint-close" class="room-back">Close hints</button>
+            </div>
+          </aside>
         </footer>
       </section>
     </section>

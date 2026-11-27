@@ -31,7 +31,7 @@ function element(dataset = {}) {
     click() { listeners.get("click")?.(); } };
 }
 test("spellbook opens, selects all spells, returns to title and cleans up", () => {
-  const ids = ["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","open-spellbook","close-spellbook","spellbook-heading"];
+  const ids = ["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","open-spellbook","close-spellbook","spellbook-heading","translation-vector"];
   const elements = Object.fromEntries(ids.map(id => [id,element()]));
   elements["spellbook-view"].hidden = true;
   const buttons = SPELLS.map(spell => element({spell:spell.id}));
@@ -48,6 +48,7 @@ test("spellbook opens, selects all spells, returns to title and cleans up", () =
     assert.equal(state.selectedSpell,SPELLS[i].id);
     assert.equal(elements["spell-name"].textContent,SPELLS[i].label);
     assert.equal(elements["spell-example"].textContent,SPELLS[i].example);
+    assert.equal(elements["translation-vector"].hidden,SPELLS[i].id !== "translate");
     assert.equal(elements["spell-detail"].attributes["--spell-colour"],SPELLS[i].color);
     assert.equal(buttons.filter(x => x.attributes["aria-pressed"] === "true").length,1);
     assert.equal(button.attributes["aria-pressed"],"true");

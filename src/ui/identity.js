@@ -1,6 +1,6 @@
 /** Canonical spell identity. Keep formal maths names visible throughout the game. */
 export const SPELLS = Object.freeze([
-  Object.freeze({"id":"translate","label":"Translation","color":"#4EADC3","description":"Move without turning or resizing.","example":"Column vector: (4, −2) — four right, two down.","icon":"assets/ui/translate.svg"}),
+  Object.freeze({"id":"translate","label":"Translation","color":"#4EADC3","description":"Move without turning or resizing.","example":"Four units right, two units down.","icon":"assets/ui/translate.svg"}),
   Object.freeze({"id":"rotate","label":"Rotation","color":"#D5A044","description":"Turn about a chosen centre.","example":"90° clockwise about (2, 3).","icon":"assets/ui/rotate.svg"}),
   Object.freeze({"id":"enlarge","label":"Enlargement","color":"#65A77A","description":"Change size about a centre, preserving shape.","example":"Scale factor 2, centre (1, 1).","icon":"assets/ui/enlarge.svg"}),
   Object.freeze({"id":"reflect","label":"Reflection","color":"#A57ACB","description":"Flip a shape across a mirror line.","example":"Reflection in the line x = 5.","icon":"assets/ui/reflect.svg"}),
@@ -19,6 +19,7 @@ export function mountIdentity(document, state) {
   const example = document.getElementById("spell-example");
   const icon = document.getElementById("spell-image");
   const panel = document.getElementById("spell-detail");
+  const vector = document.getElementById("translation-vector");
   if (!title || !book || !name || !description || !example || !icon || !panel) return null;
   const buttons = Array.from(document.querySelectorAll("[data-spell]"));
   const listeners = [];
@@ -35,6 +36,7 @@ export function mountIdentity(document, state) {
     name.textContent = spell.label;
     description.textContent = spell.description;
     example.textContent = spell.example;
+    if (vector) vector.hidden = id !== "translate";
     icon.src = new URL("../../" + spell.icon, import.meta.url).href;
     panel.style.setProperty("--spell-colour", spell.color);
     return true;

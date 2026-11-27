@@ -11,7 +11,7 @@ function node(tag="div"){
   fire(k,event={}){listeners.get(k)?.({preventDefault(){},...event})},focus(){}};
 }
 function fixture(reduce){
- const ids="room-canvas room-stage room-status play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-moves reset-practice".split(" ");
+ const ids="room-canvas room-stage room-status play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-moves reset-practice undo-cast return-safety recovery-count".split(" ");
  const els=Object.fromEntries(ids.map(id=>[id,node()])),rect={left:0,top:0,width:1000,height:500};
  const ctx={save(){},restore(){},setTransform(){},createLinearGradient(){return{addColorStop(){}}},createRadialGradient(){return{addColorStop(){}}},
  fillRect(){},drawImage(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){},stroke(){},clip(){},rect(){},translate(){},rotate(){},ellipse(){},arc(){},strokeRect(){},quadraticCurveTo(){},strokeText(){},fillText(){},measureText(s){return{width:s.length*7}},setLineDash(){}};
@@ -169,4 +169,90 @@ test("fourth tutorial validates mirror equation, commits a magical transfer and 
   c.inspector.showPreview({line:"x=5.2"});assert.equal(els["object-apply"].hidden,true);
   c.destroy();
  }
+});
+
+function cast(f,id,type,raw){
+ const {els,controller:c}=f;
+ if(!c.inspector.getState().active)els["object-toggle"].fire("click");
+ assert.equal(c.inspector.selectObject(id),true);
+ assert.equal(c.inspector.selectType(type),true);
+ for(const field of els["object-fields"].querySelectorAll())field.value=String(raw[field.name]??"");
+ els["object-form"].fire("submit");
+ const preview=c.inspector.getState().preview;
+ if(preview.ok)els["object-apply"].fire("click");
+ return preview;
+}
+test("undo in all four tutorials restores exact geometry and stable reference IDs; move stays charged",()=>{
+ const cases=[
+  ["level1","brook-beam","translate",{dx:12,dy:0}],
+  ["level2","stubborn-gate","rotate",{angle:90,direction:"anticlockwise",cx:14,cy:8}],
+  ["level3","cheesy-wedge","enlarge",{factor:3,cx:25,cy:3}],
+  ["level4","missing-barrel","reflect",{line:"x=15"}]
+ ];
+ for(const [level,id,type,raw] of cases){
+  const f=fixture(true),{controller:c,els}=f;
+  c.setLevel(level);c.setActive(true);
+  const original=c.room,spawn=c.getPlayer();
+  assert.equal(els["undo-cast"].disabled,true);
+  assert.equal(cast(f,id,type,raw).ok,true);assert.notEqual(c.room,original);
+  assert.equal(els["undo-cast"].disabled,false);
+  // A stale inspection preview must disappear on undo.
+  c.setObjectMode(true);c.inspector.selectObject(id);c.inspector.selectType(type);c.inspector.showPreview(raw);
+  els["undo-cast"].fire("click");
+  assert.equal(c.room,original);assert.equal(c.getPlayer().x,spawn.x);assert.equal(c.getPlayer().y,spawn.y);
+  assert.equal(c.inspector.getState().preview,null);assert.equal(els["object-panel"].hidden,true);
+  assert.equal(c.getAttemptSummary().moves,1);assert.equal(c.getAttemptSummary().undos,1);assert.equal(c.getAttemptSummary().activeMoves,0);
+  assert.equal(c.getAttemptSummary().entries[0].undone,true);assert.equal(c.getRecords().length,1);
+  assert.equal(els["tutorial-moves"].textContent,"Moves: 1");assert.match(els["play-status"].textContent,/still counts/);
+  assert.equal(els["undo-cast"].disabled,true);assert.equal(c.undoCast(),false);
+  assert.equal(cast(f,id,type,raw).ok,true);assert.equal(c.getAttemptSummary().moves,2);
+  els["reset-practice"].fire("click");
+  assert.equal(c.room,original);assert.deepEqual(c.getAttemptSummary(),{moves:0,undos:0,activeMoves:0,respawns:0,entries:[]});
+  c.destroy();
+ }
+});
+test("manual return keeps transformations, invalid preview is free, multiple undos are LIFO",()=>{
+ const f=fixture(true),{controller:c,els,view,frame}=f;
+ c.setLevel("level1");c.setActive(true);
+ const initial=c.room;
+ assert.equal(cast(f,"brook-beam","translate",{dx:2,dy:0}).ok,true);
+ const intermediate=c.room;
+ assert.equal(cast(f,"brook-beam","translate",{dx:10,dy:0}).ok,true);
+ const bridged=c.room;
+ view.fire("keydown",{code:"ArrowRight"});frame(30);
+ assert.ok(c.getPlayer().x>1.5);
+ els["return-safety"].fire("click");
+ assert.equal(c.room,bridged);assert.equal(c.getPlayer().x,1.5);assert.equal(c.getAttemptSummary().respawns,1);
+ frame(20);assert.equal(c.getPlayer().x,1.5); // held key was cleared
+ assert.equal(cast(f,"brook-beam","translate",{dx:100,dy:0}).ok,false);
+ assert.match(els["object-result"].textContent,/No move used/);
+ assert.equal(c.getAttemptSummary().moves,2);assert.equal(c.room,bridged);
+ assert.equal(c.undoCast(),true);assert.equal(c.room,intermediate);
+ assert.equal(c.undoCast(),true);assert.equal(c.room,initial);
+ assert.deepEqual(c.getAttemptSummary().entries.map(e=>e.undone),[true,true]);
+ assert.equal(c.getAttemptSummary().respawns,1);assert.equal(c.getAttemptSummary().moves,2);
+ assert.equal(c.undoCast(),false);
+ c.setLevel("room");assert.equal(c.getAttemptSummary().moves,0);assert.equal(els["undo-cast"].disabled,true);
+ assert.equal(c.recoverPlayer(),true);assert.equal(c.getAttemptSummary().respawns,1);
+ c.destroy();
+});
+test("recovery controls lock during animation; reset cancels animation and clears history",()=>{
+ const f=fixture(false),{controller:c,els,frame}=f;
+ c.setLevel("level3");c.setActive(true);
+ assert.equal(cast(f,"cheesy-wedge","enlarge",{factor:3,cx:25,cy:3}).ok,true);
+ assert.equal(els["undo-cast"].disabled,true);assert.equal(els["return-safety"].disabled,true);
+ assert.equal(c.undoCast(),false);assert.equal(c.recoverPlayer(),false);
+ els["reset-practice"].fire("click");frame(70);
+ assert.equal(c.getAttemptSummary().moves,0);assert.equal(c.room.objects[0].vertices[0][0],19);
+ assert.equal(els["object-toggle"].disabled,false);assert.equal(els["return-safety"].disabled,false);
+ c.destroy();
+});
+test("after portal completion, undo and return cannot alter the finished result",()=>{
+ const f=fixture(true),{controller:c,els,view,frame}=f;c.setLevel("level2");c.setActive(true);
+ assert.equal(cast(f,"stubborn-gate","rotate",{angle:90,direction:"anticlockwise",cx:14,cy:8}).ok,true);
+ view.fire("keydown",{code:"ArrowRight"});frame(300);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(c.getPlayer().completed,true);
+ assert.equal(els["undo-cast"].disabled,true);assert.equal(els["return-safety"].disabled,true);
+ assert.equal(c.undoCast(),false);assert.equal(c.recoverPlayer(),false);assert.equal(c.getAttemptSummary().moves,1);
+ c.destroy();
 });

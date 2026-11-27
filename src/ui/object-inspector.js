@@ -2,6 +2,7 @@ import {createObjectEngine} from "../core/object-engine.js";
 import {getSpell} from "./identity.js";
 import {screenToWorld} from "../rendering/camera.js";
 import {parsePreviewRequest} from "../transformations/preview-math.js";
+import {transformationFeedback} from "./transformation-feedback.js";
 const format=p=>"("+p[0]+", "+p[1]+")";
 const refsText=refs=>refs.map(r=>r.id+" "+format(r.point)).join(" · ");
 export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,actions={}){
@@ -67,10 +68,10 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   function showPreview(raw){
     if(!active||!selected||!type)return null;
     preview=canApply()?actions.preview(type,selected,raw):engine.preview(getPlayer(),selected,type,raw);
-    result.textContent=preview.message+(preview.geometry?" · Image: "+refsText(preview.geometry.points):"");
+    result.textContent=transformationFeedback(preview,type)+(preview.geometry?" · Image: "+refsText(preview.geometry.points):"");
     result.dataset.state=preview.ok?"clear":"invalid";syncApply();onChange();return preview;
   }
-  function clearPreview(){preview=null;result.dataset.state="";result.textContent="Preview cleared.";syncApply();onChange();}
+  function clearPreview(){preview=null;result.dataset.state="";result.textContent="Preview cleared. No move used.";syncApply();onChange();}
   function setActive(value){
     active=Boolean(value);panel.hidden=!active;toggle.setAttribute("aria-pressed",String(active));toggle.textContent=active?"Objects: on":"Objects";
     if(!active){selected=null;type=null;preview=null;result.dataset.state="";updateObject();}syncApply();
@@ -89,7 +90,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
     // An autofill/programmatic edit must not silently apply different parameters than the ghost.
     if(JSON.stringify(parsePreviewRequest(type,raw))!==JSON.stringify(preview.request)){showPreview(raw);return;}
     const r=actions.apply(type,selected,raw);
-    if(!r.ok){preview=r;result.textContent=r.message;result.dataset.state="invalid";syncApply();onChange();}
+    if(!r.ok){preview=r;result.textContent=transformationFeedback(r,type);result.dataset.state="invalid";syncApply();onChange();}
   });
   function replaceRoom(next){engine=createObjectEngine(next);selected=null;type=null;preview=null;populate();updateObject();}
   on(fields,"input",()=>{if(preview)clearPreview();});on(fields,"change",()=>{if(preview)clearPreview();});

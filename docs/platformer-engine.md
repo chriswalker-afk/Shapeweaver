@@ -21,3 +21,6 @@ Pure geometry and physics tests cover contacts/concave geometry, walls, ceiling,
 
 ## PR06 update
 Object inspection pauses movement and clears held controls. The gate is now behind the exit on the east ledge with a corner hinge, to provide a valid rotation preview without obstructing the existing movement replay. Object geometry remains unchanged by previews; the practice route is still a movement test, not a campaign puzzle.
+
+## PR11 update
+Automatic respawn and manual Return to safety share the finite, clear, dry, supported checkpoint/spawn validator. Unsafe destinations are never used. If no automatic destination is safe, the attempt enters a recovery-required state; Undo (when available) or Reset can recover it. See [mistake recovery](mistake-recovery.md).

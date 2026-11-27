@@ -563,6 +563,7 @@ test("diagonal reflection creates a supporting bracket, premature translation is
  assert.equal(cast(f,"diagonal-bracket","reflect",{line:"y=x"}).ok,true);
  assert.equal(cast(f,"dock-span","translate",{dx:-12,dy:0}).ok,true);
  assert.equal(cast(f,"diagonal-bracket","reflect",{line:"y=x"}).code,"bearing-unsupported");
+ assert.equal(c.inspector.getState().active,true);els["object-close"].fire("click");assert.equal(c.inspector.getState().active,false);
  assert.equal(c.getTutorialState().step,"Traverse");assert.equal(c.getAttemptSummary().moves,2);
  frame(2);view.fire("keydown",{code:"ArrowRight"});frame(63);
  view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(50);

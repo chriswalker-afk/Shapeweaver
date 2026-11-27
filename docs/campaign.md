@@ -98,3 +98,6 @@ Levels 7–8 are implemented with two distinct objects per puzzle. A hinged ladd
 
 ## PR18 — Clockwork Gallery opening
 Levels 9–10 require sequential transformations of a single beam/plank. The fixed socket and low arch create different order dependencies. Both have verified two-cast physical routes.
+
+## PR19 — Clockwork Gallery finale
+Levels 11–12 are implemented: reflect and enlarge a brass wedge about an external centre; enlarge and rotate a concave L-shaped key to match a lock outline. Both routes are verified. PR20 audits the first twelve levels.

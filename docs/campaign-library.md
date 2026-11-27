@@ -9,3 +9,5 @@ PR16 releases Levels 5–6 in Chapter II. The library lists both permitted spell
 PR17 completes Chapter II with Levels 7–8, bringing the library to eight released puzzles and 24 possible stars. Chapter II is fully available; Chapter III remains planned.
 
 PR18 releases the first two Clockwork Gallery puzzles. Ten released levels, 30 available stars and a Chapter III filter. Levels 9–10 both combine two spells on the same object; chapter III remains partially available.
+
+PR19 completes Chapter III. Twelve released puzzles, 36 possible stars and three fully available chapters. PR20 audits the first twelve before further levels.

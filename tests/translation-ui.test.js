@@ -447,7 +447,7 @@ test("mobile hinge updates on translation; early rotation is free and undo remov
  assert.equal(c.getAttemptSummary().moves,2);assert.equal(c.getAttemptSummary().undos,2);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });
-test("clockwork clearance puzzle completes with two casts on one object and no phantom next level",()=>{
+test("clockwork clearance puzzle completes with two casts on one object and continues",()=>{
  const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
  app.identity.show("level10");assert.equal(c.room.id,"clockwork-10");
  const blocked=cast(f,"clearance-plank","translate",{dx:17,dy:0});
@@ -460,6 +460,37 @@ test("clockwork clearance puzzle completes with two casts on one object and no p
  assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,2);assert.equal(c.getResult().returns,0);
  assert.deepEqual(c.getRecords().map(e=>e.objectId),["clearance-plank","clearance-plank"]);
  assert.deepEqual(c.getResult().entries.map(e=>e.type),["rotate","translate"]);
+ assert.equal(els["results-next"].hidden,false);assert.equal(els["results-next"].disabled,false);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level11");assert.equal(c.room.id,"clockwork-11");
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+
+test("external enlargement and reflected reference points complete level 11",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level11");
+ assert.equal(cast(f,"clockwork-wedge","reflect",{line:"x=13"}).ok,true);
+ assert.equal(cast(f,"clockwork-wedge","enlarge",{factor:3,cx:10,cy:3}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ frame(2);view.fire("keydown",{code:"ArrowRight"});frame(500);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().moves,2);assert.equal(c.getResult().stars,3);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level12");assert.equal(c.room.id,"clockwork-12");
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+test("key outline preview, geometric fit, undo/reset and final result",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level12");
+ c.setObjectMode(true);c.inspector.selectObject("brass-key");
+ assert.match(els["object-references"].textContent,/Lock outline: S1/);
+ const grow={factor:2,cx:8,cy:5},turn={angle:90,direction:"clockwise",cx:13,cy:8};
+ assert.equal(cast(f,"brass-key","enlarge",grow).ok,true);assert.equal(c.room.shapeSockets[0].filled,false);
+ assert.equal(cast(f,"brass-key","rotate",turn).ok,true);assert.equal(c.room.shapeSockets[0].filled,true);
+ assert.equal(c.undoCast(),true);assert.equal(c.room.shapeSockets[0].filled,false);
+ c.resetPlayer();assert.equal(c.room.shapeSockets[0].filled,false);
+ assert.equal(cast(f,"brass-key","enlarge",grow).ok,true);
+ assert.equal(cast(f,"brass-key","rotate",turn).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ frame(2);view.fire("keydown",{code:"ArrowRight"});frame(500);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().moves,2);assert.equal(c.getResult().stars,3);
  assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });

@@ -8,7 +8,7 @@ export function dockedSocket(room,object,hinge=object?.hinge){
  return (room.sockets??[]).find(s=>s.objectId===object.id&&samePoint(hinge,[s.x,s.y]))??null;
 }
 export function validateSockets(room){
- const ids=new Set([...room.terrain,...room.hazards,...room.objects,...(room.plates??[]),...(room.ladders??[]),...(room.checkpoints??[])].map(o=>o.id));
+ const ids=new Set([...room.terrain,...room.hazards,...room.objects,...(room.plates??[]),...(room.shapeSockets??[]),...(room.ladders??[]),...(room.checkpoints??[])].map(o=>o.id));
  for(const s of room.sockets??[]){
   if(typeof s.id!=="string"||ids.has(s.id)||![s.x,s.y].every(Number.isFinite)||!boundsContain(room.bounds,{minX:s.x,maxX:s.x,minY:s.y,maxY:s.y})||!room.objects.some(o=>o.id===s.objectId&&o.dockable))throw Error("Invalid hinge socket: "+s.id);
   if(!room.terrain.some(t=>pointPolygonDistance([s.x,s.y],t.vertices)<=GEOMETRY_EPS))throw Error("Hinge socket needs a terrain anchor: "+s.id);

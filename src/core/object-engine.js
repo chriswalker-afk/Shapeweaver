@@ -74,6 +74,7 @@ export function previewObject(room,player,id,type,raw){
     if(obstructedGate(candidate))return failure("gate-obstructed","A linked gate would close on an object. Clear the gate first.",extra);
     if(player&&candidate.objects.some(o=>o.kind==="linked-gate"&&!o.open&&polygonIntersectsBox(o.vertices,playerBox(player))))return failure("gate-obstructed","A linked gate would close on the apprentice. Move clear first.",extra);
   }
+  if(object.kind==="ladder")extra.mechanismEffects=[ladderSegment({...object,vertices:geometry.vertices})?"Ladder will be upright and climbable.":"Ladder will not be climbable in this orientation."];
   return {ok:true,code:"final-clear",scope:"final-pose",message:"Final position is clear. Travel path is not yet checked; Apply is unavailable.",...extra};
 }
 export function createObjectEngine(room){

@@ -14,7 +14,7 @@ export function mountCampaign(document,best,navigate){
   map.replaceChildren(...CHAPTERS.map(c=>{
    const available=LEVELS.filter(l=>l.chapter===c.id),done=available.filter(l=>best.get(l.id)).length;
    const b=node("button",undefined,"chapter-card");b.type="button";b.disabled=!available.length;
-   b.append(node("small","Chapter "+c.id),node("strong",c.title),node("span",available.length?done+" / "+available.length+" released completed · "+available.length+" of "+(c.last-c.first+1)+" planned available":"Planned · Levels "+c.first+"–"+c.last));
+   b.append(node("small","Chapter "+c.id),node("strong",c.title),node("span",available.length?done+" / "+available.length+" completed · "+(available.length===c.last-c.first+1?"Full chapter available":available.length+" of "+(c.last-c.first+1)+" planned available"):"Planned · Levels "+c.first+"–"+c.last));
    if(available.length)b.addEventListener("click",()=>{ $("filter-chapter").value=String(c.id);render();});
    return b;
   }));

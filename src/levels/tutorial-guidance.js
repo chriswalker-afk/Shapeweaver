@@ -1,5 +1,6 @@
 import {polygonBounds,deepFreeze} from "../geometry/world.js";
 import {gardenSituation} from "./garden-guidance.js";
+import {clockworkSituation} from "./clockwork-guidance.js";
 import {referencePoints} from "../transformations/preview-math.js";
 import {previewTranslation} from "../transformations/translation.js";
 import {previewRotation} from "../transformations/rotation.js";
@@ -57,6 +58,7 @@ export function tutorialConfig(room){return CONFIG[room?.id]??null;}
  * never a completion gate or an exhaustive solver. */
 export function tutorialSituation(room){
   if(room?.chapter===2)return gardenSituation(room);
+  if(room?.chapter===3)return clockworkSituation(room);
   const config=tutorialConfig(room),o=room?.objects.find(v=>v.id===config?.objectId);
   if(!config||!o)return null;
   const b=polygonBounds(o.vertices),a=ref(o,"A");

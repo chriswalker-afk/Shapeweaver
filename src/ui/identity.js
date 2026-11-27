@@ -44,20 +44,22 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
     return true;
   }
   function show(view) {
-    if (view !== "title" && view !== "spellbook" && !(view === "room" && room)) return false;
+    const isRoom = view === "room" || view === "level1";
+    if (view !== "title" && view !== "spellbook" && !(isRoom && room)) return false;
     state.view = view;
     title.hidden = view !== "title";
     book.hidden = view !== "spellbook";
-    if (room) room.hidden = view !== "room";
-    if (art) art.hidden = view === "room";
+    if (room) room.hidden = !isRoom;
+    if (art) art.hidden = isRoom;
     onViewChange(view);
-    document.getElementById(view === "title" ? "open-spellbook" : view === "room" ? "room-heading" : "spellbook-heading")?.focus();
+    document.getElementById(view === "title" ? "open-spellbook" : isRoom ? "room-heading" : "spellbook-heading")?.focus();
     return true;
   }
   for (const button of buttons) on(button, () => select(button.dataset.spell));
   on(document.getElementById("open-spellbook"), () => show("spellbook"));
   on(document.getElementById("close-spellbook"), () => show("title"));
   on(document.getElementById("open-room"), () => show("room"));
+  on(document.getElementById("open-level1"), () => show("level1"));
   on(document.getElementById("close-room"), () => show("title"));
   select(state.selectedSpell);
   return { select, show, destroy() { for (const [element, fn] of listeners) element.removeEventListener("click", fn); } };

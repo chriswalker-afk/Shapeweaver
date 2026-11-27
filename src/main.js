@@ -12,10 +12,10 @@ export function startApp(document, view) {
   const state = createAppState();
   const viewport = mountViewport(canvas, host, view);
   status.textContent = viewport
-    ? "Scaffold ready · Explore the Gatehouse movement and object preview room or the spellbook."
+    ? "Scaffold ready · Play Across the Brook, explore the practice room, or open the spellbook."
     : "Canvas is unavailable in this browser. The game requires Canvas 2D.";
   const room = typeof view.Image === "function" ? mountRoomPreview(document, view) : null;
-  const identity = typeof document.querySelectorAll === "function" ? mountIdentity(document, state, next => { room?.setActive(next === "room"); state.playable = next === "room" && Boolean(room); }) : null;
+  const identity = typeof document.querySelectorAll === "function" ? mountIdentity(document, state, next => { const playable = next === "room" || next === "level1"; if(playable)room?.setLevel(next); room?.setActive(playable); state.playable = playable && Boolean(room); }) : null;
   return { state, viewport, identity, room };
 }
 

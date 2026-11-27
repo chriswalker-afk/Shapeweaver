@@ -19,3 +19,6 @@ Example previews (at spawn): beam vector (14, −3.65) creates a ghost over the 
 
 ## QA
 Tests cover selection, permissions, geometry/vertex correspondence, exact quarter turns, fraction parsing, no-op rejection, concave overlaps/contact, player safety, support, final bounds, immutability, preview-only UI, and retained movement replay. Browser visual review remains required for small viewports, marker visibility, form focus/touch, selection and paused/resumed movement. PR07 should implement actual translation with swept collision validation, atomic apply/rebuild, animation and Level 1 Across the Brook; retain explicit mathematical input and never treat final-pose success as path success.
+
+## PR07 update
+Actual translation is available in Level 1 through a separate full-path validator and atomic transaction; the original preview-only practice room is retained. See [translation tutorial](translation-tutorial.md). Other spells still preview only.

@@ -1,4 +1,5 @@
 import {polygonBounds,deepFreeze} from "../geometry/world.js";
+import {gardenSituation} from "./garden-guidance.js";
 import {referencePoints} from "../transformations/preview-math.js";
 import {previewTranslation} from "../transformations/translation.js";
 import {previewRotation} from "../transformations/rotation.js";
@@ -55,6 +56,7 @@ export function tutorialConfig(room){return CONFIG[room?.id]??null;}
  * usable arrangement (including common alternate placements); it is guidance only,
  * never a completion gate or an exhaustive solver. */
 export function tutorialSituation(room){
+  if(room?.chapter===2)return gardenSituation(room);
   const config=tutorialConfig(room),o=room?.objects.find(v=>v.id===config?.objectId);
   if(!config||!o)return null;
   const b=polygonBounds(o.vertices),a=ref(o,"A");
@@ -104,7 +106,7 @@ export function tutorialSituation(room){
 export function contextualGuide(room,player,inspection,{casting=false,picking=false,canUndo=false,moves=0,situation=tutorialSituation(room)}={}){
   const c=situation?.config;if(!c)return null;
   if(player.blockedRespawn)return {step:"Recover",text:"You need to recover before moving. "+(canUndo?"Use Undo or Reset.":"Use Reset.")};
-  if(player.completed)return {step:"Complete",text:"Well done! You reached the portal using "+moves+" "+c.name.toLowerCase()+(moves===1?"":"s")+"."};
+  if(player.completed)return {step:"Complete",text:"Well done! You reached the portal using "+moves+" "+(room.tutorial.spells?"transformation":c.name.toLowerCase())+(moves===1?"":"s")+"."};
   if(casting)return {step:"Cast",text:"The transformation is being applied. Movement resumes when the animation finishes."};
   if(picking)return {step:"Read coordinates",text:"Use the grid to inspect coordinates. Close Pick point before selecting an object or moving."};
   if(inspection?.active){
@@ -113,7 +115,7 @@ export function contextualGuide(room,player,inspection,{casting=false,picking=fa
     if(!inspection.type)return {step:"Choose transformation",text:"Read the selected object's allowed transformations and choose one."};
     if(inspection.preview?.ok)return {step:"Apply or revise",text:"Compare the ghost image with the obstacle. If it helps, select Apply. A clear preview is not necessarily a useful solution."};
     if(inspection.preview&&!inspection.preview.ok)return {step:"Revise",text:"Read the feedback, adjust the mathematical parameters and preview again. Rejected previews use no moves."};
-    return {step:"Enter parameters",text:c.fields+" Preview is free."};
+    return {step:"Enter parameters",text:(inspection.type===c.type?c.fields:({translate:"Enter the signed horizontal and vertical components of a column vector.",rotate:"Enter angle, direction and both centre coordinates.",enlarge:"Enter scale factor and both centre coordinates.",reflect:"Enter the mirror line equation."}[inspection.type]??c.fields))+" Preview is free."};
   }
   if(situation.ready)return {step:"Traverse",text:c.traverse};
   return {step:"Explore",text:c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional."};

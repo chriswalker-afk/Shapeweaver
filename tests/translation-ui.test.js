@@ -291,7 +291,7 @@ test("actual completion routes to results once, replay and next level start clea
  click("close-room");assert.equal(app.state.view,"title");assert.equal(app.bestResults.get("gatehouse-03"),null);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });
-test("last available level completes without a nonexistent next level; returns to title",()=>{
+test("Level 4 continues into the Enchanted Gardens",()=>{
  const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
  els["open-level4"].fire("click");
  assert.equal(cast(f,"missing-barrel","reflect",{line:"x=15"}).ok,true);
@@ -299,9 +299,8 @@ test("last available level completes without a nonexistent next level; returns t
  frame(2);down("ArrowRight");frame(88);down("Space");frame(30);up("Space");up("ArrowRight");frame(20);
  down("ArrowRight");down("Space");frame(28);up("Space");frame(72);up("ArrowRight");
  assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);
- assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
- els["results-next"].fire("click");assert.equal(app.state.view,"results");
- els["results-title"].fire("click");assert.equal(app.state.view,"title");assert.equal(els["results-view"].hidden,true);
+ assert.equal(els["results-next"].hidden,false);assert.equal(els["results-next"].disabled,false);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level5");assert.equal(c.room.id,"gardens-05");assert.equal(c.getAttemptSummary().moves,0);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });
 
@@ -374,4 +373,29 @@ test("compact view controls collapse safely, picking can always be closed, Escap
  c.setPicking(true);assert.equal(c.getToolsOpen(),true);click("coordinate-close");assert.equal(c.getCoordinateState().picking,false);
  c.setLevel("room");assert.equal(els["climb-controls"].hidden,false);assert.equal(c.getToolsOpen(),false);
  c.destroy();
+});
+
+test("garden levels support separate spells, mechanism rollback and final-level results",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level5");assert.match(els["room-chapter"].textContent,/Chapter II.*Translation \+ Rotation/);
+ assert.equal(cast(f,"garden-hinge","rotate",{angle:90,direction:"anticlockwise",cx:37,cy:8}).ok,true);
+ assert.equal(cast(f,"garden-beam","translate",{dx:12,dy:0}).ok,true);
+ assert.equal(c.getAttemptSummary().moves,2);assert.equal(c.getTutorialState().step,"Traverse");
+ app.identity.show("level6");
+ assert.equal(cast(f,"garden-barrel","reflect",{line:"x=9"}).ok,true);assert.equal(c.room.plates[0].pressed,true);
+ assert.equal(c.undoCast(),true);assert.equal(c.room.plates[0].pressed,false);assert.equal(c.room.objects.find(o=>o.id==="plate-gate").open,false);
+ c.resetPlayer();
+ assert.equal(cast(f,"garden-barrel","reflect",{line:"x=9"}).ok,true);
+ assert.equal(cast(f,"garden-mushroom","enlarge",{factor:2,cx:30,cy:3}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ const down=code=>view.fire("keydown",{code}),up=code=>view.fire("keyup",{code});
+ frame(2);down("ArrowRight");down("Space");frame(30);up("Space");frame(105);
+ down("Space");frame(30);up("Space");up("ArrowRight");frame(30);
+ assert.equal(c.getPlayer().grounded,true);assert.ok(Math.abs(c.getPlayer().y-5.5)<.05);
+ down("ArrowRight");down("Space");frame(60);up("Space");frame(100);up("ArrowRight");
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,2);assert.equal(c.getResult().returns,0);
+ assert.deepEqual(c.getResult().entries.map(e=>e.type),["reflect","enlarge"]);
+ assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
+ els["results-title"].fire("click");assert.equal(app.state.view,"title");
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });

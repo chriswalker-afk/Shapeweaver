@@ -1,0 +1,13 @@
+# PR16 — The Enchanted Gardens
+
+Level 5, Two Small Problems: translate Garden beam by (12,0), then rotate Garden gate 90 degrees anticlockwise about (37,8). Both casts can be done from spawn or in reverse order. Cross the brook and walk beneath the opened gate. The bridge spans x=16..26; a checkpoint on the east bank helps recovery. Recorded replay at 120 Hz: right 215 ticks, right+jump 120 ticks (one press), right 650 ticks.
+
+Level 6, The Secret Garden: reflect Weighted barrel in x=9 so its bottom covers the amber plate at x=12..15, y=3. Enlarge Spring mushroom by 2 about (30,3). The cap becomes 2.5 units above the floor and its spring jump reaches the terrace at y=11. Recorded replay: right+jump 60 ticks, right 210 ticks, right+jump 60 ticks, release all for 60 ticks to land on cap, right+jump 120 ticks, right 200 ticks. Both replays were verified without respawns. Cast order is flexible, but the physical obstacles remain.
+
+Pressure plates are floor-flush weight sensors, not switches activated by the apprentice. Eligible objects require actual horizontal bottom-edge contact (2.5 units on the first plate). Gates open while all linked plates are held. Gate state is derived from immutable room geometry, atomically updated at commit, and restored on undo/reset. Releasing a plate closes the gate unless the resulting solid overlaps an object or the apprentice; previews and commits both reject that case. This does not prevent every possible stranding configuration; Undo/Return/Reset remain available. Open gate outlines, plate labels and connector lines are cosmetic. No time-dependent mechanism simulation.
+
+Mushroom caps are real horizontal top edges of scalable concave collision polygons. Jumping while grounded on the cap uses 17.5 units/s vertical speed instead of the ordinary 12.2. No automatic bounce, no new transformation, no penalty for retries. The initial mushroom is too low for the intended terrace route. The artwork is clipped to the actual shape. Positive scale factors 0.5–2 per cast. Both puzzles use 2/4 move thresholds for three/two stars. All four introductory tutorials and practice remain accessible.
+
+The garden guidance chooses the remaining obstacle from live geometry. Worked hints validate against the existing spell engine, but are not exhaustive solvers. Students may use other valid orders or corrective casts. The campaign shows six released puzzles; Level 6 is the current last level. Procedural forest artwork distinguishes the chapter while retaining the storybook palette. Actual browser screenshot review and classroom/touch playtesting remain necessary. No deployment/domain change.
+
+Next PR17 — Mind the Gap and Above and Below: ladders, dependent placements and horizontal reflections.

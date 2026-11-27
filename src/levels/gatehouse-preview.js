@@ -1,5 +1,6 @@
 import { rectangle, deepFreeze, polygonBounds, signedArea, boundsContain } from "../geometry/world.js";
 import {validateObjectDefinitions} from "../core/object-engine.js";
+import {validateMechanisms} from "../mechanisms/pressure-plates.js";
 
 /** Movement practice fixture, NOT a released campaign puzzle. */
 export const GATEHOUSE_PREVIEW = deepFreeze({
@@ -55,6 +56,6 @@ export function validateRoom(room) {
   if (![spawn.x,spawn.y,exit.x,exit.y,exit.width,exit.height].every(Number.isFinite) || exit.width<=0||exit.height<=0 ||
     !boundsContain(b,{minX:spawn.x,maxX:spawn.x,minY:spawn.y,maxY:spawn.y}) ||
     !boundsContain(b,{minX:exit.x-exit.width/2,maxX:exit.x+exit.width/2,minY:exit.y,maxY:exit.y+exit.height})) throw new Error("Invalid spawn or exit");
-  validateObjectDefinitions(room);
+  validateObjectDefinitions(room);validateMechanisms(room);
   return room;
 }

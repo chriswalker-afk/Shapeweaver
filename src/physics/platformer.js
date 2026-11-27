@@ -1,5 +1,6 @@
 import {inHazard,supported,sweepAxis,walkHorizontal,PLAYER_SIZE} from "./collision.js";
 import {isSafePosition,returnToSafety} from "./recovery.js";
+import {onMushroomCap,MUSHROOM_JUMP_SPEED} from "../mechanisms/mushroom.js";
 export const FIXED_DT=1/120;
 export const MOTION=Object.freeze({speed:7.2,groundAcceleration:65,airAcceleration:34,gravity:25,jumpSpeed:12.2,terminalSpeed:18,climbSpeed:3.8,coyote:.11,buffer:.12});
 const approach=(a,b,d)=>a<b?Math.min(a+d,b):Math.max(a-d,b);
@@ -55,7 +56,7 @@ export function stepPlayer(world,previous,input={}){
   p.climbing=false;
   let jumped=false;
   if(p.buffer>0&&(p.coyote>0||fromLadder)){
-    p.vy=MOTION.jumpSpeed;p.buffer=0;p.coyote=0;p.grounded=false;jumped=true;
+    p.vy=p.grounded&&onMushroomCap(world.room,p)?MUSHROOM_JUMP_SPEED:MOTION.jumpSpeed;p.buffer=0;p.coyote=0;p.grounded=false;jumped=true;
   }
   p.vx=approach(p.vx,move*MOTION.speed,(p.grounded?MOTION.groundAcceleration:MOTION.airAcceleration)*dt);
   const horizontal=walkHorizontal(world,p,p.vx*dt,p.grounded&&!jumped);

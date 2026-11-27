@@ -1,4 +1,5 @@
 import {deepFreeze} from "../geometry/world.js";
+import {resolveMechanisms} from "../mechanisms/pressure-plates.js";
 import {createPhysicsWorld,blocked,inHazard} from "../physics/collision.js";
 const cloneData=value=>Array.isArray(value)?value.map(cloneData):value&&typeof value==="object"?Object.fromEntries(Object.entries(value).map(([k,v])=>[k,cloneData(v)])):value;
 
@@ -13,7 +14,7 @@ export function commitValidated(room,player,id,preview,message,transition,record
   if(before.hinge)moved.hinge=[...preview.geometry.hinge];
   // Keep vertex correspondence through winding reversal and subsequent transformations.
   if(preview.request.type==="reflect"||before.vertexIds)moved.vertexIds=[...preview.geometry.vertexIds];
-  const nextRoom=deepFreeze(cloneData({...room,objects:room.objects.map(o=>o.id===id?moved:o)}));
+  const nextRoom=deepFreeze(cloneData(resolveMechanisms({...room,objects:room.objects.map(o=>o.id===id?moved:o)})));
   const physics=createPhysicsWorld(nextRoom);
   if(player&&(blocked(physics,player)||inHazard(physics,player)))return {...preview,ok:false,code:"player-unsafe",message:"The apprentice would not be safe after this move."};
   return {ok:true,code:"applied",message,room:nextRoom,physics,

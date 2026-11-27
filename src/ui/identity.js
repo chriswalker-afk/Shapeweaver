@@ -1,3 +1,4 @@
+import {LEVEL_ROUTES} from "../levels/campaign.js";
 /** Canonical spell identity. Keep formal maths names visible throughout the game. */
 export const SPELLS = Object.freeze([
   Object.freeze({"id":"translate","label":"Translation","color":"#4EADC3","description":"Move without turning or resizing.","example":"Four units right, two units down.","icon":"assets/ui/translate.svg"}),
@@ -46,7 +47,7 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
     return true;
   }
   function show(view) {
-    const isRoom = ["room","level1","level2","level3","level4"].includes(view);
+    const isRoom = view==="room"||LEVEL_ROUTES.includes(view);
     if (view !== "title" && view !== "spellbook" && !(isRoom && room) && !(view === "results" && results) && !(view === "campaign" && campaign)) return false;
     state.view = view;
     title.hidden = view !== "title";

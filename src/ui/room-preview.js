@@ -1,14 +1,12 @@
 import { GATEHOUSE_PREVIEW, validateRoom } from "../levels/gatehouse-preview.js";
-import { ACROSS_THE_BROOK } from "../levels/across-the-brook.js";
-import { STUBBORN_GATE } from "../levels/stubborn-gate.js";
-import { LITTLE_CHEESY } from "../levels/little-cheesy.js";
-import { MISSING_BARREL } from "../levels/missing-barrel.js";
+import {LEVELS as CAMPAIGN_LEVELS} from "../levels/campaign.js";
 import { previewReflection, commitReflection, reflectedFrame } from "../transformations/reflection.js";
 import { previewEnlargement, commitEnlargement, enlargedFrame } from "../transformations/enlargement.js";
 import { previewRotation, commitRotation, rotatedFrame } from "../transformations/rotation.js";
 import { previewTranslation, commitTranslation, translatedFrame } from "../transformations/translation.js";
 import { FIXED_DT, MOTION } from "../physics/platformer.js";
 import {returnToSafety} from "../physics/recovery.js";
+import {resolveMechanisms} from "../mechanisms/pressure-plates.js";
 import {createAttemptHistory,rememberSafePosition,recordCast,undoLastCast,attemptSummary} from "../core/attempt-history.js";
 import {completedResult} from "../core/level-results.js";
 import {HINT_STAGES,tutorialSituation,contextualGuide,tutorialHint} from "../levels/tutorial-guidance.js";
@@ -36,8 +34,8 @@ const TUTORIALS=Object.freeze({
   reflect:{label:"Reflection",preview:previewReflection,commit:commitReflection,frame:reflectedFrame,duration:.8,
     ready:"Reflection applied. Jump onto the barrel, then onto the ledge.",finished:"You rescued the barrel and reached the ledge."}
 });
-const LEVELS=Object.freeze({level1:ACROSS_THE_BROOK,level2:STUBBORN_GATE,level3:LITTLE_CHEESY,level4:MISSING_BARREL});
-const tutorialType=room=>room.tutorial?(room.tutorial.spell??"translate"):null;
+const LEVELS=Object.freeze(Object.fromEntries(CAMPAIGN_LEVELS.map(l=>[l.route,l.room])));
+const roomSpells=room=>room.tutorial?(room.tutorial.spells??[room.tutorial.spell??"translate"]):[];
 
 /** Movement practice room, coordinate inspection, and deterministic simulation. */
 export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
@@ -58,10 +56,9 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   const canHint=()=>Boolean(active&&situation&&!animation&&!player.completed&&!player.blockedRespawn);
   const undoButton=$("undo-cast"),returnButton=$("return-safety"),recoveryCount=$("recovery-count");
   const canUndo=()=>active&&!animation&&!player.completed&&history.stack.length>0;
-  const spellType=()=>tutorialType(room);
-  const tutorial=()=>TUTORIALS[spellType()];
-  const actionLabel=()=>tutorial()?.label??"Transformation";
-  const readyMessage=()=>situation?.ready?(tutorial()?.ready??"Transformation applied."):"Transformation applied. Check the new position; revise if it does not solve the obstacle.";
+  const tutorial=()=>TUTORIALS[roomSpells(room)[0]];
+  const actionLabel=()=>TUTORIALS[animation?.type]?.label??"Transformation";
+  const readyMessage=()=>roomSpells(room).length>1?(situation?.ready?"Both obstacles are ready. "+situation.config.traverse:"Transformation applied. "+(situation?.config.objective??"Check the other obstacle.")):situation?.ready?(tutorial()?.ready??"Transformation applied."):"Transformation applied. Check the new position; revise if it does not solve the obstacle.";
   const reducedMotion=()=>Boolean(view.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
   let follow=true;
   const input=mountMovementInput(document,view,()=>active&&!animation&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
@@ -73,7 +70,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     player=next;lastSafe=rememberSafePosition(physics,player,lastSafe);
     if(next.event&&next.event!==lastEvent){
       if(next.event==="respawn"||next.event==="exit"||next.event==="reset-required")input.clear();
-      if(playStatus)playStatus.textContent=next.event==="respawn"?(player.checkpoint?"Returned to the last safe checkpoint.":"Returned to the start.")+" Your transformations are kept.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?(room.tutorial?"Level "+room.number+" complete! "+tutorial().finished+" Reset to try again.":"Gatehouse practice complete! Reset to play again."):"No safe return point. "+(canUndo()?"Undo a transformation or reset.":"Reset to start a fresh attempt.");
+      if(playStatus)playStatus.textContent=next.event==="respawn"?(player.checkpoint?"Returned to the last safe checkpoint.":"Returned to the start.")+" Your transformations are kept.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?(room.tutorial?"Level "+room.number+" complete! "+(roomSpells(room).length>1?"You reached the portal.":tutorial().finished)+" Reset to try again.":"Gatehouse practice complete! Reset to play again."):"No safe return point. "+(canUndo()?"Undo a transformation or reset.":"Reset to start a fresh attempt.");
     }
     lastEvent=next.event;
     if(["exit","respawn","reset-required"].includes(next.event))updateGuide();
@@ -89,7 +86,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   let grid=true,axes=true,picking=false,snap=1,point=null;
   const images=loadWorldArt(view,()=>viewport?.resize());
   inspector=mountObjectInspector(document,room,()=>player,()=>{updateGuide();redraw();},setObjectMode,{
-    canApply:type=>Boolean(type===spellType()&&!animation&&!player.completed&&!player.blockedRespawn),
+    canApply:type=>Boolean(roomSpells(room).includes(type)&&!animation&&!player.completed&&!player.blockedRespawn),
     preview:(type,id,raw)=>TUTORIALS[type].preview(room,player,id,raw),
     apply:applySpell
   });
@@ -129,7 +126,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     camera=createCamera(room.bounds,metrics.width,metrics.height,mode,target,zoom);
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
     const progress=animation?castProgress(animation.elapsed/animation.duration):0;
-    const frame=animation?TUTORIALS[animation.type].frame(room,animation.transition,progress):room;
+    const frame=animation?resolveMechanisms(TUTORIALS[animation.type].frame(room,animation.transition,progress)):room;
     renderWorld(ctx,metrics,camera,frame,images.art,player,reducedMotion());
     plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});
     if(animation?.type==="reflect")drawReflectionFlash(ctx,camera,room.bounds,animation.transition.line,progress);
@@ -261,7 +258,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   }
   function setGuidance(value){guidanceEnabled=Boolean(value);updateGuide();redraw();return guidanceEnabled;}
   function applySpell(type,id,raw){
-    if(type!==spellType()||!room.tutorial||!objectMode||animation)return {ok:false,code:"unavailable",message:"That spell is not available now."};
+    if(!roomSpells(room).includes(type)||!objectMode||animation)return {ok:false,code:"unavailable",message:"That spell is not available now."};
     const tx=TUTORIALS[type].commit(room,player,id,raw);
     if(!tx.ok)return tx;
     // Commit geometry + collision index together; animation is presentation only.
@@ -269,7 +266,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     room=tx.room;physics=tx.physics;situation=tutorialSituation(room);lastSafe=rememberSafePosition(physics,player,lastSafe);hintStage=0;
     objectMode=false;inspector?.setActive(false);inspector?.replaceRoom(room);input.clear();
     if(!reducedMotion())animation={type,transition:tx.transition,elapsed:0,duration:TUTORIALS[type].duration};
-    if(playStatus)playStatus.textContent=animation?actionLabel()+" applied. Wait for the object to settle.":readyMessage();
+    if(playStatus)playStatus.textContent=animation?TUTORIALS[type].label+" applied. Wait for the object to settle.":readyMessage();
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return tx;
   }
   function clearRecoveryInteraction(){
@@ -306,7 +303,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     mode="overview";zoom=null;focus=null;toolsOpen=false;
     const heading=$("room-heading"),chapter=$("room-chapter");
     if(heading)heading.textContent=initialRoom.title;
-    if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter I · Level "+initialRoom.number+" · "+TUTORIALS[tutorialType(initialRoom)].label:"Chapter I · Interactive object practice";
+    if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter "+(initialRoom.chapter===2?"II":"I")+" · Level "+initialRoom.number+" · "+roomSpells(initialRoom).map(t=>TUTORIALS[t].label).join(" + "):"Chapter I · Interactive object practice";
     resetPlayer();
   }
   on(guidanceButton,"click",()=>setGuidance(!guidanceEnabled));

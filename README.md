@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR15 — Campaign and level library. Seven planned chapters, four released tutorials, direct access, filters, sequential continuation and locally saved best results. Next: PR16 Levels 5–6.
+PR16 — The Enchanted Gardens. Six released puzzles, two-object spell dispatch, weight-held plates and linked gates, scalable spring mushrooms, contextual hints and two-move targets. Next: PR17 Levels 7–8.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR15 — Campaign and level library. Seven planned chapters, four released tutor
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Enchanted Gardens](docs/enchanted-gardens.md) — Levels 5–6, mechanism rules and recorded traversal.
 - [Campaign and level library](docs/campaign-library.md) — chapter map, direct access, filtering and saved progress.
 - [Gatehouse polish](docs/gatehouse-polish.md) — review scope, visual and replay QA.
 - [Tutorials and hints](docs/tutorials-and-hints.md) — contextual guidance, five-stage hints, live geometry and worked examples.

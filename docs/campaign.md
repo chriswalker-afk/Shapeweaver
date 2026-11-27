@@ -89,3 +89,6 @@ A Little Cheesy is implemented in `src/levels/little-cheesy.js`. The initial wed
 
 ## Level 4 implementation (PR10)
 The Missing Barrel places a barrel in a sealed store; reflection in x=15 puts it on the courtyard floor near the raised ledge. Two jumps and a walk reach the portal. All four introductory tutorials are now implemented; see [reflection tutorial](reflection-tutorial.md).
+
+## PR16 — Enchanted Gardens release
+Levels 5–6 are implemented. Each has two different interactive objects and a verified two-cast physical route. Chapter II remains partially released until PR17 adds Levels 7–8.

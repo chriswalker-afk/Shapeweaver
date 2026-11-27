@@ -12,6 +12,14 @@ function label(ctx,t,x,y,c){
 function dot(ctx,p,c,r=3){
   ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();ctx.strokeStyle="#211c31";ctx.lineWidth=1.3;ctx.stroke();
 }
+function markReferences(ctx,camera,refs,c,prime=""){
+  const groups=[];
+  for(const r of refs){
+    const p=screen(camera,r.point),group=groups.find(g=>Math.hypot(g.p.x-p.x,g.p.y-p.y)<.1);
+    if(group)group.ids.push(r.id+prime);else groups.push({p,ids:[r.id+prime]});
+  }
+  for(const g of groups){dot(ctx,g.p,c,g.ids.some(id=>id==="H"+prime||id==="Hinge"+prime)?5:3);label(ctx,g.ids.join("/"),g.p.x+5,g.p.y-9,c);}
+}
 function line(ctx,a,b){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
 function mirrorSegment(line,b){
   if(line.kind==="x")return [[line.value,b.minY],[line.value,b.maxY]];
@@ -30,7 +38,7 @@ export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview){
     ctx.strokeStyle=active?"#ffe1a5":"#e9d6b2aa";ctx.lineWidth=active?2:1;ctx.stroke();
     if(!active)continue;
     const refs=referencePoints(o);
-    refs.forEach(r=>{const p=screen(camera,r.point);dot(ctx,p,"#ffe1a5",r.id==="H"?5:3);label(ctx,r.id,p.x+5,p.y-9,"#ffe1a5");});
+    markReferences(ctx,camera,refs,"#ffe1a5");
     if(!preview?.geometry||preview.objectId!==o.id)continue;
     const {request,geometry}=preview,c=preview.ok?COLOURS[request.type]:"#ff9b94";
     ctx.save();ctx.setLineDash?.([5,4]);ctx.lineWidth=1.5;ctx.strokeStyle=c;
@@ -43,7 +51,7 @@ export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview){
       dot(ctx,p,c,4);label(ctx,"Centre",p.x+6,p.y-9,c);
     }
     path(ctx,camera,geometry.vertices);ctx.fillStyle=preview.ok?"rgba(112,210,195,.24)":"rgba(255,110,104,.22)";ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2.2;ctx.stroke();ctx.restore();
-    geometry.points.forEach(r=>{const p=screen(camera,r.point);dot(ctx,p,c);label(ctx,r.id+"′",p.x+5,p.y-9,c);});
+    markReferences(ctx,camera,geometry.points,c,"′");
   }
   ctx.restore();
 }

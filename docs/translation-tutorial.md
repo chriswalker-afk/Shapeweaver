@@ -12,3 +12,6 @@ Apply recomputes from current room and player. On success return a new frozen ro
 Continuous sweep tests cover thin walls, diagonal vectors, legal sliding contact, concave voids, player/hazard intersections and start/end-only checks. Transaction tests verify immutable source, new collision geometry, unchanged rejected state, repeated casts and actual traversal with recorded input steps. The intended solution is an achievable one-move route, not a proof of optimality across every possible movement sequence. Browser playtesting and visual/touch sign-off remain necessary. PR08 adds actual rotation and Level 2, using the same preview/commit boundary.
 
 Recorded traversal at 120 Hz: apply (12,0) at spawn, hold right for 215 ticks, hold right and press jump on the first of 120 ticks, then hold right for 400 ticks (simulation freezes at actual exit). At the jump landing the feet are on the translated beam at y≈3.5. The replay completes with zero respawns. Equivalent placements and corrective casts are tested separately.
+
+## PR08 update
+Translation and rotation share the immutable commit/collision-index boundary in `spell-transaction.js`. Level 1 behaviour and replay remain regression-tested. The title also offers Level 2 directly.

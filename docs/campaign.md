@@ -80,3 +80,6 @@ Inverted Kingdom (negative scale factors and more signed coordinates), Shattered
 
 ## Level 1 implementation (PR07)
 Across the Brook now has data in `src/levels/across-the-brook.js`, with a recorded one-translation route. The 10-unit brook requires a bridge under current movement tuning; the beam is translated horizontally to rest on both banks. The precise intended vector is guidance, not a required-answer check. See [translation tutorial](translation-tutorial.md) for replay and caveats.
+
+## Level 2 implementation (PR08)
+The Stubborn Gate now has a playable room in `src/levels/stubborn-gate.js`. Its overhead hinge is at (14,8); a 90-degree anticlockwise rotation opens the passage. The opposite direction and longer equivalent-final-pose turns are unsafe. The recorded route walks through the physically open passage. See [rotation tutorial](rotation-tutorial.md).

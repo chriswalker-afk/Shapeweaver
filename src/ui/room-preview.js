@@ -180,7 +180,7 @@ export function mountRoomPreview(document,view) {
     // Commit geometry + collision index together; animation is presentation only.
     room=tx.room;physics=tx.physics;records=[...records,tx.record];hintStage=0;
     objectMode=false;inspector?.setActive(false);inspector?.replaceRoom(room);input.clear();
-    if(!reducedMotion())animation={type,transition:tx.transition,elapsed:0,duration:type==="rotate"?.75:.65};
+    if(!reducedMotion())animation={type,transition:tx.transition,elapsed:0,duration:type==="rotate" ? .75 : .65};
     if(playStatus)playStatus.textContent=animation?actionLabel()+" applied. Wait for the object to settle.":readyMessage();
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return tx;
   }

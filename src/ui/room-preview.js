@@ -204,8 +204,8 @@ export function mountRoomPreview(document,view) {
     }
     if(returnButton)returnButton.disabled=!active||Boolean(animation)||player.completed||player.blockedRespawn;
     if(recoveryCount){
-      const stats=attemptSummary(history,player);
-      const text=stats.undos||stats.respawns?"Undos: "+stats.undos+" · Returns: "+stats.respawns:"";
+      const undos=history.entries.length-history.stack.length;
+      const text=undos||player.respawns?"Undos: "+undos+" · Returns: "+player.respawns:"";
       if(recoveryCount.textContent!==text)recoveryCount.textContent=text;
       recoveryCount.hidden=!text;
     }

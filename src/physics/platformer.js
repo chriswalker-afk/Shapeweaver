@@ -1,4 +1,4 @@
-import {blocked,inHazard,supported,sweepAxis,walkHorizontal,PLAYER_SIZE} from "./collision.js";
+import {inHazard,supported,sweepAxis,walkHorizontal,PLAYER_SIZE} from "./collision.js";
 import {isSafePosition,returnToSafety} from "./recovery.js";
 export const FIXED_DT=1/120;
 export const MOTION=Object.freeze({speed:7.2,groundAcceleration:65,airAcceleration:34,gravity:25,jumpSpeed:12.2,terminalSpeed:18,climbSpeed:3.8,coyote:.11,buffer:.12});

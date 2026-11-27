@@ -3,3 +3,5 @@ The map distinguishes seven planned chapters from released puzzles. All four rel
 
 ## Verification
 The Node suite covers chapter metadata, combined filters, saved progress and library UI navigation. HTTP smoke checks cover the campaign modules under root and repository subpaths. The Chromium workflow additionally opens the library, selects a reflection puzzle directly, clears filters and resumes the first unfinished level at all four viewport sizes. Browser screenshot artifacts support subsequent visual review.
+
+PR16 releases Levels 5–6 in Chapter II. The library lists both permitted spells, filters against either spell, and shows partial chapter availability. The campaign now has six released puzzles and 18 possible stars.

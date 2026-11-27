@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Shapeweaver — a mathematical transformation puzzle platformer.">
+  <meta name="theme-color" content="#221e2c">
+  <title>Shapeweaver</title>
+  <link rel="stylesheet" href="./src/styles.css">
+  <script type="module" src="./src/main.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <h1>Shapeweaver</h1>
+      <p>Reshape the world. Find your way.</p>
+    </div>
+    <span class="stage-label">Development preview</span>
+  </header>
+  <main class="app-main" id="app">
+    <section class="game-viewport" aria-labelledby="viewport-title">
+      <canvas id="world" aria-hidden="true"></canvas>
+      <div class="viewport-message">
+        <h2 id="viewport-title">The world is taking shape</h2>
+        <p id="app-status" role="status">Loading the development scaffold…</p>
+        <noscript><p>Enable JavaScript to load the game.</p></noscript>
+      </div>
+    </section>
+    <details class="development-info">
+      <summary>About this preview</summary>
+      <p>PR01 establishes the browser shell and canvas. The storybook artwork, movement, coordinate grid and transformation spells will be added in later development stages. This is not a playable puzzle yet.</p>
+    </details>
+  </main>
+</body>
+</html>

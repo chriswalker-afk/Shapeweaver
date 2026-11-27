@@ -1,0 +1,31 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  background: #181720;
+  color: #f3edf6;
+  --surface: #221e2c;
+  --line: #565061;
+  --muted: #c8c0d0;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; min-width: 0; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+.app-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .3rem 1rem; padding: .55rem clamp(.7rem, 2vw, 1.5rem); border-bottom: 1px solid var(--line); background: var(--surface); }
+.brand h1 { font-size: clamp(1.1rem, 2.2vw, 1.55rem); margin: 0; letter-spacing: .025em; }
+.brand p { font-size: .8rem; margin: .15rem 0 0; color: var(--muted); }
+.stage-label { color: var(--muted); font-size: .75rem; }
+.app-main { display: flex; flex: 1 0 auto; flex-direction: column; gap: .5rem; padding: clamp(.45rem, 1vw, .85rem); min-width: 0; }
+.game-viewport { position: relative; flex: 1 0 auto; display: grid; place-items: center; min-height: clamp(15rem, 68vh, 58rem); overflow: hidden; isolation: isolate; border: 1px solid var(--line); border-radius: .6rem; background: #201e2a; }
+#world { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; }
+.viewport-message { max-width: 36rem; padding: 1rem; text-align: center; background: rgb(24 23 32 / .86); border: 1px solid var(--line); border-radius: .5rem; margin: 1rem; }
+.viewport-message h2 { font-size: clamp(1.05rem, 3vw, 1.6rem); margin: 0 0 .4rem; }
+.viewport-message p { color: var(--muted); margin: 0; line-height: 1.5; }
+.development-info { background: var(--surface); border: 1px solid var(--line); border-radius: .4rem; padding: .5rem .75rem; color: var(--muted); font-size: .85rem; }
+.development-info summary { cursor: pointer; color: #f3edf6; }
+.development-info p { margin: .5rem 0 0; line-height: 1.5; max-width: 72ch; }
+:focus-visible { outline: 2px solid #d6b8fb; outline-offset: 4px; }
+@media (max-height: 480px) and (orientation: landscape) {
+  .brand p { display: none; }
+  .app-header { padding-block: .35rem; }
+  .game-viewport { min-height: 11rem; }
+  .app-main { gap: .35rem; padding: .35rem; }
+}

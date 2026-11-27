@@ -1,0 +1,17 @@
+{
+  "name": "shapeweaver",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A mathematical transformation puzzle platformer.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node tools/serve.mjs",
+    "test": "node --test",
+    "build": "node tools/build.mjs",
+    "preview": "npm run build && node tools/serve.mjs --dist",
+    "check": "npm test && npm run build"
+  }
+}

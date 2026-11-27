@@ -113,10 +113,10 @@ export function contextualGuide(room,player,inspection,{casting=false,picking=fa
     if(!inspection.type)return {step:"Choose transformation",text:"Read the selected object's allowed transformations and choose one."};
     if(inspection.preview?.ok)return {step:"Apply or revise",text:"Compare the ghost image with the obstacle. If it helps, select Apply. A clear preview is not necessarily a useful solution."};
     if(inspection.preview&&!inspection.preview.ok)return {step:"Revise",text:"Read the feedback, adjust the mathematical parameters and preview again. Rejected previews use no moves."};
-    return {step:"Enter parameters",text:c.fields+" Then choose Preview; it does not spend a move."};
+    return {step:"Enter parameters",text:c.fields+" Preview is free."};
   }
   if(situation.ready)return {step:"Traverse",text:c.traverse};
-  return {step:"Explore",text:c.objective+" Move with arrows / WASD or the on-screen controls; Space / Jump jumps. Open Objects to inspect the room. Hints are optional."};
+  return {step:"Explore",text:c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional."};
 }
 /** Stage 5 is the only stage that supplies parameter values as a worked answer.
  * Validate the proposed cast against the live world and apprentice before suggesting Apply.

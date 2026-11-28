@@ -48,7 +48,7 @@ test("workflow matches canonical viewport matrix and retains the focused and fin
  assert.match(workflow,/browser-smoke:\s*[^]*?needs: \[focused, campaign\]\s+if: always\(\)/);
  assert.ok(workflow.includes('test "$FOCUSED_RESULT" = success'));
  assert.ok(workflow.includes('test "$CAMPAIGN_RESULT" = success'));
- for(const script of ["production-smoke","home-polish-qa","library-qa","workshop-browser-qa","verify-browser-coverage"])assert.ok(workflow.includes("node tools/"+script+".mjs"));
+ for(const script of ["production-smoke","home-polish-qa","library-qa","gameplay-hud-qa","workshop-browser-qa","verify-browser-coverage"])assert.ok(workflow.includes("node tools/"+script+".mjs"));
 });
 test("report aggregation CLI requires all four successful exact-commit shards",async()=>{
  const root=await mkdtemp(join(tmpdir(),"shapeweaver-qa-"));

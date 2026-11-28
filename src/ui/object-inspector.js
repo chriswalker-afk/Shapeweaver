@@ -79,7 +79,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   }
   function clearPreview(){preview=null;result.dataset.state="";result.textContent="Preview cleared. No move used.";syncApply();onChange();}
   function setActive(value){
-    active=Boolean(value);panel.hidden=!active;toggle.setAttribute("aria-pressed",String(active));toggle.textContent=active?"Objects: on":"Objects";
+    active=Boolean(value);panel.hidden=!active;toggle.setAttribute("aria-pressed",String(active));const label=toggle.querySelector?.("[data-hud-label]")??toggle;label.textContent=active?"Objects: on":"Objects";
     if(!active){selected=null;type=null;preview=null;result.dataset.state="";updateObject();}syncApply();
   }
   function pick(camera,p){

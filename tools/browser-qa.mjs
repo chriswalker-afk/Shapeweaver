@@ -163,8 +163,9 @@ try{
    assert.equal(await page.locator(".library-level").count(),4);
    await page.locator('.library-level[data-level="'+(index+1)+'"]').click();await page.locator("#library-play").click();
    await page.locator("#room-canvas").waitFor();
-   const initial=await page.locator("#room-stage").boundingBox();
+   const initial=await page.locator("#room-playfield").boundingBox();
    assert.ok(initial&&initial.height>=138,name+" stage");
+   assert.ok((await page.locator("#room-playfield").boundingBox()).height>=138,name+" unobstructed playfield");
    assert.ok(await page.locator("#room-secondary-tools").isHidden(),name+" tools initially collapsed");
    if(index===0){
     await page.locator("#quick-camera").click();assert.equal(await page.locator("#quick-camera").getAttribute("aria-pressed"),"true");
@@ -175,7 +176,7 @@ try{
     await page.locator("#motion-toggle").click();assert.equal(await page.locator("html").getAttribute("data-motion"),"reduced");
     await page.locator("#motion-toggle").click();assert.equal(await page.locator("html").getAttribute("data-motion"),"system");
     await page.locator("#focus-toggle").click();assert.equal(await page.locator("#room-view").getAttribute("data-focus"),"true");
-    assert.ok((await page.locator("#room-stage").boundingBox()).height>=138);
+    assert.ok((await page.locator("#room-playfield").boundingBox()).height>=138);
     await capture(page,name+"-focus-view.png");
     await page.locator("#room-tools-toggle").click();await page.locator("#focus-toggle").click();await page.locator("#room-tools-toggle").click();
    }
@@ -193,7 +194,7 @@ try{
    assert.equal(await page.locator("#object-apply").isEnabled(),true,name+" legal preview "+id);
    assert.ok(await page.locator("#object-image").isEnabled());
    if(index===0){await page.locator("#object-image").click();assert.equal(await page.locator("#quick-camera").getAttribute("aria-pressed"),"true");await page.locator("#quick-camera").click();}
-   const inspected=await page.locator("#room-stage").boundingBox();
+   const inspected=await page.locator("#room-playfield").boundingBox();
    await capture(page,name+"-level"+(index+1)+"-preview.png",index+1);
    await page.locator("#object-apply").click();
    assert.match(await page.locator("#tutorial-moves").innerText(),/Moves: 1/);
@@ -207,10 +208,12 @@ try{
    assert.equal(await page.locator(".library-level").count(),chapter==="7"?6:chapter==="6"?6:chapter==="5"?6:chapter==="4"?6:4);
    await page.locator('.library-level[data-level="'+(index+5)+'"]').click();await page.locator("#library-play").click();
    await page.locator("#room-canvas").waitFor();
-   const initial=await page.locator("#room-stage").boundingBox();
+   const initial=await page.locator("#room-playfield").boundingBox();
    assert.ok(initial.height>=138);
+   await page.locator("#room-tools-toggle").click();
    await page.locator("#tutorial-guidance-toggle").click();assert.equal(await page.locator("#tutorial-guide").isHidden(),true);
    await page.locator("#tutorial-guidance-toggle").click();
+   await page.locator("#room-tools-toggle").click();
    await page.locator("#grid-toggle").click();assert.equal(await page.locator("#grid-toggle").getAttribute("aria-pressed"),"false");
    await page.locator("#grid-toggle").click();assert.equal(await page.locator("#grid-toggle").getAttribute("aria-pressed"),"true");
    await capture(page,name+"-level"+(index+5)+"-initial.png",index+5);

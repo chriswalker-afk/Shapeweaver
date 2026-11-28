@@ -45,6 +45,8 @@ const roomSpells=room=>room.tutorial?(room.tutorial.spells??[room.tutorial.spell
 export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   const canvas=document.getElementById("room-canvas"),host=document.getElementById("room-stage");
   const status=document.getElementById("room-status");
+  // Rails are inside the stage but outside the measured mathematical viewport.
+  const playfield=document.getElementById("room-playfield")??host;
   if(!canvas||!host||!status)return null;
   let initialRoom=validateRoom(GATEHOUSE_PREVIEW),room=initialRoom;
   const $=id=>document.getElementById(id);
@@ -59,6 +61,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   const guidanceButton=$("tutorial-guidance-toggle"),hintPanel=$("tutorial-hint-panel"),hintTitle=$("tutorial-hint-title"),hintText=$("tutorial-hint-text"),hintPrevious=$("tutorial-hint-previous"),hintNext=$("tutorial-hint-next"),hintClose=$("tutorial-hint-close");
   const canHint=()=>Boolean(active&&situation&&!animation&&!player.completed&&!player.blockedRespawn);
   const undoButton=$("undo-cast"),returnButton=$("return-safety"),recoveryCount=$("recovery-count");
+  const resetButton=$("reset-practice"),resetDialog=$("room-reset-dialog"),resetCancel=$("room-reset-cancel"),resetConfirm=$("room-reset-confirm");
   const canUndo=()=>active&&!animation&&!player.completed&&history.stack.length>0;
   const tutorial=()=>TUTORIALS[roomSpells(room)[0]];
   const actionLabel=()=>TUTORIALS[animation?.type]?.label??"Transformation";
@@ -76,9 +79,9 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     motionButton?.setAttribute("aria-pressed",String(preferences.reduced));setText(motionButton,preferences.reduced?"Motion: reduced":reducedMotion()?"Motion: system (reduced)":"Motion: system");
   }
   updatePresentation();
-  const input=mountMovementInput(document,view,()=>active&&!animation&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
+  const input=mountMovementInput(document,view,()=>active&&!resetDialog?.open&&!animation&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
   const loop=createFixedLoop(view,()=>{
-    if(!active||document.hidden)return;
+    if(!active||document.hidden||resetDialog?.open)return;
     if(animation){dirty=true;animation.elapsed+=FIXED_DT;if(reducedMotion()||animation.elapsed>=animation.duration){if(animation.mechanismChanged)cue("mechanism");animation=null;if(playStatus)playStatus.textContent=readyMessage();updateGuide();}return;}
     if(picking||objectMode)return;
     const previous=player,next=stepPlayer(physics,player,input.sample());
@@ -112,14 +115,14 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   });
   function updateControls(){
     if(secondaryTools)secondaryTools.hidden=!toolsOpen;
-    if(toolsButton){toolsButton.setAttribute("aria-expanded",String(toolsOpen));setText(toolsButton,toolsOpen?"View tools ▴":"View tools ▾");}
+    if(toolsButton){toolsButton.setAttribute("aria-expanded",String(toolsOpen));setText(toolsButton,"Settings");}
     if(climbControls)climbControls.hidden=!(physics.ladders?.length);
     controls.overview?.setAttribute("aria-pressed",String(mode==="overview"));
     controls.inspect?.setAttribute("aria-pressed",String(mode==="inspect"));
     gridButton?.setAttribute("aria-pressed",String(grid));
     axesButton?.setAttribute("aria-pressed",String(axes));
     pickButton?.setAttribute("aria-pressed",String(picking));
-    if(gridButton)gridButton.textContent=grid?"Grid: on":"Grid: off";
+    setText(gridButton,grid?"Grid: on":"Grid: off");
     if(axesButton)axesButton.textContent=axes?"Axes: on":"Axes: off";
     if(pickButton)pickButton.textContent=picking?"Picking point":"Pick point";
     if(panel)panel.hidden=!picking;
@@ -143,7 +146,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(pickButton)pickButton.disabled=Boolean(animation);
     if($("object-toggle"))$("object-toggle").disabled=Boolean(animation);
   }
-  viewport=mountViewport(canvas,host,view,(ctx,metrics)=>{
+  viewport=mountViewport(canvas,playfield,view,(ctx,metrics)=>{
     const target=active&&follow&&!animation&&!picking&&!objectMode&&mode==="inspect"?{x:player.x,y:player.y+0.8}:focus;
     camera=createCamera(room.bounds,metrics.width,metrics.height,mode,target,zoom);
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
@@ -236,7 +239,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   on(document,"pointerdown",()=>{if(active&&preferences.sound)audio.unlock();});
   on(document,"keydown",event=>{
     if(active&&preferences.sound)audio.unlock();
-    if(!active||event.code!=="Escape"||animation)return;
+    if(!active||event.code!=="Escape"||animation||resetDialog?.open)return;
     if(hintStage){setHintStage(0);hintButton?.focus?.({preventScroll:true});}
     else if(picking){setPicking(false);canvas.focus?.({preventScroll:true});}
     else if(objectMode)setObjectMode(false);
@@ -255,14 +258,14 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   function setActive(value){
     active=Boolean(value);input.clear();
     if(active){dirty=true;updatePresentation();viewport?.resize();loop.start();}else{loop.stop();if(!result)audio.silence();animation=null;objectMode=false;inspector?.setActive(false);}
-    if(!active)hintStage=0;
+    if(!active){hintStage=0;if(resetDialog?.open)resetDialog.close();}
     updateGuide();
   }
   function updateRecoveryControls(){
     if(undoButton){
       undoButton.disabled=!canUndo();
       const text=history.stack.length?"Undo ("+history.stack.length+")":"Undo";
-      if(undoButton.textContent!==text)undoButton.textContent=text;
+      setText(undoButton,text);
       undoButton.setAttribute("aria-label","Undo last applied transformation; "+history.stack.length+" available. Committed moves still count.");
     }
     if(returnButton)returnButton.disabled=!active||Boolean(animation)||player.completed||player.blockedRespawn;
@@ -273,16 +276,16 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
       recoveryCount.hidden=!text;
     }
   }
-  function setText(el,text){if(el&&el.textContent!==text)el.textContent=text;}
+  function setText(el,text){const label=el?.querySelector?.("[data-hud-label]")??el;if(label&&label.textContent!==text)label.textContent=text;}
   function updateGuide(){
     const config=situation?.config;
     if(tutorialTools)tutorialTools.hidden=!config;
     const context=contextualGuide(room,player,inspector?.getState(),{casting:Boolean(animation),picking,canUndo:canUndo(),moves:history.entries.length,situation});
     if(guide){guide.hidden=!config||!guidanceEnabled;setText(guide,context?context.step+" · "+context.text:"");}
-    if(guidanceButton){guidanceButton.setAttribute("aria-pressed",String(guidanceEnabled));setText(guidanceButton,guidanceEnabled?"Guide: on":"Guide: off");}
+    if(guidanceButton){guidanceButton.hidden=!config;guidanceButton.setAttribute("aria-pressed",String(guidanceEnabled));setText(guidanceButton,guidanceEnabled?"Guide: on":"Guide: off");}
     if(moves)setText(moves,"Moves: "+history.entries.length);
     if(!canHint())hintStage=0;
-    if(hintButton){hintButton.setAttribute("aria-expanded",String(hintStage>0));setText(hintButton,hintStage?"Hide hints":"Hints");hintButton.disabled=!canHint();}
+    if(hintButton){hintButton.setAttribute("aria-expanded",String(hintStage>0));setText(hintButton,hintStage?"Hide hints":"Hints");hintButton.setAttribute("aria-label",hintStage?"Hide hints":"Hints");hintButton.disabled=!canHint();}
     const hint=hintStage?tutorialHint(room,player,hintStage,situation):null;
     if(hintPanel)hintPanel.hidden=!hint;
     setText(hintTitle,hint?"Hint "+hint.stage+" of "+HINT_STAGES.length+" · "+hint.label:"");
@@ -361,9 +364,25 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   on(hintClose,"click",()=>{setHintStage(0);hintButton?.focus?.({preventScroll:true});});
   on(undoButton,"click",undoCast);on(returnButton,"click",recoverPlayer);
   on(followButton,"click",()=>{follow=!follow;redraw();});
-  on($("reset-practice"),"click",()=>{resetPlayer();canvas.focus?.({preventScroll:true});});
-  // Click the stage to return keyboard focus to gameplay after inspecting controls.
-  on(host,"click",()=>{if(!picking&&!objectMode)canvas.focus?.({preventScroll:true});});
+  function finishReset(confirm){
+    if(resetDialog?.open)resetDialog.close();
+    input.clear();
+    if(confirm){setToolsOpen(false);resetPlayer();canvas.focus?.({preventScroll:true});}
+    else resetButton?.focus?.({preventScroll:true});
+  }
+  on(resetButton,"click",()=>{
+    if(!active||resetDialog?.open)return;
+    input.clear();
+    if(typeof resetDialog?.showModal==="function"){resetDialog.showModal();resetCancel?.focus?.({preventScroll:true});}
+    else if(typeof view.confirm==="function"){if(view.confirm("Restart this puzzle? Your current transformations and moves will be reset."))finishReset(true);}
+    else finishReset(true); // lightweight DOM fixtures have no modal implementation
+  });
+  on(resetCancel,"click",()=>finishReset(false));
+  on(resetConfirm,"click",()=>finishReset(true));
+  on(resetDialog,"cancel",event=>{event.preventDefault();finishReset(false);});
+  // Only actual canvas clicks restore gameplay focus. Stage HUD and gamepad
+  // buttons retain their native focus and never double as world clicks.
+  on(host,"click",event=>{if((event.target===canvas||!event.target)&&!picking&&!objectMode)canvas.focus?.({preventScroll:true});});
   updateControls();updateGuide();
   return {get room(){return room;},setLevel,captureAttempt,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getResult:()=>result,setToolsOpen,getToolsOpen:()=>toolsOpen,setGuidance,setHintStage,getTutorialState:()=>({guidanceEnabled,hintStage,step:contextualGuide(room,player,inspector?.getState(),{casting:Boolean(animation),picking,canUndo:canUndo(),moves:history.entries.length,situation})?.step??null}),getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
     getCamera:()=>camera,locateGeometry,setFocusView,getPresentation:()=>({focus:focusView,sound:preferences.sound,reduced:reducedMotion()}),getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),

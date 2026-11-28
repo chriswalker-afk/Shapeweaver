@@ -182,41 +182,70 @@
         </article>
       </section>
       <section class="room-view" id="room-view" aria-labelledby="room-heading" hidden>
-        <header class="room-toolbar">
+        <header class="room-toolbar game-hud">
+          <button type="button" class="room-back hud-button hud-back" id="close-room" aria-label="Back to levels" title="Back to levels"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7M8 12h13"/></svg><span data-hud-label>Levels</span></button>
           <div class="room-heading"><p id="room-chapter">Chapter I · Interactive object practice</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
-          <div class="coordinate-controls primary-tools" role="group" aria-label="Puzzle tools">
-            <button type="button" id="grid-toggle" aria-pressed="true">Grid: on</button>
-            <button type="button" id="object-toggle" class="object-primary" aria-pressed="false" aria-controls="object-panel">Objects</button><button type="button" id="quick-camera" aria-pressed="false" title="Zoom in and follow the apprentice; press again for the full room">Close-up</button>
-          </div>
-          <button type="button" id="room-tools-toggle" class="room-back" aria-expanded="false" aria-controls="room-secondary-tools">View tools ▾</button>
-          <div id="tutorial-tools" class="tutorial-tools" hidden><span id="tutorial-moves">Moves: 0</span><button type="button" id="tutorial-guidance-toggle" class="room-back" aria-pressed="true">Guide: on</button><button type="button" id="tutorial-hint" class="room-back" aria-expanded="false" aria-controls="tutorial-hint-panel">Hints</button></div>
-          <div class="recovery-controls" role="group" aria-label="Mistake recovery">
-            <button type="button" id="undo-cast" class="room-back" title="Undo the last cast and restore a safe earlier position. Committed moves still count." disabled>Undo</button>
-            <button type="button" id="return-safety" class="room-back" title="Return to a safe checkpoint or start without changing the world or move count" aria-label="Return to safety">Return</button>
-            <button type="button" id="reset-practice" class="room-back" title="Start a fresh attempt: restore all objects and clear moves">Reset</button>
-          </div>
-          <button type="button" class="room-back" id="close-room">← Levels</button>
-          <div id="room-secondary-tools" class="room-secondary-tools" role="group" aria-label="View and coordinate tools" hidden>
-          <div class="camera-controls" aria-label="Camera and coordinate tools">
-            <button type="button" id="camera-overview" aria-pressed="true">Full room</button>
-            <button type="button" id="camera-inspect" aria-pressed="false">Inspect</button>
-            <div class="zoom-controls" role="group" aria-label="Zoom">
-              <button type="button" id="camera-zoom-out" aria-label="Zoom out" disabled>−</button>
-              <button type="button" id="camera-zoom-in" aria-label="Zoom in">+</button>
+          <div class="hud-actions" role="group" aria-label="Adventure actions">
+            <div id="tutorial-tools" class="tutorial-tools" hidden>
+              <span id="tutorial-moves" class="hud-moves">Moves: 0</span>
+              <button type="button" id="tutorial-hint" class="room-back hud-button hud-hint" aria-label="Hints" title="Hints" aria-expanded="false" aria-controls="tutorial-hint-panel"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.1 8a3 3 0 1 1 4.3 2.7c-1.4.7-1.4 1.3-1.4 2.8M12 17h.01"/></svg><span data-hud-label>Hints</span></button>
             </div>
-            <div class="pan-controls" aria-label="Pan camera">
-              <button type="button" id="camera-left" aria-label="Pan left" disabled>←</button>
-              <button type="button" id="camera-right" aria-label="Pan right" disabled>→</button>
-              <button type="button" id="camera-up" aria-label="Pan up" disabled>↑</button>
-              <button type="button" id="camera-down" aria-label="Pan down" disabled>↓</button>
+            <div class="recovery-controls" role="group" aria-label="Mistake recovery">
+              <button type="button" id="undo-cast" class="room-back hud-button hud-undo" aria-label="Undo last applied transformation" title="Undo the last cast. Committed moves still count." disabled><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 5l-5 5 5 5M3 10h11a6 6 0 0 1 0 12h-3"/></svg><span data-hud-label>Undo</span></button>
+              <button type="button" id="return-safety" class="room-back hud-button hud-return" title="Return to a safe checkpoint or start without changing the world or move count" aria-label="Return to safety"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 21V3m0 1h13l-3 5 3 5H5M2 21h8"/></svg><span data-hud-label>Return</span></button>
             </div>
           </div>
-            <div class="coordinate-controls"><button type="button" id="axes-toggle" aria-pressed="true">Axes: on</button><button type="button" id="pick-toggle" aria-pressed="false" aria-controls="coordinate-panel">Pick point</button></div>
-            <button type="button" id="follow-toggle" class="room-back" aria-pressed="true">Follow</button><div class="presentation-controls" role="group" aria-label="Presentation preferences"><button type="button" id="focus-toggle" class="room-back" aria-pressed="false">Focus view</button><button type="button" id="sound-toggle" class="room-back" aria-pressed="false">Sound: off</button><button type="button" id="motion-toggle" class="room-back" aria-pressed="false">Motion: system</button></div>
+          <button type="button" id="room-tools-toggle" class="room-back hud-button hud-settings" aria-label="Settings" title="Settings and view tools" aria-expanded="false" aria-controls="room-secondary-tools"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2l2 3.1 3.6-.4.8 3.6L22 10v4l-3.6 1.7-.8 3.6-3.6-.4L12 22l-2-3.1-3.6.4-.8-3.6L2 14v-4l3.6-1.7.8-3.6 3.6.4Z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg><span data-hud-label>Settings</span></button>
+          <div id="room-secondary-tools" class="room-secondary-tools" role="group" aria-label="Settings and view tools" hidden>
+            <div class="hud-tool-group"><span class="hud-group-label">Camera</span>
+              <div class="camera-controls" aria-label="Camera and coordinate tools">
+                <button type="button" id="camera-overview" aria-pressed="true">Full room</button>
+                <button type="button" id="camera-inspect" aria-pressed="false">Inspect</button>
+                <div class="zoom-controls" role="group" aria-label="Zoom">
+                  <button type="button" id="camera-zoom-out" aria-label="Zoom out" disabled>−</button>
+                  <button type="button" id="camera-zoom-in" aria-label="Zoom in">+</button>
+                </div>
+                <div class="pan-controls" aria-label="Pan camera">
+                  <button type="button" id="camera-left" aria-label="Pan left" disabled>←</button>
+                  <button type="button" id="camera-right" aria-label="Pan right" disabled>→</button>
+                  <button type="button" id="camera-up" aria-label="Pan up" disabled>↑</button>
+                  <button type="button" id="camera-down" aria-label="Pan down" disabled>↓</button>
+                </div>
+                <button type="button" id="follow-toggle" class="room-back" aria-pressed="true">Follow</button>
+              </div>
+            </div>
+            <div class="hud-tool-group"><span class="hud-group-label">Mathematics</span>
+              <div class="coordinate-controls"><button type="button" id="axes-toggle" aria-pressed="true">Axes: on</button><button type="button" id="pick-toggle" aria-pressed="false" aria-controls="coordinate-panel">Pick point</button><button type="button" id="tutorial-guidance-toggle" class="room-back" aria-pressed="true">Guide: on</button></div>
+            </div>
+            <div class="hud-tool-group"><span class="hud-group-label">Display &amp; audio</span>
+              <div class="presentation-controls" role="group" aria-label="Presentation preferences"><button type="button" id="focus-toggle" class="room-back" aria-pressed="false">Focus view</button><button type="button" id="sound-toggle" class="room-back" aria-pressed="false">Sound: off</button><button type="button" id="motion-toggle" class="room-back" aria-pressed="false">Motion: system</button></div>
+            </div>
+            <div class="hud-tool-group hud-reset-group"><span class="hud-group-label">Attempt</span><button type="button" id="reset-practice" class="room-back hud-button hud-reset" title="Start a fresh attempt"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 1 3 6.7M3 5v7h7"/></svg><span data-hud-label>Reset puzzle</span></button></div>
           </div>
         </header>
         <div class="room-stage" id="room-stage">
-          <canvas id="room-canvas" tabindex="0" aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Space A D W S Z" aria-label="Gatehouse puzzle. Arrow keys or WASD to move; Space or Z to jump. Coordinate picking and object inspection pause movement."></canvas>
+          <div class="stage-tools" role="group" aria-label="Quick puzzle tools">
+            <div class="coordinate-controls primary-tools">
+              <button type="button" id="grid-toggle" class="hud-button hud-view-tool" aria-label="Grid" aria-pressed="true" title="Toggle coordinate grid"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3h18v18H3ZM3 9h18M3 15h18M9 3v18M15 3v18"/></svg><span data-hud-label>Grid: on</span></button>
+              <button type="button" id="quick-camera" class="hud-button hud-view-tool" aria-label="Close-up or full room" aria-pressed="false" title="Zoom in and follow the apprentice; press again for the full room"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5M12 8v8M8 12h8"/></svg><span data-hud-label>Close-up</span></button>
+            </div>
+            <button type="button" id="object-toggle" class="hud-button object-primary" aria-label="Objects" aria-pressed="false" aria-controls="object-panel" title="Choose an enchanted object"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 20 11-11 3 3L7 23ZM16 2v4M14 4h4M5 3v4M3 5h4M21 14v4M19 16h4"/></svg><span data-hud-label>Objects</span></button>
+          </div>
+          <div class="room-playfield" id="room-playfield">
+            <canvas id="room-canvas" tabindex="0" aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Space A D W S Z" aria-label="Gatehouse puzzle. Arrow keys or WASD to move; Space or Z to jump. Coordinate picking and object inspection pause movement."></canvas>
+          </div>
+          <div class="movement-controls gamepad-dock" id="movement-controls" role="group" aria-label="Character movement">
+            <div class="gamepad-direction" role="group" aria-label="Direction controls">
+              <button type="button" class="gamepad-button" data-move="left" aria-label="Walk left" title="Walk left (A or left arrow)"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 4 6 12l9 8Z"/></svg></button>
+              <button type="button" class="gamepad-button" data-move="right" aria-label="Walk right" title="Walk right (D or right arrow)"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 4 9 8-9 8Z"/></svg></button>
+              <span class="climb-controls" id="climb-controls">
+                <button type="button" class="gamepad-button gamepad-climb" data-move="up" aria-label="Climb up" title="Climb up (W or up arrow)"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 15 8-9 8 9Z"/></svg></button>
+                <button type="button" class="gamepad-button gamepad-climb" data-move="down" aria-label="Climb down" title="Climb down (S or down arrow)"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 9 8 9 8-9Z"/></svg></button>
+              </span>
+            </div>
+            <span class="gamepad-keyboard" aria-hidden="true"><kbd>A</kbd><kbd>D</kbd> Move <span>·</span> <kbd>Space</kbd> Jump</span>
+            <button type="button" data-move="jump" class="gamepad-button jump-control" aria-label="Jump" title="Jump (Space or Z)"><svg class="hud-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4 11h5v10h6V11h5Z"/></svg><span>Jump</span></button>
+          </div>
         </div>
         <section id="coordinate-panel" class="coordinate-panel" aria-label="Coordinate picker" hidden>
           <label class="snap-field" for="coordinate-snap">Click snap <select id="coordinate-snap"><option value="1">1 unit</option><option value="0.5">½ unit</option><option value="0.1">0.1 unit</option></select></label>
@@ -246,13 +275,12 @@
           </form>
           <output id="object-result" role="status" aria-live="polite"></output>
         </section>
+        <dialog id="room-reset-dialog" class="room-reset-dialog" aria-labelledby="room-reset-title" aria-describedby="room-reset-description">
+          <h3 id="room-reset-title">Restart this puzzle?</h3>
+          <p id="room-reset-description">Your current transformations and moves will be reset. Previously earned stars are kept.</p>
+          <div class="reset-dialog-actions"><button id="room-reset-cancel" type="button" class="room-back" autofocus>Keep playing</button><button id="room-reset-confirm" type="button" class="hud-reset">Restart puzzle</button></div>
+        </dialog>
         <footer class="room-footer">
-          <div class="movement-controls" id="movement-controls" role="group" aria-label="Character movement">
-            <button type="button" data-move="left" aria-label="Walk left">←</button>
-            <button type="button" data-move="right" aria-label="Walk right">→</button>
-            <span class="climb-controls" id="climb-controls"><button type="button" data-move="up" aria-label="Climb up">↑</button><button type="button" data-move="down" aria-label="Climb down">↓</button></span>
-            <button type="button" data-move="jump" class="jump-control">Jump</button>
-          </div>
           <div class="play-info"><span id="room-status">Loading practice room…</span><span id="play-status" role="status">Arrows / WASD · Space to jump · Up/down on ladders</span><span id="recovery-count" hidden></span><span id="tutorial-guide" role="status" aria-live="polite" hidden></span></div>
           <aside id="tutorial-hint-panel" class="tutorial-hint-panel" aria-labelledby="tutorial-hint-title" hidden>
             <div class="hint-content" aria-live="polite"><strong id="tutorial-hint-title"></strong><p id="tutorial-hint-text"></p></div>

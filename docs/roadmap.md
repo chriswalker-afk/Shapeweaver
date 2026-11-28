@@ -70,5 +70,8 @@ Chapter VII begins with live vertical mirror sliders and reuse of a translated, 
 ## Historical milestone: PR32
 Levels 33–34 introduce three genuine solution routes with different object usage and a crystal delivery condition independent of traversal. PR33 finishes the campaign with The Observatory Machine and The Final Ascent: interconnected mechanisms and all four transformations. PR34 is the final campaign audit.
 
-## Current milestone: PR33
+## Historical milestone: PR33
 All 36 levels are authored. The Observatory Machine combines a compound selector, an AND-linked seal and shape lock, and a reused deck. The Final Ascent combines all four transformations with two equally efficient five-cast routes and live star delivery. PR34: final campaign audit, review progression and alternative routes, strengthen regression/QA evidence, and resolve blockers before PR35 polish and PR36 release.
+
+## Current milestone: PR34
+Full-campaign acceptance review, exact coordinate oracle, live preview/rejection and recovery fork checks, independent workshop verification for every recorded/alternative route, catalog and browser coverage guards. See [Final campaign audit](final-campaign-audit.md). PR35 addresses audio, animation, accessibility, touch, responsive layout and performance; manual playtesting remains a separate release gate before PR36.

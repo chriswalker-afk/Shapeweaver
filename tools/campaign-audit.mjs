@@ -1,5 +1,6 @@
 import {pathToFileURL} from "node:url";
-import {LEVELS} from "../src/levels/campaign.js";
+import {LEVELS,CHAPTERS} from "../src/levels/campaign.js";
+import {auditCatalog,auditIntegrityRoute,exactImageErrors} from "./campaign-integrity.mjs";
 import {validateRoom} from "../src/levels/gatehouse-preview.js";
 import {BROOK_SOLUTION} from "../src/levels/across-the-brook.js";
 import {GATE_SOLUTION} from "../src/levels/stubborn-gate.js";
@@ -97,6 +98,8 @@ const near=(a,b)=>Math.abs(a-b)<=1e-6*Math.max(1,Math.abs(a),Math.abs(b));
 function invariantErrors(before,after,cast){
  const original=referencePoints(before),image=new Map(referencePoints(after).map(p=>[p.id,p.point]));
  const errors=[],factor=cast.type==="enlarge"?cast.factor:1;
+ const record=cast.type==="rotate"||cast.type==="enlarge"?{...cast,centre:[cast.cx,cast.cy]}:cast;
+ errors.push(...exactImageErrors(before,after,record));
  if(image.size!==original.length||original.some(p=>!image.has(p.id)))return ["Reference identity changed"];
  for(let i=0;i<original.length;i++)for(let j=i+1;j<original.length;j++){
   const a=original[i].point,b=original[j].point,c=image.get(original[i].id),d=image.get(original[j].id);
@@ -263,7 +266,13 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const alternatives=ALTERNATIVE_ROUTES.map(auditAlternativeRoute);
  for(const a of alternatives)console.log(JSON.stringify(a));
  console.log("ALTERNATIVE ROUTES: "+alternatives.filter(a=>!a.errors.length).length+"/"+alternatives.length+" passed.");
- if([...report,...alternatives].some(r=>r.errors.length))process.exitCode=1;
+ const catalog=auditCatalog(LEVELS,CHAPTERS,RECORDED_ROUTES,ALTERNATIVE_ROUTES);
+ console.log("CAMPAIGN CATALOG: "+JSON.stringify(catalog));
+ const integrity=[...RECORDED_ROUTES,...ALTERNATIVE_ROUTES].map(f=>auditIntegrityRoute(LEVELS.find(l=>l.number===f.number),f,campaignActions(f)));
+ for(const result of integrity)console.log("INTEGRITY: "+JSON.stringify(result));
+ const sum=key=>integrity.reduce((n,r)=>n+r[key],0);
+ console.log("RELEASE INTEGRITY: "+integrity.filter(r=>!r.errors.length).length+"/"+integrity.length+" routes; "+sum("images")+" exact point images; "+sum("previewChecks")+" previews; "+sum("undos")+" undo snapshots; "+sum("returns")+" safe returns; "+sum("resetRequired")+" explicit reset-required states; "+integrity.filter(r=>r.bundleVerified).length+" independently verified bundles.");
+ if([...report,...alternatives,catalog,...integrity].some(r=>r.errors.length))process.exitCode=1;
  // New shortcut hits are evidence for review, not automatic proof of a broken
  // level: genuine alternative solutions must not be prohibited arbitrarily.
 }

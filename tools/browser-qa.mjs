@@ -9,6 +9,7 @@ const origin="http://127.0.0.1:"+server.address().port+"/";
 const browser=await chromium.launch({headless:true});
 const out="browser-qa";await mkdir(out,{recursive:true});
 const report=[];
+const viewports=["desktop","small-desktop","landscape-phone","portrait-phone"];
 const cases=[
  ["brook-beam","translate",{dx:"12",dy:"0"}],
  ["stubborn-gate","rotate",{angle:"90",direction:"anticlockwise",cx:"14",cy:"8"}],
@@ -128,8 +129,12 @@ try{
    report.push({viewport:name,level:index+5,stageHeight:initial.height,casts:spells.length});
    await page.locator("#close-room").click();
   }
-  assert.deepEqual(errors,[],name+" runtime errors");await page.close();
+  assert.deepEqual(errors,[],name+" runtime errors");
+  assert.deepEqual(report.filter(r=>r.viewport===name).map(r=>r.level),Array.from({length:36},(_,i)=>i+1),name+" all campaign levels covered");
+  await page.close();
  }
+ assert.equal(report.length,36*viewports.length,"All 144 level/viewport combinations covered");
+ console.log("BROWSER COVERAGE: "+report.length+"/144 initial-level and cast-setup combinations; screenshots saved for manual review.");
 }finally{
  await writeFile(out+"/layout-report.json",JSON.stringify(report,null,2));
  await browser.close();await new Promise(resolve=>server.close(resolve));

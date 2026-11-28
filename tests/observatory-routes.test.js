@@ -23,7 +23,7 @@ test("all three routes use distinct actual object geometry and independently rep
   const [long,short,raised]=s.room.objects.map(o=>polygonBounds(o.vertices));
   if(!f.name){assert.equal(long.minX,22);assert.equal(long.maxX,56);assert.equal(short.minX,2);}
   else if(f.name==="Two independent spans"){assert.equal(long.minX,4);assert.equal(short.minX,22);assert.equal(raised.minX,44);assert.equal(raised.maxY,5.4);}
-  else {assert.equal(long.minX,4);assert.equal(short.minX,44);assert.equal(raised.minX,56);assert.equal(s.player.checkpoint,"three-ways-far");}
+  else {assert.equal(long.minX,4);assert.equal(short.minX,44);assert.equal(raised.minX,55.4);assert.equal(s.player.checkpoint,"three-ways-far");}
   assert.ok(tutorialSituation(s.room,s.player).ready);
  }
  assert.deepEqual(reports.map(r=>r.errors),[[],[],[]]);
@@ -44,7 +44,7 @@ test("portal alone cannot finish the lost star; delivering from the portal can f
  const s=createWorkshopSession(THE_LOST_STAR),[a,b]=LOST_STAR_CASTS;
  cast(s,a);move(s,300);move(s,120,true);move(s,280);
  assert.ok(Math.abs(s.player.x-s.room.exit.x)<.9);assert.equal(s.player.completed,false);
- assert.equal(s.player.respawns,0);assert.throws(()=>s.bundle(),/complete/i);
+ assert.equal(s.player.respawns,0);assert.throws(()=>s.bundle(),/reach the portal/i);
  cast(s,b);move(s,1,false,0);assert.equal(s.player.completed,true);
  assert.deepEqual(verifyWorkshopBundle(s.bundle()),{ok:true,result:s.bundle().result});
 });

@@ -6,12 +6,12 @@ export const THREE_WAYS_ACROSS=deepFreeze({...base(33,"Three Ways Across",68,["t
  terrain:[stone("west-bank",0,0,22,3),stone("star-island",34,0,10,3),stone("east-bank",56,0,12,3)],
  hazards:[{id:"first-star-channel",kind:"water",vertices:rectangle(22,0,12,2.1)},{id:"second-star-channel",kind:"water",vertices:rectangle(44,0,12,2.1)}],
  objects:[beam("long-star-deck","Long star deck",4,16,34,.6,["translate"]),beam("short-star-deck","Reusable short deck",2,6,12,.6,["translate","reflect"]),
- {...beam("raised-star-beam","Raised hinged span",56,4.8,.6,12,["rotate"]),hinge:[56,4.8],support:"hinged"}],
+ {...beam("raised-star-beam","Raised hinged span",55.4,5.4,.6,12,["rotate"]),hinge:[56,5.4],support:"hinged"}],
  checkpoints:[{id:"three-ways-island",x:39,y:3},{id:"three-ways-far",x:60,y:3}],
  decor:[{kind:"lantern",x:3,y:5},{kind:"lantern",x:39,y:5},{kind:"lantern",x:65,y:5}]
 });
-export const LONG_DECK_CASTS=deepFreeze([{objectId:"long-star-deck",type:"translate",dx:18,dy:-12}]);
-export const TWO_SPAN_CASTS=deepFreeze([{objectId:"short-star-deck",type:"translate",dx:20,dy:-2},{objectId:"raised-star-beam",type:"rotate",angle:90,direction:"anticlockwise",cx:56,cy:4.8}]);
+export const LONG_DECK_CASTS=deepFreeze([{objectId:"long-star-deck",type:"translate",dx:18,dy:-13}]);
+export const TWO_SPAN_CASTS=deepFreeze([{objectId:"short-star-deck",type:"translate",dx:20,dy:-3},{objectId:"raised-star-beam",type:"rotate",angle:90,direction:"anticlockwise",cx:56,cy:5.4}]);
 export const REUSE_DECK_CASTS=deepFreeze([{...TWO_SPAN_CASTS[0]},{objectId:"short-star-deck",type:"reflect",line:"x = 39"}]);
 export const THE_LOST_STAR=deepFreeze({...base(34,"The Lost Star",46,["translate","reflect"],2),
  terrain:[stone("west-bank",0,0,22,3),stone("east-bank",34,0,12,3)],

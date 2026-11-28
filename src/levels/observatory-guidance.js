@@ -48,14 +48,14 @@ export function observatorySituation(room,player=null){
   if(first&&!second){
    if(x<35||x>43||!player?.grounded)return state("island-first",{...config,traverse:"Cross the first bridge and stop on the safe island. Then reflect the short deck or turn the raised span."},{travel:true});
    const a=round((sb.minX+56)/2);
-   return state("reuse-short",{...config,objectId:short.id,type:"reflect",name:"Reflection",spell:"A vertical mirror keeps the height and maps each x to twice the mirror coordinate minus x.",fields:"Enter the mirror line equation."},{reasoning:"The left edge of the bridge must become the right edge of the second crossing. Find the midpoint of "+round(sb.minX)+" and 56.",worked:"Reflect in x = "+a+". Alternatively rotate the raised span 90 degrees anticlockwise about (56, 4.8).",raw:{line:"x = "+a}});
+   return state("reuse-short",{...config,objectId:short.id,type:"reflect",name:"Reflection",spell:"A vertical mirror keeps the height and maps each x to twice the mirror coordinate minus x.",fields:"Enter the mirror line equation."},{reasoning:"The left edge of the bridge must become the right edge of the second crossing. Find the midpoint of "+round(sb.minX)+" and 56.",worked:"Reflect in x = "+a+". Alternatively rotate the raised span 90 degrees anticlockwise about (56, 5.4).",raw:{line:"x = "+a}});
   }
   if(second&&!first){
-   const dx=round(22-sb.minX),dy=round(4-sb.minY);
-   return state("first-short",{...config,objectId:short.id,type:"translate",name:"Translation",spell:"Translate the short deck to the first channel.",fields:"Enter both vector components."},{reasoning:"Map the lower-left corner to (22, 4).",worked:"Translate by vector "+pt(dx,dy)+".",raw:{dx,dy}});
+   const dx=round(22-sb.minX),dy=round(3-sb.minY);
+   return state("first-short",{...config,objectId:short.id,type:"translate",name:"Translation",spell:"Translate the short deck to the first channel.",fields:"Enter both vector components."},{reasoning:"Map the lower-left corner to (22, 3).",worked:"Translate by vector "+pt(dx,dy)+".",raw:{dx,dy}});
   }
-  const dx=round(22-lb.minX),dy=round(4-lb.minY);
-  return state("long-bridge",{...config,objectId:long.id,type:"translate",name:"Translation",spell:"A translation moves every vertex by the same vector. The long deck can span both channels.",fields:"Enter both vector components."},{reasoning:"The two outer banks are 34 units apart. Map the lower-left corner of the long deck onto (22, 4).",worked:"Translate the long deck by vector "+pt(dx,dy)+". This is one efficient route; the shorter pieces permit other routes.",raw:{dx,dy}});
+  const dx=round(22-lb.minX),dy=round(3-lb.minY);
+  return state("long-bridge",{...config,objectId:long.id,type:"translate",name:"Translation",spell:"A translation moves every vertex by the same vector. The long deck can span both channels.",fields:"Enter both vector components."},{reasoning:"The two outer banks are 34 units apart. Map the lower-left corner of the long deck onto (22, 3).",worked:"Translate the long deck by vector "+pt(dx,dy)+". This is one efficient route; the shorter pieces permit other routes.",raw:{dx,dy}});
  }
  if(room.id==="observatory-34"){
   const o=room.objects.find(o=>o.id==="rescue-deck"),b=polygonBounds(o.vertices),crystal=room.objects.find(o=>o.id==="lost-crystal"),cb=polygonBounds(crystal.vertices),target=room.deliveries[0],tb=polygonBounds(target.vertices);

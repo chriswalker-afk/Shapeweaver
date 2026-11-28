@@ -90,7 +90,7 @@ export function removeItem(room,group,id){
  r[group]=r[group].filter(o=>o.id!==id);return prepareDraft(r);
 }
 export const PALETTE=Object.freeze([
- ["terrain","Terrain block"],["water","Water hazard"],["beam","Timber beam"],["bearing-beam","Two-ended bridge piece"],["waterwheel","Waterwheel rotor"],["orbit-beam","External-centre walkway"],["dock-bracket","L-shaped dock piece"],["gate","Hinged gate"],["crate","Step crate"],["barrel","Weighted barrel"],["ladder","Transformable ladder"],["bridge-ladder","Bridge ladder"],["static-ladder","Fixed ladder"],["wedge","Wedge"],["mushroom","Spring mushroom"],["key","L-shaped key"],["linked-gate","Linked gate"],["plate","Pressure plate"],["hinge-socket","Hinge socket"],["shape-socket","Shape socket"],["checkpoint","Checkpoint"],["fern","Fern"],["lantern","Lantern"]
+ ["terrain","Terrain block"],["water","Water hazard"],["beam","Timber beam"],["bearing-beam","Two-ended bridge piece"],["waterwheel","Waterwheel rotor"],["orbit-beam","External-centre walkway"],["dock-bracket","L-shaped dock piece"],["gate","Hinged gate"],["crate","Step crate"],["barrel","Weighted barrel"],["compound-weight","Linked double seal"],["ladder","Transformable ladder"],["bridge-ladder","Bridge ladder"],["static-ladder","Fixed ladder"],["wedge","Wedge"],["mushroom","Spring mushroom"],["key","L-shaped key"],["linked-gate","Linked gate"],["plate","Pressure plate"],["hinge-socket","Hinge socket"],["shape-socket","Shape socket"],["checkpoint","Checkpoint"],["fern","Fern"],["lantern","Lantern"]
 ]);
 export function addTemplate(room,type,x,y){
  require(PALETTE.some(p=>p[0]===type)&&finite(x)&&finite(y),"Invalid palette placement");
@@ -109,6 +109,7 @@ export function addTemplate(room,type,x,y){
  case "gate":Object.assign(o,{vertices:rect(.5,4),hinge:[x,y+4],permissions:["rotate"],support:"hinged"});break;
  case "crate":o.vertices=rect(2,2);break;
  case "barrel":Object.assign(o,{vertices:rect(2,2.5),permissions:["reflect","translate"],pressesPlates:true});break;
+ case "compound-weight":Object.assign(o,{material:"brass",vertices:[[x,y],[x+1,y],[x+1,y+2],[x+5,y+2],[x+5,y],[x+7,y],[x+7,y+3],[x,y+3]],pressesPlates:true});break;
  case "ladder":Object.assign(o,{vertices:rect(4,.6),hinge:[x,y],permissions:["rotate"],support:"hinged"});break;
  case "bridge-ladder":Object.assign(o,{kind:"ladder",vertices:rect(8,.6),hinge:[x+8,y],permissions:["translate","rotate"],support:"supported",pivotOnly:true,bridgeDeck:true});break;
  case "static-ladder":group="ladders";o={id,x,width:.6,bottom:y,top:y+4};break;

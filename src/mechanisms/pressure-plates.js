@@ -26,6 +26,13 @@ export function plateGroups(room){
  }
  return [...groups].map(([gateId,plates])=>({gateId,plates,held:plates.filter(p=>p.pressed).length,total:plates.length}));
 }
+/** A gate may require pressure AND a geometric key fit. Keep this derived
+ * from the same contact predicates used by the actual gate transaction. */
+export function mixedGateProgress(room,gateId){
+ const plates=(room.plates??[]).filter(p=>p.gateId===gateId),slots=(room.shapeSockets??[]).filter(s=>s.gateId===gateId);
+ if(!plates.length||!slots.length)return null;
+ return {held:plates.filter(p=>plateHeld(room,p)).length+slots.filter(s=>shapeSocketFilled(room,s)).length,total:plates.length+slots.length};
+}
 export function multiPlateEffects(before,after){
  const previous=new Map(plateGroups(before).map(g=>[g.gateId,g])),effects=[];
  for(const group of plateGroups(after)){
@@ -35,6 +42,10 @@ export function multiPlateEffects(before,after){
   if(!changed.length)continue;
   for(const {p,i} of changed)effects.push((p.label??"Plate "+(i+1))+(p.pressed?" will be held.":" will be released."));
   effects.push(group.held+"/"+group.total+" linked plates will be held.");
+ }
+ for(const g of after.objects.filter(o=>o.kind==="linked-gate")){
+  const progress=mixedGateProgress(after,g.id),old=mixedGateProgress(before,g.id);
+  if(progress&&progress.held!==old?.held)effects.push((g.label??g.id)+": "+progress.held+"/"+progress.total+" linked conditions will be held.");
  }
  return effects;
 }

@@ -1,5 +1,5 @@
 import {isBridgeDeck,ladderSegment} from "../mechanisms/transformable-ladders.js";
-import {plateGroups} from "../mechanisms/pressure-plates.js";
+import {plateGroups,mixedGateProgress} from "../mechanisms/pressure-plates.js";
 import { polygonBounds } from "../geometry/world.js";
 import { worldToScreen } from "./camera.js";
 import {SPELL_COLOURS} from "./cast-effects.js";
@@ -333,7 +333,7 @@ function drawShapeSockets(ctx,camera,room,foreground=false){
       const p=worldToScreen(camera,{x:b.maxX,y:b.maxY}),q=worldToScreen(camera,{x:(gb.minX+gb.maxX)/2,y:gb.maxY-.5});
       ctx.strokeStyle=colour;ctx.lineWidth=Math.max(1,s*.045);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,q.y);ctx.lineTo(q.x,q.y);ctx.stroke();ctx.setLineDash([]);
       worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.55,slot.locking?(slot.filled?"KEY CAPTURED":(slot.label??"LOCKING RECESS").toUpperCase()+" · LOCKS"):(slot.filled?"KEY FITS":"LOCK RECESS"),colour);
-      worldLabel(ctx,camera,(gb.minX+gb.maxX)/2,gb.minY+4,g.open?"OPEN":"LOCKED",colour);
+      if(!mixedGateProgress(room,g.id))worldLabel(ctx,camera,(gb.minX+gb.maxX)/2,gb.minY+4,g.open?"OPEN":"LOCKED",colour);
     }
     ctx.restore();
   }
@@ -356,7 +356,8 @@ function drawPlates(ctx,camera,room){
 function drawPlateGateStates(ctx,camera,room){
   for(const group of plateGroups(room)){
     const g=room.objects.find(o=>o.id===group.gateId),b=polygonBounds(g.vertices);
-    const label=(group.total>1?group.held+"/"+group.total+" HELD · ":"")+(g.open?"OPEN":"CLOSED");
+    const mixed=mixedGateProgress(room,g.id);
+    const label=(mixed?mixed.held+"/"+mixed.total+" LINKED · ":group.total>1?group.held+"/"+group.total+" HELD · ":"")+(g.open?"OPEN":"CLOSED");
     worldLabel(ctx,camera,(b.minX+b.maxX)/2,Math.min(b.maxY-.55,b.minY+4),label,g.open?"#c7ef9d":"#f1c37b");
   }
 }

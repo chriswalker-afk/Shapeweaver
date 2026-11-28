@@ -1,0 +1,8 @@
+# Mirror Archives finale
+## Level 23 — The Double Seal
+One contiguous concave brass assembly has two connected unequal-width feet. Rotate it by 180 degrees about the marked pivot (7.5, 13.5), then translate by (12, -3). Both feet must contact the linked plates. A small physical separator pin prevents simply landing the flat inverted bar across the two plates. It fits within the gap of the correctly oriented assembly. No scripted cast sequence.
+## Level 24 — The Archivist’s Chain
+Translate the connected three-foot assembly (8, 0). Two feet activate the transit gate, which physically blocks the key's translation path until opened; the third is an input to the final gate. Rotate the asymmetric key 90 degrees clockwise about (5, 14), then translate by (27, 0) into its locking recess. The final gate uses AND logic between the third plate and the exact key fit. Alternate ordering is allowed where geometrically legal (rotate the key earlier, for example).
+## Implementation boundary
+Rigid assemblies are single connected concave polygons, not independently moving pieces or arbitrary disconnected groups. All vertices, pivots, collision checks, previews and undo use the existing transformation engine. Mixed gate progress is derived from the same effective contact and fit predicates used by mechanism resolution. The internal workshop has a compound-weight template and can edit its polygon.
+Levels target two and three transformations respectively. Automated fixtures cover geometry, omitted casts, recovery, scoring and independent workshop replay; browser QA covers all planned casts at four viewport sizes. Manual visual review and classroom playtesting remain pending.

@@ -650,6 +650,7 @@ test("the horizontal ladder is a solid bridge, then a climbable ladder after saf
  view.fire("keydown",{code:"ArrowUp"});frame(222);view.fire("keyup",{code:"ArrowUp"});
  view.fire("keydown",{code:"ArrowRight"});view.fire("keydown",{code:"Space"});frame(126);view.fire("keyup",{code:"Space"});view.fire("keyup",{code:"ArrowRight"});
  assert.equal(app.state.view,"results");assert.equal(c.getResult().moves,3);assert.equal(c.getResult().stars,3);assert.equal(c.getResult().returns,0);
- assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
+ assert.equal(els["results-next"].hidden,false);assert.equal(els["results-next"].disabled,false);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level21");assert.equal(c.room.id,"archives-21");
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });

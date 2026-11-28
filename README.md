@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR30 — The Alchemist’s Workshop: Levels 29–30. Thirty released puzzles; complementary selector gates, multi-stage traversal and bridge reuse. Next: PR31 — The Celestial Observatory: Levels 31–32.
+PR31 — The Celestial Observatory: Levels 31–32. Thirty-two released puzzles; movable reflection lines and reflected pivot assemblies. Next: PR32 — The Celestial Observatory: Levels 33–34.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR30 — The Alchemist’s Workshop: Levels 29–30. Thirty released puzzles; co
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Observatory opening](docs/observatory-mirrors.md) — live movable mirror equations and bridge reuse.
 - [Alchemist’s Workshop finale and review](docs/alchemist-finale.md) — selector state, chronological bridge reuse, chapter review.
 - [Alchemist’s movable pivots](docs/alchemist-pivots.md) — attached beams and shared moving centres.
 - [Alchemist’s Workshop opening](docs/alchemist-workshop.md) — fractional scale factors and physical clearance.

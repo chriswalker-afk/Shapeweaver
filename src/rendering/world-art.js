@@ -1,3 +1,4 @@
+import {mirrorRails,railMirrorValue,railEquation} from "../mechanisms/movable-mirrors.js";
 import {isBridgeDeck,ladderSegment} from "../mechanisms/transformable-ladders.js";
 import {plateGroups,mixedGateProgress,selectorPlates,plateHeld} from "../mechanisms/pressure-plates.js";
 import { polygonBounds } from "../geometry/world.js";
@@ -271,6 +272,27 @@ function clockworkBackdrop(ctx,camera,room){
   const a=worldToScreen(camera,{x:room.bounds.minX,y:10.5}),b=worldToScreen(camera,{x:room.bounds.maxX,y:10.5});
   ctx.strokeStyle="#aa90664d";ctx.lineWidth=Math.max(2,s*.26);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
 }
+function observatoryBackdrop(ctx,camera,room){
+ const b=room.bounds,s=camera.scale;
+ ctx.save();
+ for(let i=0;i<44;i++){
+  const x=b.minX+(b.maxX-b.minX)*((i*37%101)/101),y=b.minY+(b.maxY-b.minY)*(.42+.56*((i*19%97)/97));
+  const p=worldToScreen(camera,{x,y});ctx.fillStyle=i%4===0?"#f5dea8b0":"#d9dbfa65";
+  ctx.beginPath();ctx.arc(p.x,p.y,Math.max(.8,s*(i%4===0?.095:.045)),0,Math.PI*2);ctx.fill();
+ }
+ for(let x=b.minX+4;x<b.maxX;x+=12){
+  const p=worldToScreen(camera,{x,y:4}),w=9*s,h=(b.maxY-5)*s;
+  ctx.strokeStyle="#9dabc238";ctx.lineWidth=Math.max(1,s*.12);ctx.beginPath();ctx.moveTo(p.x-w/2,p.y);ctx.lineTo(p.x-w/2,p.y-h*.72);ctx.quadraticCurveTo(p.x,p.y-h,p.x+w/2,p.y-h*.72);ctx.lineTo(p.x+w/2,p.y);ctx.stroke();
+ }
+ ctx.restore();
+}
+function drawMirrorRails(ctx,camera,room){
+ for(const rail of mirrorRails(room)){
+  const x=railMirrorValue(rail),b=polygonBounds(rail.vertices),a=worldToScreen(camera,{x,y:room.bounds.minY}),z=worldToScreen(camera,{x,y:room.bounds.maxY});
+  ctx.save();ctx.strokeStyle="#b9aff3bb";ctx.lineWidth=1.5;ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(z.x,z.y);ctx.stroke();ctx.restore();
+  worldLabel(ctx,camera,x,b.maxY+.65,"MIRROR · "+railEquation(rail),"#e5d7ff");
+ }
+}
 function alchemistBackdrop(ctx,camera,room){
  const s=camera.scale,b=room.bounds;
  // Muted laboratory shelving, round flasks and copper pipes. Scenery only.
@@ -474,8 +496,8 @@ function apprentice(ctx,camera,player,art,reducedMotion) {
 /** A deterministic scene draw. Art never modifies the room or collision polygons. */
 export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,reducedMotion=false) {
   ctx.setTransform(metrics.scaleX,0,0,metrics.scaleY,0,0);
-  const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===6?"#263e43":room.chapter===5?"#302b45":room.chapter===4?"#31596d":room.chapter===3?"#34434e":room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===6?"#8ca79b":room.chapter===5?"#9c8ba9":room.chapter===4?"#b4d0ca":room.chapter===3?"#a6a99b":room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
-  if(![2,3,4,5,6].includes(room.chapter)){backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);}
+  const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===7?"#202846":room.chapter===6?"#263e43":room.chapter===5?"#302b45":room.chapter===4?"#31596d":room.chapter===3?"#34434e":room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===7?"#747da8":room.chapter===6?"#8ca79b":room.chapter===5?"#9c8ba9":room.chapter===4?"#b4d0ca":room.chapter===3?"#a6a99b":room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
+  if(![2,3,4,5,6,7].includes(room.chapter)){backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);}
   ctx.save();
   const b=room.bounds,tl=worldToScreen(camera,{x:b.minX,y:b.maxY}),br=worldToScreen(camera,{x:b.maxX,y:b.minY});
   ctx.beginPath();ctx.rect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.clip();
@@ -484,9 +506,11 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   if(room.chapter===4)riverworksBackdrop(ctx,camera,room);
   if(room.chapter===5)archivesBackdrop(ctx,camera,room);
    if(room.chapter===6)alchemistBackdrop(ctx,camera,room);
+  if(room.chapter===7)observatoryBackdrop(ctx,camera,room);
   sceneDetails(ctx,camera,room);
   for(const item of room.hazards)hazard(ctx,camera,item,art);
   for(const item of room.terrain)terrain(ctx,camera,item,art);
+  drawMirrorRails(ctx,camera,room);
   drawRotationMechanisms(ctx,camera,room);
   drawPlates(ctx,camera,room);
   drawSelectors(ctx,camera,room);
@@ -514,6 +538,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   if(room.id==="archives-20")worldLabel(ctx,camera,36,6.35,"SAFE BALCONY","#e9cffa");
    if(room.id==="alchemist-25")worldLabel(ctx,camera,29,8.2,"RAISED WORKBENCH","#d1eac9");
    if(room.id==="alchemist-26"){worldLabel(ctx,camera,21,13.45,"NARROW CHANNEL","#d1eac9");worldLabel(ctx,camera,21,10.15,"1.6 UNITS CLEAR","#d1eac9");}
+  if(room.id==="observatory-32")worldLabel(ctx,camera,39,5.35,"SAFE STAR PLATFORM","#e5d7ff");
   if(room.id==="alchemist-29")worldLabel(ctx,camera,24,5.4,"SAFE CHAMBER","#d1eac9");
   if(room.id==="alchemist-30"){worldLabel(ctx,camera,21,12.8,"NARROW CHANNEL","#d1eac9");worldLabel(ctx,camera,44.5,8.85,"SAFE WORKBENCH","#d1eac9");}
   if(room.id==="alchemist-28")worldLabel(ctx,camera,17,7.4,"MIRROR PARTITION","#d1eac9");

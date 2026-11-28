@@ -18,6 +18,7 @@ import {DOUBLE_SEAL_CASTS,ARCHIVISTS_CHAIN_CASTS} from "../src/levels/archives-f
 import {TOO_BIG_CASTS,SMALL_NOW_CASTS} from "../src/levels/alchemist-workshop.js";
 import {WANDERING_PIVOT_CASTS,MIRRORED_MECHANISM_CASTS} from "../src/levels/alchemist-pivots.js";
 import {AIRLOCK_CASTS,TRIAL_CASTS} from "../src/levels/alchemist-finale.js";
+import {WANDERING_MIRROR_CASTS,ASTRONOMERS_BRIDGE_CASTS} from "../src/levels/observatory-mirrors.js";
 import {attachedObjects} from "../src/mechanisms/attached-pivots.js";
 import {createPhysicsWorld} from "../src/physics/collision.js";
 import {createPlayer,stepPlayer} from "../src/physics/platformer.js";
@@ -67,7 +68,9 @@ export const RECORDED_ROUTES=deepFreeze([
  ]]
 ].map(([number,casts,segments])=>({number,casts,segments,route:segments.flat()}))).concat([{number:21,casts:NO_GOING_BACK_CASTS,route:walk(1000)},{number:22,casts:LOCKED_PASSAGE_CASTS,route:walk(1000)},{number:23,casts:DOUBLE_SEAL_CASTS,route:walk(1000)},{number:24,casts:ARCHIVISTS_CHAIN_CASTS,route:walk(1000)},{number:25,casts:TOO_BIG_CASTS,route:[[180,1,0],[95,1,1],[120,1,1],[400,1,0]]},{number:26,casts:SMALL_NOW_CASTS,route:[[400,1,0],[110,1,1],[500,1,0]]},{number:27,casts:WANDERING_PIVOT_CASTS,route:[[300,1,0],[120,1,1],[500,1,0]]},{number:28,casts:MIRRORED_MECHANISM_CASTS,route:[[335,1,0],[120,1,1],[500,1,0]]}]).concat([
  [29,AIRLOCK_CASTS,[[[380,1,0]],[[400,1,0]]]],
- [30,TRIAL_CASTS,[[],[],[[400,1,0],[110,1,1],[100,1,0],[120,1,1]],[],[[70,1,0],[80,0,0],[120,1,1],[500,1,0]]]]
+ [30,TRIAL_CASTS,[[],[],[[400,1,0],[110,1,1],[100,1,0],[120,1,1]],[],[[70,1,0],[80,0,0],[120,1,1],[500,1,0]]]],
+ [31,WANDERING_MIRROR_CASTS,[[],[[300,1,0],[120,1,1],[500,1,0]]]],
+ [32,ASTRONOMERS_BRIDGE_CASTS,[[],[[300,1,0],[120,1,1],[210,1,0]],[],[[45,1,0],[120,1,1],[500,1,0]]]]
 ].map(([number,casts,segments])=>({number,casts,segments,route:segments.flat()}))));
 export function replayRoute(world,route,start=createPlayer(world)){
  let player=start,ticks=0;

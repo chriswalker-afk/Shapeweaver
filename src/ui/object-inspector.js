@@ -1,3 +1,4 @@
+import {mirrorRailFor,railEquation} from "../mechanisms/movable-mirrors.js";
 import {dockedSocket} from "../mechanisms/hinge-sockets.js";
 import {createObjectEngine} from "../core/object-engine.js";
 import {getSpell} from "./identity.js";
@@ -53,9 +54,10 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
     result.dataset.state="";const object=engine.get(selected);select.value=object?.id??"";
     spell.replaceChildren(option("","Choose a transformation…"),...(object?.permissions??[]).map(t=>option(t,getSpell(t).label)));
     spell.disabled=!object;spell.value=type??"";
+    const rail=mirrorRailFor(room,object);
     const sockets=object?(room.shapeSockets??[]).filter(s=>s.objectId===object.id):[];
     refs.textContent=object?refsText(engine.references(object.id))+(sockets.length?" · "+sockets.map(socket=>(socket.locking?(socket.label??"Lock")+" (captures key)":"Lock outline")+": "+socket.vertices.map((p,i)=>"S"+(i+1)+" "+format(p)).join(" · ")).join(" | "):""):"Select a highlighted object in the room or from the list.";
-    permissions.textContent=object?"Allowed: "+object.permissions.map(t=>getSpell(t).label).join(", ")+(object.hinge?" · "+(object.dockable?"Mobile hinge H "+format(object.hinge)+(dockedSocket(room,object)?" (docked)":" (undocked; translate to socket)"):object.pivotOnly?"Marked pivot H "+format(object.hinge):object.kind==="pivot-carrier"?"Movable socket H "+format(object.hinge):"Fixed hinge H "+format(object.hinge)):"")+(object.fixedCentre?" · Fixed external centre "+format(object.fixedCentre):"")+(object.bridgeDeck?" · Horizontal: solid bridge; upright: climbable ladder":"")+(object.kind==="compound-weight"?" · Rigid linked feet: all vertices move together":"")+(object.pressesPlates&&(room.plates??[]).some(p=>p.closedGateId!==undefined)?" · Selector weight: holding the plate opens its HELD gate and closes its FREE gate":"")+(object.kind==="pivot-carrier"?" · Carries "+room.objects.filter(o=>o.attachedTo===object.id).map(o=>o.label??o.id).join(", "):"")+(object.attachedTo?" · Attached to "+(room.objects.find(o=>o.id===object.attachedTo)?.label??object.attachedTo)+"; rotate about the current shared pivot":"")+(object.scaleRange?" · Scale factor per cast: "+object.scaleRange.join("–"):"")+(object.bearing==="both-ends"?" · Both ends require support":""):"";
+    permissions.textContent=object?"Allowed: "+object.permissions.map(t=>getSpell(t).label).join(", ")+(object.hinge?" · "+(object.dockable?"Mobile hinge H "+format(object.hinge)+(dockedSocket(room,object)?" (docked)":" (undocked; translate to socket)"):object.pivotOnly?"Marked pivot H "+format(object.hinge):object.kind==="pivot-carrier"?"Movable socket H "+format(object.hinge):"Fixed hinge H "+format(object.hinge)):"")+(object.fixedCentre?" · Fixed external centre "+format(object.fixedCentre):"")+(object.bridgeDeck?" · Horizontal: solid bridge; upright: climbable ladder":"")+(object.kind==="mirror-rail"?" · Horizontal slider; current mirror "+railEquation(object)+"; translate with vertical component zero":"")+(rail?" · Linked mirror: "+railEquation(rail)+"; reflection requires this exact line":"")+(object.kind==="compound-weight"?" · Rigid linked feet: all vertices move together":"")+(object.pressesPlates&&(room.plates??[]).some(p=>p.closedGateId!==undefined)?" · Selector weight: holding the plate opens its HELD gate and closes its FREE gate":"")+(object.kind==="pivot-carrier"?" · Carries "+room.objects.filter(o=>o.attachedTo===object.id).map(o=>o.label??o.id).join(", "):"")+(object.attachedTo?" · Attached to "+(room.objects.find(o=>o.id===object.attachedTo)?.label??object.attachedTo)+"; rotate about the current shared pivot":"")+(object.scaleRange?" · Scale factor per cast: "+object.scaleRange.join("–"):"")+(object.bearing==="both-ends"?" · Both ends require support":""):"";
     buildFields();result.textContent=object?"Choose a transformation and enter its parameters.":"No object selected.";
   }
   function selectObject(id){
@@ -64,7 +66,7 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
   }
   function selectType(next){
     const o=engine.get(selected);
-    type=o?.permissions.includes(next)?next:null;preview=null;result.dataset.state="";spell.value=type??"";buildFields();result.textContent=type==="reflect"?"Enter the mirror line: x = a, y = b, y = x or y = −x. Then Preview.":type?"Enter mathematical parameters, then Preview.":"Choose a permitted transformation.";onChange();
+    type=o?.permissions.includes(next)?next:null;preview=null;result.dataset.state="";spell.value=type??"";buildFields();result.textContent=type==="reflect"?(mirrorRailFor(room,o)?"Read the current linked mirror line and enter its equation. Then Preview.":"Enter the mirror line: x = a, y = b, y = x or y = −x. Then Preview."):type?"Enter mathematical parameters, then Preview.":"Choose a permitted transformation.";onChange();
     return Boolean(type);
   }
   function showPreview(raw){

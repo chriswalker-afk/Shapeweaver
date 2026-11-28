@@ -525,7 +525,10 @@ body:has(#title-view:not([hidden])) .home-motion-toggle{min-width:88px;min-heigh
  #title-view .home-card-copy strong{font-size:1.08rem}
  #title-view .home-card-copy>span,#title-view .home-card-copy small{font-size:.75rem}
  #title-view .home-card-arrow{align-self:start}
- #title-view .home-progress{margin-top:.7rem;padding:.5rem .55rem;font-size:.76rem}
+ #title-view .home-progress{margin-top:.7rem;padding:.5rem .55rem;font-size:.76rem;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.3rem .5rem}
+ #title-view .home-progress progress{grid-column:1/-1;grid-row:2;min-width:0}
+ #title-view .home-progress>span{min-width:0;overflow-wrap:anywhere}
+ #title-view .home-stars{white-space:normal;text-align:right}
  .game-viewport:has(#title-view:not([hidden])) .home-kingdom-composition{height:57%}
  .game-viewport:has(#title-view:not([hidden])) .scene-shade{background:linear-gradient(0deg,#211b2f 0%,#211b2f 44%,#211b2fda 65%,#211b2f0d 98%)}
 }

@@ -28,6 +28,7 @@ jobs:
       - run: node tools/production-smoke.mjs
       - run: node tools/home-polish-qa.mjs
       - run: node tools/library-qa.mjs
+      - run: node tools/gameplay-hud-qa.mjs
       - run: node tools/workshop-browser-qa.mjs
       - uses: actions/upload-artifact@v4
         if: always()
@@ -50,6 +51,13 @@ jobs:
         with:
           name: shapeweaver-library-review
           path: browser-qa/library-review/
+          if-no-files-found: warn
+          overwrite: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shapeweaver-gameplay-hud-review
+          path: browser-qa/gameplay-hud-review/
           if-no-files-found: warn
           overwrite: true
   campaign:

@@ -165,6 +165,7 @@ try{
    await page.locator("#room-canvas").waitFor();
    const initial=await page.locator("#room-stage").boundingBox();
    assert.ok(initial&&initial.height>=138,name+" stage");
+   assert.ok((await page.locator("#room-playfield").boundingBox()).height>=138,name+" unobstructed playfield");
    assert.ok(await page.locator("#room-secondary-tools").isHidden(),name+" tools initially collapsed");
    if(index===0){
     await page.locator("#quick-camera").click();assert.equal(await page.locator("#quick-camera").getAttribute("aria-pressed"),"true");
@@ -209,8 +210,10 @@ try{
    await page.locator("#room-canvas").waitFor();
    const initial=await page.locator("#room-stage").boundingBox();
    assert.ok(initial.height>=138);
+   await page.locator("#room-tools-toggle").click();
    await page.locator("#tutorial-guidance-toggle").click();assert.equal(await page.locator("#tutorial-guide").isHidden(),true);
    await page.locator("#tutorial-guidance-toggle").click();
+   await page.locator("#room-tools-toggle").click();
    await page.locator("#grid-toggle").click();assert.equal(await page.locator("#grid-toggle").getAttribute("aria-pressed"),"false");
    await page.locator("#grid-toggle").click();assert.equal(await page.locator("#grid-toggle").getAttribute("aria-pressed"),"true");
    await capture(page,name+"-level"+(index+5)+"-initial.png",index+5);

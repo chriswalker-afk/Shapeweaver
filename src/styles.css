@@ -672,3 +672,120 @@ body:has(#title-view:not([hidden])) .home-motion-toggle{min-width:88px;min-heigh
    A single full-width tile is permitted when two readable tiles cannot fit. */
 .library-level{grid-template-columns:minmax(0,1fr)}
 .library-tile-stars{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+
+/* PR43 — game HUD. Native button IDs/actions remain stable. The two stage
+   rails occupy their own tracks so pointer controls never obscure maths. */
+#room-view{height:auto;min-height:100dvh;grid-template-rows:auto minmax(min-content,1fr) auto auto}
+#room-view .game-hud{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-areas:"back title actions settings" "tools tools tools tools";align-items:center;gap:.25rem .65rem;padding:.48rem .7rem;background:linear-gradient(110deg,#2c233b,#211c31);border-bottom:1px solid #a88c66}
+#room-view .hud-back{grid-area:back;order:0}
+#room-view .room-heading{grid-area:title;min-width:0}
+#room-view .room-heading h2{margin:.1rem 0 0;font-size:clamp(1.15rem,2vw,1.65rem);line-height:1.12}
+#room-view .room-heading p{font-size:.64rem;line-height:1.3;overflow-wrap:anywhere}
+#room-view .hud-actions{grid-area:actions;display:flex;align-items:center;justify-content:flex-end;gap:.45rem;flex-wrap:wrap;min-width:0}
+#room-view .hud-settings{grid-area:settings}
+#room-view .hud-icon{width:19px;height:19px;flex:0 0 auto;display:block}
+#room-view .hud-button{display:inline-flex;align-items:center;justify-content:center;gap:.38rem;min-height:42px;min-width:42px;padding:.38rem .64rem;border:1px solid #766681;border-radius:.52rem;background:#393046;color:#f5e6ce;font-size:.78rem;font-weight:650;line-height:1.16;white-space:normal;text-align:center}
+#room-view .hud-button:hover:not(:disabled){border-color:#efce91;background:#4c3d57}
+#room-view .hud-button:focus-visible,#room-view .gamepad-button:focus-visible,#room-view .room-reset-dialog button:focus-visible{outline:3px solid #ffe1a0;outline-offset:2px}
+#room-view .hud-button:disabled{opacity:.45;cursor:default}
+#room-view .hud-back{background:transparent;color:#e1c9ac;border-color:#807081}
+#room-view .hud-moves{display:inline-flex;align-items:center;min-height:34px;padding:.35rem .7rem;border:1px solid #6d5e78;background:#1d192c;color:#f9dca3;border-radius:99px;font-size:.8rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+#room-view .hud-hint{background:#5e4a32;border-color:#d2aa71;color:#ffe4ae}
+#room-view .hud-hint[aria-expanded="true"]{background:#f0cc91;color:#34283d}
+#room-view .hud-return .hud-icon{color:#b8dec9}
+#room-view .hud-settings{background:#292239;border-color:#8d7992}
+#room-view .hud-settings[aria-expanded="true"]{background:#4d3d5a;border-color:#e6c18c;color:#ffe6b9}
+#room-view .room-secondary-tools{grid-area:tools;display:flex;align-items:flex-start;flex-wrap:wrap;gap:.55rem .85rem;padding:.65rem .2rem .15rem;min-width:0;max-height:40dvh;overflow:auto;border-top:1px solid #6c5b77;overscroll-behavior:contain}
+#room-view .hud-tool-group{display:grid;gap:.28rem;min-width:0}
+#room-view .hud-group-label{font-size:.68rem;color:#dac6a7;letter-spacing:.035em;font-weight:700}
+#room-view .room-secondary-tools .camera-controls,#room-view .room-secondary-tools .coordinate-controls,#room-view .room-secondary-tools .presentation-controls{width:auto;max-width:100%;justify-content:flex-start;flex-wrap:wrap;gap:.25rem}
+#room-view .room-secondary-tools button{min-height:36px;border-radius:.34rem;white-space:normal}
+#room-view .hud-reset{border:1px solid #d5a49a;background:#58363d;color:#ffe2d5;border-radius:.45rem;padding:.55rem .75rem;min-height:42px;font-weight:700}
+#room-view .hud-reset:hover{background:#75464b}
+#room-view .hud-reset-group{margin-left:auto}
+#room-view .room-stage{display:grid;grid-template-rows:auto minmax(138px,1fr) auto;min-height:0;min-width:0;background:#302a40;overflow:visible;isolation:isolate}
+#room-view .stage-tools{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.35rem;padding:.32rem .7rem;background:linear-gradient(180deg,#393148,#302a40);border-bottom:1px solid #706078;min-width:0}
+#room-view .stage-tools .primary-tools{flex:0 1 auto;justify-content:flex-start;gap:.35rem;flex-wrap:wrap}
+#room-view .stage-tools .hud-view-tool{background:#29243a;color:#e8dacc;border-color:#87748b;min-height:36px}
+#room-view .stage-tools .hud-view-tool[aria-pressed="true"]{background:#42536a;border-color:#a0c8d5;color:#f0faff}
+#room-view .stage-tools .object-primary{background:linear-gradient(#edcc97,#cfa16d);color:#32243c;border-color:#f9d9a2;min-height:36px;box-shadow:0 2px 9px #211a2f65;font-weight:750}
+#room-view .stage-tools .object-primary[aria-pressed="true"]{background:#654d7c;color:#fff0d5;border-color:#e7c391}
+#room-view .room-playfield{position:relative;min-width:0;min-height:138px;overflow:hidden;background:#696177}
+#room-view .room-playfield #room-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#room-view .gamepad-dock{display:flex;width:100%;align-items:center;justify-content:space-between;gap:.45rem;padding:.38rem .85rem;background:linear-gradient(0deg,#2b2438,#454052);border-top:1px solid #84758a;touch-action:none;min-width:0}
+#room-view .gamepad-direction,#room-view .climb-controls{display:flex;align-items:center;gap:.36rem;flex-wrap:nowrap}
+#room-view .climb-controls{margin-left:.2rem;padding-left:.45rem;border-left:1px solid #85768b}
+#room-view .gamepad-button{display:grid;place-items:center;width:48px;height:48px;min-width:44px;min-height:44px;flex:0 0 auto;border-radius:50%;border:1.5px solid #c4b199;background:radial-gradient(ellipse at 50% 25%,#5a4d66,#30283f);color:#f5e2bf;box-shadow:inset 0 0 0 3px #29243965,0 2px 4px #17132270;padding:0;touch-action:none;user-select:none}
+#room-view .gamepad-button .hud-icon{width:24px;height:24px;fill:currentColor;stroke-width:1.2}
+#room-view .gamepad-climb{background:radial-gradient(ellipse at 50% 25%,#49616b,#303c4e);border-color:#a9bfc1;color:#e5f1de}
+#room-view .gamepad-dock .jump-control{margin:0;width:62px;height:62px;min-width:62px;min-height:62px;gap:0;align-content:center;background:radial-gradient(ellipse at 50% 23%,#8a6c45,#4e3a38);color:#ffe0a3;border-color:#e8c48d;font-size:.61rem;letter-spacing:.045em;text-transform:uppercase}
+#room-view .gamepad-dock .jump-control .hud-icon{width:25px;height:25px}
+#room-view .gamepad-button:hover{border-color:#ffe1a0}
+#room-view .gamepad-button[data-held="true"],#room-view .gamepad-button:active{background:#eac88d;color:#302438;border-color:#fff0c5;box-shadow:inset 0 0 0 3px #fbe3b2,0 0 10px #edc48865}
+#room-view .gamepad-keyboard{display:flex;align-items:center;gap:.35rem;font-size:.73rem;color:#e4d5cf;white-space:nowrap}
+#room-view kbd{font:inherit;font-weight:700;color:#f7e4bd;border:1px solid #86768d;border-bottom-width:2px;border-radius:.24rem;background:#30283d;padding:.13rem .32rem}
+#room-view .room-footer{padding:.3rem .7rem;background:#251e32;border-top:1px solid #74627b}
+#room-view .play-info{display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;gap:.2rem .7rem;text-align:left;line-height:1.35}
+#room-view #room-status{font-size:.69rem;color:#cdbdce}
+#room-view #play-status{color:#f3e2c6;min-width:0;overflow-wrap:anywhere}
+#room-view #recovery-count{margin-left:auto;color:#d6bf9c;white-space:normal;font-variant-numeric:tabular-nums}
+#room-view #tutorial-guide{flex:1 1 100%;min-width:0;padding:.32rem .45rem;border-left:2px solid #d5ac70;border-radius:.16rem;background:#392d46;color:#f3e1bd;overflow-wrap:anywhere}
+#room-view .room-reset-dialog{width:min(25rem,calc(100% - 2rem));max-height:calc(100% - 2rem);overflow:auto;padding:1.1rem;border:1px solid #d9b885;border-radius:.75rem;color:#f4e3c6;background:#33283e;box-shadow:0 14px 45px #140f23c0}
+#room-view .room-reset-dialog::backdrop{background:#191325a0}
+#room-view .room-reset-dialog h3{margin:0 0 .6rem;font-family:var(--display);color:#ffdfac}
+#room-view .room-reset-dialog p{line-height:1.5;margin:0 0 1rem}
+#room-view .reset-dialog-actions{display:flex;justify-content:flex-end;gap:.5rem;flex-wrap:wrap}
+#room-view .reset-dialog-actions button{min-height:44px;border-radius:.4rem}
+@media(pointer:fine) and (min-width:901px){
+ #room-view .gamepad-dock{padding:.28rem .85rem}
+ #room-view .gamepad-button{width:44px;height:44px}
+ #room-view .gamepad-dock .jump-control{width:54px;height:54px;min-width:54px;min-height:54px}
+}
+@media(max-width:1050px){
+ #room-view .game-hud{gap:.25rem .38rem}
+ #room-view .hud-actions .hud-button,#room-view .hud-settings{padding:.35rem .48rem}
+}
+@media(max-width:900px){
+ #room-view .hud-actions .hud-button [data-hud-label],#room-view .hud-settings [data-hud-label]{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ #room-view .hud-actions .hud-button,#room-view .hud-settings{min-width:44px;min-height:44px;padding:.35rem}
+}
+@media(max-width:650px) and (orientation:portrait){
+ #room-view .game-hud{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"back title settings" "actions actions actions" "tools tools tools";padding:.35rem .45rem;gap:.35rem}
+ #room-view .hud-back [data-hud-label]{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ #room-view .hud-actions{justify-content:space-between;gap:.35rem}
+ #room-view .stage-tools{padding:.28rem .45rem;gap:.25rem}
+ #room-view .stage-tools .hud-button{font-size:.72rem;min-height:40px;padding:.3rem .4rem}
+ #room-view .gamepad-dock{padding:.32rem .5rem}
+ #room-view .gamepad-direction,#room-view .climb-controls{gap:.25rem}
+ #room-view .gamepad-button{width:46px;height:46px}
+ #room-view .climb-controls{margin-left:0;padding-left:.25rem}
+ #room-view .gamepad-dock .jump-control{width:58px;height:58px;min-width:58px;min-height:58px}
+ #room-view .gamepad-keyboard{display:none}
+ #room-view .hud-reset-group{margin-left:0}
+ #room-view .room-footer{padding:.3rem .45rem}
+}
+@media(max-height:520px) and (orientation:landscape){
+ #room-view .game-hud{padding:.2rem .45rem;gap:.18rem .32rem}
+ #room-view .room-heading h2{font-size:1.12rem}
+ #room-view .hud-button{min-height:36px;min-width:36px;padding:.25rem .4rem}
+ #room-view .stage-tools{padding:.18rem .45rem}
+ #room-view .stage-tools .hud-button{min-height:32px;padding:.2rem .42rem}
+ #room-view .gamepad-dock{padding:.2rem .6rem}
+ #room-view .gamepad-button{width:44px;height:44px}
+ #room-view .gamepad-dock .jump-control{width:50px;height:50px;min-width:50px;min-height:50px}
+ #room-view .gamepad-keyboard{display:none}
+ #room-view .room-footer{padding:.18rem .45rem}
+ #room-view #tutorial-guide{padding:.18rem .35rem;font-size:.71rem}
+}
+@media(max-width:600px) and (orientation:landscape){
+ #room-view .game-hud{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"back title settings" "actions actions actions" "tools tools tools"}
+ #room-view .hud-actions{justify-content:space-between}
+ #room-view .hud-back [data-hud-label]{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+}
+@media(pointer:coarse){
+ #room-view .hud-button,#room-view .stage-tools .hud-button,#room-view .room-secondary-tools button{min-width:44px;min-height:44px}
+ #room-view .gamepad-button{min-width:44px;min-height:44px}
+ #room-view .gamepad-keyboard{display:none}
+}
+#room-view[data-focus="true"] .game-hud{padding:.2rem .45rem}
+#room-view[data-focus="true"] .room-heading h2{font-size:1rem}

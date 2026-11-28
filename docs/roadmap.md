@@ -102,3 +102,6 @@ Replace the word-heavy simultaneous chapter/level grid with a seven-chapter illu
 
 ## PR42 — CI performance optimisation
 Split campaign browser QA into four independent 36-level viewport jobs, run focused acceptance alongside them, cache the pinned browser download, retain representative screenshots plus failures and verify all 144 unique combinations in the stable browser-smoke gate. See [CI performance](ci-performance.md). After merging and verifying the production deployment, inspect the actual library on classroom devices and resume planning the public puzzle workshop.
+
+## Gameplay UX redesign (PR43–47)
+PR43 — clearer gameplay HUD and in-stage gamepad controls, grouped secondary tools and confirmed reset, without altering spell rules or movement mode. PR44 — persistent object glows, direct pointer selection and four-icon contextual palette; separate mouse and keyboard movement. PR45 — graphical Translation and Rotation inputs with exact numerical alternatives. PR46 — graphical Reflection and Enlargement inputs. PR47 — tutorials, popup/camera placement, touch, accessibility and final all-campaign acceptance. See [Gameplay UX](gameplay-ux.md). Public workshop follows core interaction changes.

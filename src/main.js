@@ -8,6 +8,7 @@ import {LEVEL_ROUTES,campaignProgress} from "./levels/campaign.js";
 import {mountCampaign} from "./ui/campaign.js";
 import {createResumeLevel,homeContinuation} from "./core/home-progress.js";
 import {renderHome} from "./ui/home.js";
+import {mountHomeShowcase} from "./ui/home-showcase.js";
 
 /** Export startup separately so it can be tested without loading a browser. */
 export function startApp(document, view) {
@@ -36,6 +37,7 @@ export function startApp(document, view) {
     results.show(result,best,LEVEL_ROUTES[index],LEVEL_ROUTES[index+1]??null,campaignProgress(bestResults));
     identity.show("results");
   }}):null;
+  const homeShowcase=mountHomeShowcase(document,view);
   identity=typeof document.querySelectorAll==="function"?mountIdentity(document,state,(next,{resume=false}={})=>{
     const playable=next==="room"||LEVEL_ROUTES.includes(next);
     if(LEVEL_ROUTES.includes(activeRoute)&&room&&!room.getPlayer().completed){
@@ -54,9 +56,10 @@ export function startApp(document, view) {
     activeRoute=playable?next:null;
     state.playable=playable&&Boolean(room);
     if(next==="title")updateHome();
+    homeShowcase?.setActive(next==="title");
   },{continueRoute:()=>continuation().route}):null;
-  if(identity)updateHome();
-  return { state, viewport, identity, room, results, bestResults, campaign };
+  if(identity){updateHome();homeShowcase?.setActive(true);}
+  return { state, viewport, identity, room, results, bestResults, campaign, homeShowcase };
 }
 
 if (typeof window !== "undefined" && typeof document !== "undefined") {

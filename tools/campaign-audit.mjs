@@ -15,6 +15,7 @@ import {WATERMILL_SOLUTION,AROUND_THE_TOWER_SOLUTION} from "../src/levels/riverw
 import {BRING_IT_WITH_YOU_CASTS,A_BRIDGE_AND_A_LADDER_CASTS} from "../src/levels/mirror-archives.js";
 import {NO_GOING_BACK_CASTS,LOCKED_PASSAGE_CASTS} from "../src/levels/archives-latches.js";
 import {DOUBLE_SEAL_CASTS,ARCHIVISTS_CHAIN_CASTS} from "../src/levels/archives-finale.js";
+import {TOO_BIG_CASTS,SMALL_NOW_CASTS} from "../src/levels/alchemist-workshop.js";
 import {createPhysicsWorld} from "../src/physics/collision.js";
 import {createPlayer,stepPlayer} from "../src/physics/platformer.js";
 import {commitTranslation} from "../src/transformations/translation.js";
@@ -61,7 +62,7 @@ export const RECORDED_ROUTES=deepFreeze([
   [],
   [[270,1,0],[25,0,0,1],[420,0,0,1],[1,1,1,0],[250,1,0]]
  ]]
-].map(([number,casts,segments])=>({number,casts,segments,route:segments.flat()}))).concat([{number:21,casts:NO_GOING_BACK_CASTS,route:walk(1000)},{number:22,casts:LOCKED_PASSAGE_CASTS,route:walk(1000)},{number:23,casts:DOUBLE_SEAL_CASTS,route:walk(1000)},{number:24,casts:ARCHIVISTS_CHAIN_CASTS,route:walk(1000)}]));
+].map(([number,casts,segments])=>({number,casts,segments,route:segments.flat()}))).concat([{number:21,casts:NO_GOING_BACK_CASTS,route:walk(1000)},{number:22,casts:LOCKED_PASSAGE_CASTS,route:walk(1000)},{number:23,casts:DOUBLE_SEAL_CASTS,route:walk(1000)},{number:24,casts:ARCHIVISTS_CHAIN_CASTS,route:walk(1000)},{number:25,casts:TOO_BIG_CASTS,route:[[180,1,0],[95,1,1],[120,1,1],[400,1,0]]},{number:26,casts:SMALL_NOW_CASTS,route:[[400,1,0],[110,1,1],[500,1,0]]}]));
 export function replayRoute(world,route,start=createPlayer(world)){
  let player=start,ticks=0;
  for(const [n,move,jump,climb=0] of route){

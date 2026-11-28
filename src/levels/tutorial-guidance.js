@@ -3,6 +3,7 @@ import {gardenSituation} from "./garden-guidance.js";
 import {clockworkSituation} from "./clockwork-guidance.js";
 import {riverworksSituation} from "./riverworks-guidance.js";
 import {archivesSituation} from "./archives-guidance.js";
+import {alchemistSituation} from "./alchemist-guidance.js";
 import {referencePoints} from "../transformations/preview-math.js";
 import {previewTranslation} from "../transformations/translation.js";
 import {previewRotation} from "../transformations/rotation.js";
@@ -59,6 +60,7 @@ export function tutorialConfig(room){return CONFIG[room?.id]??null;}
  * usable arrangement (including common alternate placements); it is guidance only,
  * never a completion gate or an exhaustive solver. */
 export function tutorialSituation(room,player=null){
+  if(room?.chapter===6)return alchemistSituation(room);
   if(room?.chapter===5)return archivesSituation(room,player);
   if(room?.chapter===2)return gardenSituation(room);
   if(room?.chapter===3)return clockworkSituation(room);
@@ -131,7 +133,9 @@ const CHALLENGE_GOALS=deepFreeze({
  "archives-21":"Reach the far archive door.",
  "archives-22":"Reach the exit without losing the only key.",
  "archives-23":"Open the double seal gate.",
- "archives-24":"Reach the final archive portal."
+ "archives-24":"Reach the final archive portal.",
+ "alchemist-25":"Reach the raised workbench.",
+ "alchemist-26":"Reach the far side of the channel."
 });
 export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
 const FIELD_GUIDES=Object.freeze({
@@ -163,7 +167,7 @@ export function contextualGuide(room,player,inspection,{casting=false,picking=fa
     return {step:"Enter parameters",text:(room.chapter===1&&inspection.type===c.type?c.fields:(FIELD_GUIDES[inspection.type]??"Enter the mathematical parameters."))+" Preview is free."};
   }
   if(situation.ready||situation.travel)return {step:"Traverse",text:c.traverse};
-  return {step:"Explore",text:room.chapter===1?c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional.":room.chapter===2?campaignGoal(room)+" Inspect the objects and plan how they could work together. Hints are optional.":room.chapter===3?campaignGoal(room)+" Plan a sequence on the same object. Use Hints only if needed.":room.chapter===4?campaignGoal(room)+" Consider how the pieces can support one another. Hints are optional.":campaignGoal(room)+" Consider which objects and mechanisms are linked, and plan the order of casts and movement. Hints are optional."};
+  return {step:"Explore",text:room.chapter===1?c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional.":room.chapter===2?campaignGoal(room)+" Inspect the objects and plan how they could work together. Hints are optional.":room.chapter===3?campaignGoal(room)+" Plan a sequence on the same object. Use Hints only if needed.":room.chapter===4?campaignGoal(room)+" Consider how the pieces can support one another. Hints are optional.":room.chapter===6?campaignGoal(room)+" Compare the dimensions of the objects and obstacles. Plan the transformations and movement. Hints are optional.":campaignGoal(room)+" Consider which objects and mechanisms are linked, and plan the order of casts and movement. Hints are optional."};
 }
 /** Stage 5 is the only stage that supplies parameter values as a worked answer.
  * Validate the proposed cast against the live world and apprentice before suggesting Apply.

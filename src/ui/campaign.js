@@ -52,7 +52,7 @@ export function mountCampaign(document,best,navigate){
  function updateDetail(){
   const l=visibleLevels.find(x=>x.route===selected);
   $("library-detail").hidden=!l;$("library-empty").hidden=Boolean(visibleLevels.length);$("library-play").disabled=!l;
-  for(const [route,tile] of tiles)tile.setAttribute("aria-pressed",String(route===selected));
+  for(const [route,tile] of tiles){tile.setAttribute("aria-pressed",String(route===selected));tile.tabIndex=route===selected?0:-1;}
   if(!l)return;
   const score=best.get(l.id),spells=l.spells.map(getSpell);
   set("library-detail-number","Puzzle "+String(l.number).padStart(2,"0")+" · "+CHAPTERS[l.chapter-1].title);
@@ -85,7 +85,14 @@ export function mountCampaign(document,best,navigate){
    b.append(node("strong",String(l.number).padStart(2,"0"),"level-number"),symbols,stars(score));
    // Search mode alone includes titles to aid comparison; chapter tiles remain compact.
    if(mode==="search")b.append(node("span",l.title,"library-search-title"));
-   b.addEventListener("click",()=>{selected=l.route;updateDetail();});tiles.set(l.route,b);return b;
+   b.addEventListener("click",()=>{selected=l.route;updateDetail();});
+   b.addEventListener("keydown",event=>{
+    const i=visibleLevels.indexOf(l),columns=document.defaultView?.getComputedStyle(list).gridTemplateColumns.trim().split(/\s+/).length??3;
+    const index=({ArrowLeft:i-1,ArrowRight:i+1,ArrowUp:i-columns,ArrowDown:i+columns,Home:0,End:visibleLevels.length-1})[event.key];
+    if(index===undefined)return;
+    event.preventDefault();selected=visibleLevels[Math.max(0,Math.min(visibleLevels.length-1,index))].route;updateDetail();tiles.get(selected)?.focus();
+   });
+   tiles.set(l.route,b);return b;
   }));
   updateDetail();
  }

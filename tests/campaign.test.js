@@ -35,36 +35,75 @@ test("progress uses existing personal bests and resumes first incomplete level",
 });
 
 function element(){
- const listeners=new Map();
- return {children:[],textContent:"",value:"",listeners,disabled:false,
+ const listeners=new Map(),attributes={};
+ return {children:[],textContent:"",value:"",listeners,disabled:false,hidden:false,attributes,
+ style:{setProperty(k,v){attributes[k]=v;}},
+ setAttribute(k,v){attributes[k]=String(v);},getAttribute(k){return attributes[k]??null;},
  append(...nodes){this.children.push(...nodes)},replaceChildren(...nodes){this.children=nodes},
  addEventListener(type,fn){listeners.set(type,fn)},removeEventListener(type,fn){if(listeners.get(type)===fn)listeners.delete(type)},
- fire(type){if(!this.disabled)listeners.get(type)?.()}};
+ fire(type,event={}){if(!this.disabled)listeners.get(type)?.({preventDefault(){},...event});},focus(){this.focused=true;}};
 }
-test("library shows only playable puzzles, filters, resumes and refreshes progress",()=>{
- const ids="campaign-view campaign-map campaign-levels campaign-progress campaign-resume campaign-clear filter-spell filter-math filter-puzzle filter-chapter".split(" ");
+function fixture(){
+ const ids="campaign-view campaign-map campaign-levels campaign-progress campaign-resume campaign-clear filter-spell filter-math filter-puzzle filter-chapter library-atlas library-puzzles library-find library-find-secondary library-back library-heading library-chapter-banner library-chapter-art library-chapter-name library-chapter-progress library-search library-count library-detail library-detail-number library-detail-title library-detail-spells library-detail-ratings library-detail-score library-play library-empty library-completed library-stars library-progress-bar campaign-celebration".split(" ");
  const els=Object.fromEntries(ids.map(id=>[id,element()]));
  const routes=[],best=createBestResults({});
  const ui=mountCampaign({getElementById:id=>els[id],createElement:()=>element()},best,route=>routes.push(route));
+ const click=id=>els[id].fire("click"),tiles=()=>els["campaign-levels"].children,chapters=()=>els["campaign-map"].children;
+ return {els,routes,best,ui,click,tiles,chapters};
+}
+test("atlas shows seven chapters, never an initial wall of puzzles; choose and play all 36",()=>{
+ const {els,routes,ui,click,tiles,chapters}=fixture();
  ui.render();
- assert.equal(els["campaign-map"].children.length,7);
- assert.equal(els["campaign-map"].children.filter(c=>c.disabled).length,0);
- assert.equal(els["campaign-levels"].children.length,36);
- els["filter-spell"].value="reflect";els["filter-spell"].fire("change");
- assert.equal(els["campaign-levels"].children.length,13);
- els["campaign-levels"].children[0].fire("click");
- assert.deepEqual(routes,["level4"]);
+ assert.equal(chapters().length,7);assert.ok(chapters().every(c=>!c.disabled));
+ assert.equal(tiles().length,0);assert.equal(els["library-puzzles"].hidden,true);
+ for(const c of CHAPTERS){
+  chapters()[c.id-1].fire("click");
+  const levels=LEVELS.filter(l=>l.chapter===c.id);
+  assert.deepEqual(tiles().map(e=>Number(e.getAttribute("data-level"))),levels.map(l=>l.number));
+  assert.equal(els["library-atlas"].hidden,true);assert.equal(els["library-search"].hidden,true);
+  for(const [i,l] of levels.entries()){
+   const before=routes.length;tiles()[i].fire("click");
+   assert.equal(routes.length,before,"selection must not launch gameplay");
+   assert.equal(els["library-detail-title"].textContent,l.title);
+   assert.equal(els["library-detail-spells"].children.length,l.spells.length);
+   assert.equal(els["library-detail-ratings"].children[0].children[2].textContent,l.math+"/5");
+   assert.equal(els["library-detail-ratings"].children[1].children[2].textContent,l.puzzle+"/5");
+   assert.equal(tiles().filter(t=>t.getAttribute("aria-pressed")==="true").length,1);
+   assert.equal(tiles()[i].tabIndex,0);
+   click("library-play");assert.equal(routes.at(-1),l.route);
+  }
+  click("library-back");assert.equal(els["library-atlas"].hidden,false);assert.ok(chapters()[c.id-1].focused);
+ }
+ assert.deepEqual(routes,LEVELS.map(l=>l.route));ui.destroy();
+ assert.ok(Object.values(els).every(e=>e.listeners.size===0));
+});
+test("optional global search retains all filter combinations, empty state and explicit play",()=>{
+ const {els,routes,ui,click,tiles,chapters}=fixture();ui.render();click("library-find");
+ assert.equal(tiles().length,36);assert.equal(els["library-search"].hidden,false);
+ els["filter-spell"].value="reflect";els["filter-spell"].fire("change");assert.equal(tiles().length,13);
+ tiles()[0].fire("click");assert.deepEqual(routes,[]);click("library-play");assert.deepEqual(routes,["level4"]);
  els["filter-math"].value="5";els["filter-math"].fire("change");
- assert.equal(els["campaign-levels"].children.length,3);
- assert.deepEqual(els["campaign-levels"].children.map(e=>e.children[0].textContent),["32","35","36"]);
- assert.equal(els["campaign-levels"].children[0].children[0].textContent,"32");
- assert.match(els["campaign-levels"].children[0].children[1].textContent,/Astronomer/);
- els["filter-chapter"].value="1";els["filter-chapter"].fire("change");assert.match(els["campaign-levels"].children[0].textContent,/No released puzzles/);
- els["campaign-map"].children[1].fire("click");assert.equal(els["filter-spell"].value,"");assert.equal(els["filter-math"].value,"");assert.equal(els["filter-chapter"].value,"2");assert.equal(els["campaign-levels"].children.length,4);
- els["campaign-clear"].fire("click");assert.equal(els["campaign-levels"].children.length,36);
+ assert.deepEqual(tiles().map(e=>Number(e.getAttribute("data-level"))),[32,35,36]);
+ assert.match(els["library-detail-title"].textContent,/Astronomer/);
+ els["filter-chapter"].value="1";els["filter-chapter"].fire("change");assert.equal(tiles().length,0);assert.equal(els["library-empty"].hidden,false);assert.equal(els["library-play"].disabled,true);
+ click("library-play");assert.equal(routes.length,1);
+ click("campaign-clear");assert.equal(tiles().length,36);assert.equal(els["library-empty"].hidden,true);
+ click("library-back");chapters()[1].fire("click");assert.equal(tiles().length,4);assert.equal(els["library-search"].hidden,true);
+ assert.ok(["spell","math","puzzle","chapter"].every(k=>els["filter-"+k].value===""));
+});
+test("keyboard selection, return to exact puzzle, atlas reset and saved progress",()=>{
+ const {els,routes,best,ui,click,tiles}=fixture();
  best.record({levelId:"gatehouse-01",moves:2,stars:2});
- ui.render();assert.match(els["campaign-progress"].textContent,/1 \/ 36 released puzzles complete · 2 \/ 108 stars/);
- els["campaign-resume"].fire("click");assert.deepEqual(routes,["level4","level2"]);
- assert.match(els["campaign-levels"].children[0].children.at(-1).textContent,/★★☆ · 2 moves/);
- ui.destroy();assert.ok(Object.values(els).every(e=>e.listeners.size===0));
+ ui.render({route:"level1",reset:true});
+ assert.equal(els["library-detail-title"].textContent,LEVELS[0].title);
+ assert.equal(tiles()[0].getAttribute("data-completed"),"true");
+ assert.match(els["library-detail-score"].children[1].textContent,/2\/3 stars · 2 moves/);
+ assert.match(els["campaign-progress"].textContent,/1 \/ 36 released puzzles complete · 2 \/ 108 stars/);
+ tiles()[0].fire("keydown",{key:"ArrowRight"});assert.equal(tiles()[1].getAttribute("aria-pressed"),"true");assert.ok(tiles()[1].focused);
+ tiles()[1].fire("keydown",{key:"End"});assert.equal(tiles()[3].getAttribute("aria-pressed"),"true");
+ click("library-play");click("campaign-resume");assert.deepEqual(routes,["level4","level2"]);
+ ui.render({reset:true});assert.equal(tiles().length,0);assert.equal(els["library-puzzles"].hidden,true);
+ for(const l of LEVELS)best.record({levelId:l.id,moves:1,stars:3});
+ ui.render();assert.equal(els["library-stars"].textContent,"★ 108 / 108");assert.equal(els["campaign-celebration"].hidden,false);
+ click("campaign-resume");assert.equal(routes.at(-1),"level1");
 });

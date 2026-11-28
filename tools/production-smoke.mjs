@@ -30,8 +30,12 @@ try{
    assert.equal(await page.locator("#home-showcase").getAttribute("data-showcase-progress"),"1");
    assert.equal(await page.locator("#home-motion-toggle").isHidden(),true);
    await page.locator("#open-campaign").click();
-   assert.equal(await page.locator(".library-level").count(),36);
-   await page.locator(".library-level").filter({hasText:"The Stubborn Gate"}).click();
+   assert.equal(await page.locator(".library-level").count(),0);
+   await page.locator('.chapter-card[data-chapter="1"]').click();
+   assert.equal(await page.locator(".library-level").count(),4);
+   await page.locator('.library-level[data-level="2"]').click();
+   assert.equal(await page.locator("#library-detail-title").innerText(),"The Stubborn Gate");
+   await page.locator("#library-play").click();
    await page.locator("#object-toggle").click();
    await page.locator("#object-select").selectOption("stubborn-gate");
    await page.locator("#object-spell").selectOption("rotate");
@@ -59,7 +63,8 @@ try{
    assert.match(await page.locator("#home-stars-text").innerText(),/3 \/ 108 stars/);
    await page.locator("#open-campaign").click();
    assert.match(await page.locator("#campaign-progress").innerText(),/1 \/ 36 released puzzles complete.*3 \/ 108 stars/);
-   assert.equal(await page.locator(".library-level").count(),36);
+   assert.equal(await page.locator(".library-level").count(),0);
+   await page.locator("#library-find").click();assert.equal(await page.locator(".library-level").count(),36);
    assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);assert.deepEqual(external,[]);
    report.push({basePath,version:APP.version,completedLevel:2,stars:3,progressSurvivesReload:true,externalRequests:0});
   }finally{await page.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

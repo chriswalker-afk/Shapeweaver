@@ -19,6 +19,7 @@ jobs:
       - run: npm run build
       - run: node tools/production-smoke.mjs
       - run: node tools/home-polish-qa.mjs
+      - run: node tools/library-qa.mjs
       - run: node tools/browser-qa.mjs
       - run: node tools/workshop-browser-qa.mjs
       - uses: actions/upload-artifact@v4
@@ -31,4 +32,10 @@ jobs:
         with:
           name: shapeweaver-home-review
           path: browser-qa/home-review/
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shapeweaver-library-review
+          path: browser-qa/library-review/
           if-no-files-found: warn

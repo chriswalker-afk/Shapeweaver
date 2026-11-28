@@ -4,6 +4,11 @@ import {shapeSocketFilled,validateShapeSockets} from "./shape-sockets.js";
 
 const EPS=1e-7;
 export const plateHeld=(room,p)=>Boolean(p.latch&&p.latched)||platePressed(room,p);
+// A selector is a pressure plate with two complementary outputs. State is
+// derived from actual contact, never toggled by a scripted cast counter.
+export const plateLinks=(plates,id)=>plates.filter(p=>p.gateId===id||p.closedGateId===id);
+const gateCondition=(p,id,held)=>p.closedGateId===id?!held:held;
+export const selectorPlates=room=>(room.plates??[]).filter(p=>p.closedGateId!==undefined);
 /** A weight must actually touch the plate along a horizontal bottom edge. */
 export function platePressed(room,plate){
  return room.objects.some(o=>{
@@ -35,6 +40,10 @@ export function mixedGateProgress(room,gateId){
 }
 export function multiPlateEffects(before,after){
  const previous=new Map(plateGroups(before).map(g=>[g.gateId,g])),effects=[];
+ for(const p of selectorPlates(after)){
+  const old=(before.plates??[]).find(q=>q.id===p.id),held=plateHeld(after,p);
+  if(old&&held!==plateHeld(before,old))effects.push((p.label??p.id)+" will switch to "+(held?"HELD":"FREE")+"; one gate opens and the other closes.");
+ }
  for(const group of plateGroups(after)){
   if(group.total<2)continue;
   const old=previous.get(group.gateId);
@@ -57,9 +66,9 @@ export function resolveMechanisms(room){
  const pressed=plates.map(p=>{const held=plateHeld(room,p);return {...p,pressed:held,...(p.latch?{latched:held}:{})};});
  const filled=sockets.map(s=>({...s,filled:shapeSocketFilled(room,s)}));
  const objects=room.objects.map(o=>{
-  const links=pressed.filter(p=>p.gateId===o.id),keyLinks=filled.filter(s=>s.gateId===o.id);
+  const links=plateLinks(pressed,o.id),keyLinks=filled.filter(s=>s.gateId===o.id);
   if(!links.length&&!keyLinks.length)return o;
-  const open=links.every(p=>p.pressed)&&keyLinks.every(s=>s.filled);
+  const open=links.every(p=>gateCondition(p,o.id,p.pressed))&&keyLinks.every(s=>s.filled);
   return {...o,open,decorative:open};
  });
  return {...room,...(room.plates?{plates:pressed}:{}),...(room.shapeSockets?{shapeSockets:filled}:{}),objects};
@@ -73,11 +82,15 @@ export function validateMechanisms(room){
  for(const p of room.plates??[]){
   if(typeof p.id!=="string"||ids.has(p.id)||![p.x,p.y,p.width,p.contact].every(Number.isFinite)||p.width<=0||p.contact<=0||p.contact>p.width||p.x<room.bounds.minX||p.x+p.width>room.bounds.maxX||p.y<room.bounds.minY||p.y>room.bounds.maxY||!room.objects.some(o=>o.id===p.gateId&&o.kind==="linked-gate"&&o.permissions?.length===0))throw Error("Invalid pressure plate: "+p.id);
   if(p.latch!==undefined&&p.latch!==true||p.latched!==undefined&&(!p.latch||typeof p.latched!=="boolean")||p.latch&&p.pressed!==plateHeld(room,p))throw Error("Invalid latch state: "+p.id);
+  if(p.closedGateId!==undefined){
+   if(typeof p.closedGateId!=="string"||p.closedGateId===p.gateId||p.latch||p.latched!==undefined||!room.objects.some(g=>g.id===p.closedGateId&&g.kind==="linked-gate"&&g.permissions?.length===0)||p.pressed!==platePressed(room,p))throw Error("Invalid two-state selector: "+p.id);
+   for(const id of [p.gateId,p.closedGateId])if(plateLinks(room.plates??[],id).length!==1||(room.shapeSockets??[]).some(s=>s.gateId===id))throw Error("Selector outputs require exclusive gate links: "+p.id);
+  }
   ids.add(p.id);
  }
  for(const g of room.objects.filter(o=>o.kind==="linked-gate")){
-  const linked=(room.plates??[]).filter(p=>p.gateId===g.id),keyLinks=(room.shapeSockets??[]).filter(s=>s.gateId===g.id);
-  if((!linked.length&&!keyLinks.length)||g.open!==(linked.every(p=>plateHeld(room,p))&&keyLinks.every(s=>shapeSocketFilled(room,s)))||Boolean(g.decorative)!==g.open)throw Error("Invalid linked gate state: "+g.id);
+  const linked=plateLinks(room.plates??[],g.id),keyLinks=(room.shapeSockets??[]).filter(s=>s.gateId===g.id);
+  if((!linked.length&&!keyLinks.length)||g.open!==(linked.every(p=>gateCondition(p,g.id,plateHeld(room,p)))&&keyLinks.every(s=>shapeSocketFilled(room,s)))||Boolean(g.decorative)!==g.open)throw Error("Invalid linked gate state: "+g.id);
  }
  if(obstructedGate(room))throw Error("A closed gate overlaps another object");
  return room;

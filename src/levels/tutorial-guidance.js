@@ -60,7 +60,7 @@ export function tutorialConfig(room){return CONFIG[room?.id]??null;}
  * usable arrangement (including common alternate placements); it is guidance only,
  * never a completion gate or an exhaustive solver. */
 export function tutorialSituation(room,player=null){
-  if(room?.chapter===6)return alchemistSituation(room);
+  if(room?.chapter===6)return alchemistSituation(room,player);
   if(room?.chapter===5)return archivesSituation(room,player);
   if(room?.chapter===2)return gardenSituation(room);
   if(room?.chapter===3)return clockworkSituation(room);
@@ -137,7 +137,9 @@ const CHALLENGE_GOALS=deepFreeze({
  "alchemist-25":"Reach the raised workbench.",
  "alchemist-26":"Reach the far side of the channel.",
  "alchemist-27":"Cross the wandering pivot channel.",
- "alchemist-28":"Cross the mirrored channel."
+ "alchemist-28":"Cross the mirrored channel.",
+ "alchemist-29":"Reach the far side of the airlock.",
+ "alchemist-30":"Reach the final workshop portal."
 });
 export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
 const FIELD_GUIDES=Object.freeze({

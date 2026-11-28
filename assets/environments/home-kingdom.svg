@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 800">
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="800" viewBox="0 0 1440 800">
 <title>The woven kingdom at twilight</title>
 <desc>A river winds through distant gardens, clockwork towers and an observatory toward a glowing stone gatehouse.</desc>
 <defs>
@@ -41,9 +41,9 @@
 <!-- Winding water; the warm bridge leads toward the gate. -->
 <path d="M0 538q208-30 383 3t352-1 286-8 419 20v248H0Z" fill="url(#river)"/>
 <g fill="none" stroke="#c5dfcd" stroke-linecap="round" opacity=".32"><path d="M91 552q14 -3 37 0t22 0"/><path d="M228 583q15 -3 38 0t23 0"/><path d="M365 614q16 -3 39 0t24 0"/><path d="M502 645q17 -3 40 0t25 0"/><path d="M639 676q18 -3 41 0t26 0"/><path d="M776 707q19 -3 42 0t27 0"/><path d="M913 738q20 -3 43 0t28 0"/><path d="M1050 769q21 -3 44 0t29 0"/><path d="M1187 562q22 -3 45 0t30 0"/><path d="M1324 593q23 -3 46 0t31 0"/><path d="M21 624q24 -3 47 0t32 0"/><path d="M158 655q25 -3 48 0t33 0"/><path d="M295 686q26 -3 49 0t34 0"/><path d="M432 717q14 -3 50 0t35 0"/><path d="M569 748q15 -3 51 0t36 0"/><path d="M706 779q16 -3 52 0t37 0"/><path d="M843 572q17 -3 53 0t38 0"/><path d="M980 603q18 -3 54 0t22 0"/><path d="M1117 634q19 -3 55 0t23 0"/><path d="M1254 665q20 -3 56 0t24 0"/><path d="M1391 696q21 -3 57 0t25 0"/><path d="M88 727q22 -3 37 0t26 0"/><path d="M225 758q23 -3 38 0t27 0"/><path d="M362 789q24 -3 39 0t28 0"/><path d="M499 582q25 -3 40 0t29 0"/><path d="M636 613q26 -3 41 0t30 0"/><path d="M773 644q14 -3 42 0t31 0"/><path d="M910 675q15 -3 43 0t32 0"/><path d="M1047 706q16 -3 44 0t33 0"/><path d="M1184 737q17 -3 45 0t34 0"/><path d="M1321 768q18 -3 46 0t35 0"/><path d="M18 561q19 -3 47 0t36 0"/><path d="M155 592q20 -3 48 0t37 0"/><path d="M292 623q21 -3 49 0t38 0"/></g>
-<path d="M0 515q172-31 310-8 88 15 128 48l-35 64 88 181H0Z" fill="url(#bank)" stroke="#344653" stroke-width="2"/>
+<path d="M0 515q242-31 440-8 112 15 175 48l-35 64 88 181H0Z" fill="url(#bank)" stroke="#344653" stroke-width="2"/>
 <path d="M886 574q90-41 175-25t379-12v263H930q-20-74-44-226Z" fill="url(#bank)" stroke="#314b53" stroke-width="3"/>
-<path d="M0 517q172-31 310-8 88 15 128 48m448 17q90-41 175-25t379-12" stroke="#a3ad85" stroke-width="7" fill="none" opacity=".8"/>
+<path d="M0 517q242-31 440-8 112 15 175 48m448 17q90-41 175-25t379-12" stroke="#a3ad85" stroke-width="7" fill="none" opacity=".8"/>
 <!-- Historic arched bridge, visible behind the menu. -->
 <g transform="translate(615 537)">
 <path d="M0 29 273 36v66h-23v-25q-23-49-47 0v21h-21V75q-28-54-56 0v19h-22V70q-26-52-54 0v18H0Z" fill="url(#stone)" stroke="#465464" stroke-width="3"/>

@@ -2,6 +2,7 @@ import {polygonBounds,deepFreeze} from "../geometry/world.js";
 import {gardenSituation} from "./garden-guidance.js";
 import {clockworkSituation} from "./clockwork-guidance.js";
 import {riverworksSituation} from "./riverworks-guidance.js";
+import {archivesSituation} from "./archives-guidance.js";
 import {referencePoints} from "../transformations/preview-math.js";
 import {previewTranslation} from "../transformations/translation.js";
 import {previewRotation} from "../transformations/rotation.js";
@@ -57,7 +58,8 @@ export function tutorialConfig(room){return CONFIG[room?.id]??null;}
 /** Read the live object, not the original answer. 'ready' recognises the intended
  * usable arrangement (including common alternate placements); it is guidance only,
  * never a completion gate or an exhaustive solver. */
-export function tutorialSituation(room){
+export function tutorialSituation(room,player=null){
+  if(room?.chapter===5)return archivesSituation(room,player);
   if(room?.chapter===2)return gardenSituation(room);
   if(room?.chapter===3)return clockworkSituation(room);
   if(room?.chapter===4)return riverworksSituation(room);
@@ -123,7 +125,9 @@ const CHALLENGE_GOALS=deepFreeze({
  "riverworks-15":"Release the sluice gate and reach the far portal.",
  "riverworks-16":"Make a connected route between the docks.",
  "riverworks-17":"Reach the elevated mill quay.",
- "riverworks-18":"Build a route across the tower and both channels."
+ "riverworks-18":"Build a route across the tower and both channels.",
+ "archives-19":"Reach the far reading room.",
+ "archives-20":"Reach the upper catalogue."
 });
 export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
 const FIELD_GUIDES=Object.freeze({
@@ -135,16 +139,18 @@ const FIELD_GUIDES=Object.freeze({
 export function castStatusMessage(room,situation,guidanceEnabled,firstChapterMessage){
  if(!guidanceEnabled)return "Transformation applied. Inspect the new arrangement.";
  if(room.chapter===1&&situation?.ready&&firstChapterMessage)return firstChapterMessage;
+ if(situation?.travel)return "Transformation applied. Explore the next safe landing before reusing the object.";
  if(situation?.ready)return "Transformation applied. Try the route to the portal.";
  return "Transformation applied. Check the new arrangement; another cast may help.";
 }
-export function contextualGuide(room,player,inspection,{casting=false,picking=false,canUndo=false,moves=0,situation=tutorialSituation(room)}={}){
+export function contextualGuide(room,player,inspection,{casting=false,picking=false,canUndo=false,moves=0,situation=tutorialSituation(room,player)}={}){
   const c=situation?.config;if(!c)return null;
   if(player.blockedRespawn)return {step:"Recover",text:"You need to recover before moving. "+(canUndo?"Use Undo or Reset.":"Use Reset.")};
   if(player.completed)return {step:"Complete",text:"Well done! You reached the portal using "+moves+" "+(room.tutorial.spells?"transformation":c.name.toLowerCase())+(moves===1?"":"s")+"."};
   if(casting)return {step:"Cast",text:"The transformation is being applied. Movement resumes when the animation finishes."};
   if(picking)return {step:"Read coordinates",text:"Use the grid to inspect coordinates. Close Pick point before selecting an object or moving."};
   if(inspection?.active){
+    if(situation.travel)return {step:"Traverse",text:"Close Objects, then "+c.traverse.charAt(0).toLowerCase()+c.traverse.slice(1)};
     if(situation.ready)return {step:"Traverse",text:(room.chapter===1?"The object is in a useful position. Close Objects, then ":"The route appears ready. Close Objects, then ")+c.traverse.charAt(0).toLowerCase()+c.traverse.slice(1)};
     if(!inspection.selected)return {step:"Select object",text:"Select an outlined object on the map or choose one from the list. The apprentice does not need to stand beside it."};
     if(!inspection.type)return {step:"Choose transformation",text:"Read the selected object's allowed transformations and choose one."};
@@ -152,17 +158,18 @@ export function contextualGuide(room,player,inspection,{casting=false,picking=fa
     if(inspection.preview&&!inspection.preview.ok)return {step:"Revise",text:"Read the feedback, adjust the mathematical parameters and preview again. Rejected previews use no moves."};
     return {step:"Enter parameters",text:(room.chapter===1&&inspection.type===c.type?c.fields:(FIELD_GUIDES[inspection.type]??"Enter the mathematical parameters."))+" Preview is free."};
   }
-  if(situation.ready)return {step:"Traverse",text:c.traverse};
-  return {step:"Explore",text:room.chapter===1?c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional.":room.chapter===2?campaignGoal(room)+" Inspect the objects and plan how they could work together. Hints are optional.":room.chapter===3?campaignGoal(room)+" Plan a sequence on the same object. Use Hints only if needed.":campaignGoal(room)+" Consider how the pieces can support one another. Hints are optional."};
+  if(situation.ready||situation.travel)return {step:"Traverse",text:c.traverse};
+  return {step:"Explore",text:room.chapter===1?c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional.":room.chapter===2?campaignGoal(room)+" Inspect the objects and plan how they could work together. Hints are optional.":room.chapter===3?campaignGoal(room)+" Plan a sequence on the same object. Use Hints only if needed.":room.chapter===4?campaignGoal(room)+" Consider how the pieces can support one another. Hints are optional.":campaignGoal(room)+" Decide when to move and when to reuse an object. Hints are optional."};
 }
 /** Stage 5 is the only stage that supplies parameter values as a worked answer.
  * Validate the proposed cast against the live world and apprentice before suggesting Apply.
  * Neither the hint nor the guide changes input fields, object state, moves or rating. */
-export function tutorialHint(room,player,stage,situation=tutorialSituation(room)){
+export function tutorialHint(room,player,stage,situation=tutorialSituation(room,player)){
   if(!situation||!Number.isInteger(stage)||stage<1||stage>HINT_STAGES.length)return null;
   const {config:c,ready,reasoning,worked,raw}=situation;
   let text;
-  if(ready)text="The object is already in a useful position. "+c.traverse;
+  if(situation.travel)text=c.traverse+" Do not move the piece while you are standing on it or in its travel path.";
+  else if(ready)text="The object is already in a useful position. "+c.traverse;
   else if(stage===1)text=c.obstacle;
   else if(stage===2)text=c.object;
   else if(stage===3)text=c.spell;

@@ -88,3 +88,6 @@ On first release, enable GitHub Actions publishing in Settings → Pages, then r
 ### Internal developer workshop
 
 Run `npm run workshop` and open http://127.0.0.1:4173/workshop/index.html. Load a copy of any released puzzle or create a blank draft, place and drag items on the grid, edit exact properties, validate, playtest, and export a verified JSON bundle. Run `npm run verify:level -- path/to/level.verified.json` to independently replay an exported proof. The workshop directory is excluded from the public build and is served only by explicit opt-in. No level is automatically registered in the campaign.
+
+### Home-screen acceptance
+The four-action menu, bespoke illustrations and optional spell showcase are covered by the normal release checks and by `node tools/home-polish-qa.mjs` (requires the existing optional Playwright/Chromium QA installation). The Browser QA workflow publishes a small `shapeweaver-home-review` screenshot/report artifact for human visual review, separately from full campaign screenshots. See [Home acceptance](docs/home-acceptance.md).

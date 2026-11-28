@@ -65,9 +65,16 @@ export function mountHomeShowcase(document,view){
  const stage=$("showcase-stage"),source=$("showcase-source"),target=$("showcase-target"),moving=$("showcase-moving"),arrival=$("showcase-arrival"),
   guide=$("showcase-guide"),arrow=$("showcase-arrow"),centre=$("showcase-centre"),name=$("showcase-name"),caption=$("showcase-caption");
  if(![art,svg,toggle,stage,source,target,moving,arrival,guide,arrow,centre,name,caption].every(el=>typeof el?.setAttribute==="function")||typeof toggle.addEventListener!=="function")return null;
- const system=view.matchMedia?.("(prefers-reduced-motion: reduce)"),compact=view.matchMedia?.("(max-width: 650px) and (max-height: 650px) and (orientation: portrait)");
+ const system=view.matchMedia?.("(prefers-reduced-motion: reduce)"),compact=view.matchMedia?.("(max-width: 820px) and (max-height: 720px) and (orientation: portrait), (max-width: 680px) and (orientation: landscape)");
  const canAnimate=typeof view.requestAnimationFrame==="function"&&typeof view.cancelAnimationFrame==="function";
  let active=false,paused=false,frame=null,last=null,lastDraw=-Infinity,elapsed=500,running=false,destroyed=false,currentId=null;
+ // Avoid redundant DOM mutations during the long settled hold in each scene.
+ const written=new WeakMap();
+ function write(el,key,value){
+  value=String(value);let cache=written.get(el);
+  if(!cache){cache=new Map();written.set(el,cache);}
+  if(cache.get(key)!==value){el.setAttribute(key,value);cache.set(key,value);}
+ }
  function render(ms){
   const state=sampleShowcase(ms),{example,target:points,progress}=state;
   if(currentId!==example.id){
@@ -81,9 +88,9 @@ export function mountHomeShowcase(document,view){
    name.textContent=getSpell(example.id).label;caption.textContent=example.caption;
    svg.setAttribute("data-showcase-spell",example.id);
   }
-  moving.setAttribute("points",polygon(state.moving));moving.setAttribute("opacity",round(state.movingAlpha));
-  arrival.setAttribute("opacity",round(state.arrivalAlpha));stage.setAttribute("opacity",round(state.opacity));
-  svg.setAttribute("data-showcase-progress",round(progress));
+  write(moving,"points",polygon(state.moving));write(moving,"opacity",round(state.movingAlpha));
+  write(arrival,"opacity",round(state.arrivalAlpha));write(stage,"opacity",round(paused?1:state.opacity));
+  write(svg,"data-showcase-progress",round(progress));
  }
  const reduced=()=>Boolean(system?.matches||document.documentElement?.getAttribute?.("data-motion")==="reduced");
  function stop(){running=false;if(frame!==null)view.cancelAnimationFrame?.(frame);frame=null;last=null;lastDraw=-Infinity;}
@@ -97,7 +104,9 @@ export function mountHomeShowcase(document,view){
  function sync(){
   if(destroyed)return;
   const stationary=reduced()||!canAnimate,visible=active&&!compact?.matches;
-  toggle.hidden=!visible||stationary;toggle.textContent=paused?"Play magic":"Pause magic";
+  const hideControl=!visible||stationary;
+  if(hideControl&&active&&document.activeElement===toggle)$("open-continue")?.focus?.({preventScroll:true});
+  toggle.hidden=hideControl;toggle.textContent=paused?"Play magic":"Pause magic";
   const shouldRun=visible&&!stationary&&!paused&&!document.hidden;
   art.setAttribute("data-home-motion",!visible?"inactive":stationary?"static":shouldRun?"running":"paused");
   if(!shouldRun){

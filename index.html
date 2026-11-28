@@ -15,7 +15,7 @@
 <body>
   <header class="app-header">
     <a class="brand" id="open-home" href="./" aria-label="Shapeweaver home"><img src="./assets/ui/crest.svg" alt="" width="35" height="35"><span>Shapeweaver</span></a>
-    <div class="header-meta"><button type="button" id="home-motion-toggle" class="home-motion-toggle" hidden>Pause magic</button><span class="stage-label">v1.0.0 · 36 puzzles · 7 chapters</span></div>
+    <div class="header-meta"><button type="button" id="home-motion-toggle" class="home-motion-toggle" aria-controls="home-showcase" hidden>Pause magic</button><span class="stage-label">v1.0.0 · 36 puzzles · 7 chapters</span></div>
   </header>
   <main class="app-main" id="app">
     <section class="game-viewport" aria-label="Shapeweaver mathematical puzzle adventure">
@@ -30,6 +30,47 @@
           <image href="./assets/characters/apprentice.svg" x="978" y="444" width="100" height="140"/>
         </svg>
         <div class="scene-shade"></div>
+        <div class="fireflies"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <section class="title-view" id="title-view" aria-labelledby="viewport-title">
+        <div class="title-content">
+          <div class="home-identity">
+            <img class="title-crest" src="./assets/ui/crest.svg" alt="" width="76" height="76">
+            <div><p class="eyebrow">An adventure in mathematical magic</p>
+              <h1 id="viewport-title">Shapeweaver</h1>
+              <p class="tagline">Reshape the world. Find your way.</p>
+            </div>
+          </div>
+          <p class="intro">Four spells. A forgotten kingdom. A path only you can create.</p>
+          <div class="title-actions" role="group" aria-label="Choose your adventure">
+            <button type="button" class="home-card home-card-primary" id="open-continue" aria-labelledby="open-continue-label" aria-describedby="continue-detail continue-note" data-continuation="begin">
+              <img src="./assets/ui/home-continue.svg" alt="" width="160" height="132">
+              <span class="home-card-copy"><strong id="open-continue-label">Continue</strong><span id="continue-detail">Begin · Level 1 · Across the Brook</span><small id="continue-note" hidden></small></span>
+              <span class="home-card-arrow" aria-hidden="true">›</span>
+            </button>
+            <button type="button" class="home-card home-card-library" id="open-campaign" aria-labelledby="open-campaign-label" aria-describedby="library-detail">
+              <img src="./assets/ui/home-library.svg" alt="" width="160" height="132">
+              <span class="home-card-copy"><strong id="open-campaign-label">Puzzle Library</strong><span id="library-detail">Explore all 36 puzzles and seven chapters.</span></span>
+              <span class="home-card-arrow" aria-hidden="true">›</span>
+            </button>
+            <button type="button" class="home-card home-card-spellbook" id="open-spellbook" aria-labelledby="open-spellbook-label" aria-describedby="spellbook-detail">
+              <img src="./assets/ui/home-spellbook.svg" alt="" width="160" height="132">
+              <span class="home-card-copy"><strong id="open-spellbook-label">Spellbook</strong><span id="spellbook-detail">Learn the four transformation spells.</span></span>
+              <span class="home-card-arrow" aria-hidden="true">›</span>
+            </button>
+            <button type="button" class="home-card home-card-practice" id="open-room" aria-labelledby="open-room-label" aria-describedby="practice-detail">
+              <img src="./assets/ui/home-practice.svg" alt="" width="160" height="132">
+              <span class="home-card-copy"><strong id="open-room-label">Practice Room</strong><span id="practice-detail">Experiment freely with the spells.</span></span>
+              <span class="home-card-arrow" aria-hidden="true">›</span>
+            </button>
+          </div>
+          <div class="home-progress" role="group" aria-label="Adventure progress">
+            <span id="home-progress-text">0 / 36 puzzles</span><progress id="home-progress-bar" max="36" value="0" aria-label="Campaign puzzles completed"></progress><span class="home-stars"><span aria-hidden="true">★</span> <span id="home-stars-text">0 / 108 stars</span></span>
+          </div>
+          <p class="preview-note" id="app-status" role="status">Loading Shapeweaver…</p>
+          <noscript><p class="preview-note">Enable JavaScript to play Shapeweaver.</p></noscript>
+        </div>
+        <div class="home-scene-space" aria-hidden="true">
         <svg id="home-showcase" class="home-showcase" viewBox="0 0 300 230" aria-hidden="true" focusable="false" data-showcase-spell="translate" data-showcase-progress="1">
           <defs>
             <radialGradient id="home-rune-light"><stop stop-color="#211d34" stop-opacity=".84"/><stop offset=".68" stop-color="#29243a" stop-opacity=".58"/><stop offset="1" stop-color="#211d34" stop-opacity="0"/></radialGradient>
@@ -52,51 +93,11 @@
               <polygon id="showcase-arrival" points="170,115 214,115 214,93 192,71 170,71" fill="currentColor" fill-opacity=".3" stroke-width="2.4" opacity="0"/>
             </g>
             <g fill="currentColor" opacity=".8"><path d="m26 63 2 5 5 2-5 2-2 5-2-5-5-2 5-2ZM267 42l2 5 5 2-5 2-2 5-2-5-5-2 5-2ZM261 154l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5Z"/></g>
-            <text id="showcase-name" x="150" y="200" fill="currentColor" font-family="Georgia,serif" font-size="15" font-weight="bold" text-anchor="middle">Translation</text>
-            <text id="showcase-caption" x="150" y="216" fill="#f2dfbc" font-family="system-ui,sans-serif" font-size="10.5" text-anchor="middle">5 right · 1 up</text>
+            <text id="showcase-name" x="150" y="200" fill="currentColor" font-family="Georgia,serif" font-size="17" font-weight="bold" text-anchor="middle">Translation</text>
+            <text id="showcase-caption" x="150" y="216" fill="#f2dfbc" font-family="system-ui,sans-serif" font-size="12" text-anchor="middle">5 right · 1 up</text>
           </g>
         </svg>
-        <div class="fireflies"><i></i><i></i><i></i><i></i><i></i></div>
-      </div>
-      <section class="title-view" id="title-view" aria-labelledby="viewport-title">
-        <div class="title-content">
-          <div class="home-identity">
-            <img class="title-crest" src="./assets/ui/crest.svg" alt="" width="76" height="76">
-            <div><p class="eyebrow">An adventure in mathematical magic</p>
-              <h1 id="viewport-title">Shapeweaver</h1>
-              <p class="tagline">Reshape the world. Find your way.</p>
-            </div>
-          </div>
-          <p class="intro">Four spells. A forgotten kingdom. A path only you can create.</p>
-          <div class="title-actions" role="group" aria-label="Choose your adventure">
-            <button type="button" class="home-card home-card-primary" id="open-continue" data-continuation="begin">
-              <img src="./assets/ui/home-continue.svg" alt="" width="160" height="132">
-              <span class="home-card-copy"><strong>Continue</strong><span id="continue-detail">Begin · Level 1 · Across the Brook</span><small id="continue-note" hidden></small></span>
-              <span class="home-card-arrow" aria-hidden="true">›</span>
-            </button>
-            <button type="button" class="home-card home-card-library" id="open-campaign">
-              <img src="./assets/ui/home-library.svg" alt="" width="160" height="132">
-              <span class="home-card-copy"><strong>Puzzle Library</strong><span>Explore all 36 puzzles and seven chapters.</span></span>
-              <span class="home-card-arrow" aria-hidden="true">›</span>
-            </button>
-            <button type="button" class="home-card home-card-spellbook" id="open-spellbook">
-              <img src="./assets/ui/home-spellbook.svg" alt="" width="160" height="132">
-              <span class="home-card-copy"><strong>Spellbook</strong><span>Learn the four transformation spells.</span></span>
-              <span class="home-card-arrow" aria-hidden="true">›</span>
-            </button>
-            <button type="button" class="home-card home-card-practice" id="open-room">
-              <img src="./assets/ui/home-practice.svg" alt="" width="160" height="132">
-              <span class="home-card-copy"><strong>Practice Room</strong><span>Experiment freely with the spells.</span></span>
-              <span class="home-card-arrow" aria-hidden="true">›</span>
-            </button>
-          </div>
-          <div class="home-progress">
-            <span id="home-progress-text">0 / 36 puzzles</span><progress id="home-progress-bar" max="36" value="0" aria-label="Campaign puzzles completed"></progress><span id="home-stars-text">0 / 108 stars</span>
-          </div>
-          <p class="preview-note" id="app-status" role="status">Loading Shapeweaver…</p>
-          <noscript><p class="preview-note">Enable JavaScript to play Shapeweaver.</p></noscript>
         </div>
-        <div class="home-scene-space" aria-hidden="true"></div>
       </section>
       <section id="campaign-view" class="campaign-view" aria-labelledby="campaign-heading" hidden>
         <header class="campaign-header"><div><p class="eyebrow">The journey begins</p><h2 id="campaign-heading" tabindex="-1">Adventure &amp; puzzle library</h2><p id="campaign-progress" role="status"></p><p id="campaign-celebration" class="campaign-celebration" hidden></p></div><button id="campaign-resume" class="gold-button" type="button">Continue</button><button id="close-campaign" class="room-back" type="button">← Title</button></header>

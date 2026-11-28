@@ -3,6 +3,7 @@ import {polygonsOverlap} from "../geometry/polygons.js";
 import {shapeSocketFilled,validateShapeSockets} from "./shape-sockets.js";
 
 const EPS=1e-7;
+export const plateHeld=(room,p)=>Boolean(p.latch&&p.latched)||platePressed(room,p);
 /** A weight must actually touch the plate along a horizontal bottom edge. */
 export function platePressed(room,plate){
  return room.objects.some(o=>{
@@ -21,7 +22,7 @@ export function plateGroups(room){
  const groups=new Map();
  for(const plate of room.plates??[]){
   if(!groups.has(plate.gateId))groups.set(plate.gateId,[]);
-  groups.get(plate.gateId).push({...plate,pressed:platePressed(room,plate)});
+  groups.get(plate.gateId).push({...plate,pressed:plateHeld(room,plate)});
  }
  return [...groups].map(([gateId,plates])=>({gateId,plates,held:plates.filter(p=>p.pressed).length,total:plates.length}));
 }
@@ -42,7 +43,7 @@ export function multiPlateEffects(before,after){
 export function resolveMechanisms(room){
  const plates=room.plates??[],sockets=room.shapeSockets??[];
  if(!plates.length&&!sockets.length)return room;
- const pressed=plates.map(p=>({...p,pressed:platePressed(room,p)}));
+ const pressed=plates.map(p=>{const held=plateHeld(room,p);return {...p,pressed:held,...(p.latch?{latched:held}:{})};});
  const filled=sockets.map(s=>({...s,filled:shapeSocketFilled(room,s)}));
  const objects=room.objects.map(o=>{
   const links=pressed.filter(p=>p.gateId===o.id),keyLinks=filled.filter(s=>s.gateId===o.id);
@@ -60,11 +61,12 @@ export function validateMechanisms(room){
  const ids=new Set([...room.terrain,...room.hazards,...room.objects,...(room.ladders??[]),...(room.checkpoints??[])].map(o=>o.id));
  for(const p of room.plates??[]){
   if(typeof p.id!=="string"||ids.has(p.id)||![p.x,p.y,p.width,p.contact].every(Number.isFinite)||p.width<=0||p.contact<=0||p.contact>p.width||p.x<room.bounds.minX||p.x+p.width>room.bounds.maxX||p.y<room.bounds.minY||p.y>room.bounds.maxY||!room.objects.some(o=>o.id===p.gateId&&o.kind==="linked-gate"&&o.permissions?.length===0))throw Error("Invalid pressure plate: "+p.id);
+  if(p.latch!==undefined&&p.latch!==true||p.latched!==undefined&&(!p.latch||typeof p.latched!=="boolean")||p.latch&&p.pressed!==plateHeld(room,p))throw Error("Invalid latch state: "+p.id);
   ids.add(p.id);
  }
  for(const g of room.objects.filter(o=>o.kind==="linked-gate")){
   const linked=(room.plates??[]).filter(p=>p.gateId===g.id),keyLinks=(room.shapeSockets??[]).filter(s=>s.gateId===g.id);
-  if((!linked.length&&!keyLinks.length)||g.open!==(linked.every(p=>platePressed(room,p))&&keyLinks.every(s=>shapeSocketFilled(room,s)))||Boolean(g.decorative)!==g.open)throw Error("Invalid linked gate state: "+g.id);
+  if((!linked.length&&!keyLinks.length)||g.open!==(linked.every(p=>plateHeld(room,p))&&keyLinks.every(s=>shapeSocketFilled(room,s)))||Boolean(g.decorative)!==g.open)throw Error("Invalid linked gate state: "+g.id);
  }
  if(obstructedGate(room))throw Error("A closed gate overlaps another object");
  return room;

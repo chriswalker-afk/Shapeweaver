@@ -332,7 +332,7 @@ function drawShapeSockets(ctx,camera,room,foreground=false){
       ctx.strokeStyle=colour;ctx.lineWidth=2;ctx.setLineDash(slot.filled?[]:[5,3]);ctx.stroke();
       const p=worldToScreen(camera,{x:b.maxX,y:b.maxY}),q=worldToScreen(camera,{x:(gb.minX+gb.maxX)/2,y:gb.maxY-.5});
       ctx.strokeStyle=colour;ctx.lineWidth=Math.max(1,s*.045);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,q.y);ctx.lineTo(q.x,q.y);ctx.stroke();ctx.setLineDash([]);
-      worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.55,slot.filled?"KEY FITS":"LOCK RECESS",colour);
+      worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.55,slot.locking?(slot.filled?"KEY CAPTURED":(slot.label??"LOCKING RECESS").toUpperCase()+" · LOCKS"):(slot.filled?"KEY FITS":"LOCK RECESS"),colour);
       worldLabel(ctx,camera,(gb.minX+gb.maxX)/2,gb.minY+4,g.open?"OPEN":"LOCKED",colour);
     }
     ctx.restore();
@@ -348,7 +348,7 @@ function drawPlates(ctx,camera,room){
       ctx.moveTo(p.x+plate.width*s/2,p.y+4);ctx.lineTo(p.x+plate.width*s/2,p.y+lane);ctx.lineTo(q.x,q.y+lane);ctx.lineTo(q.x,q.y+4);ctx.stroke();ctx.setLineDash([]);
       ctx.fillStyle="#665947";ctx.fillRect(p.x,p.y+1,plate.width*s,Math.max(4,s*.19));
       ctx.fillStyle=colour;ctx.fillRect(p.x+1,p.y+1,plate.width*s-2,Math.max(2,s*.10));
-      const label=group.total>1?(plate.label??"Plate "+(i+1)).toUpperCase()+" · "+(plate.pressed?"HELD":"FREE"):(plate.pressed?"PLATE HELD":"WEIGHT PLATE");
+      const label=plate.latch?(plate.latched?"LATCHED OPEN":"ONE-WAY LATCH"):group.total>1?(plate.label??"Plate "+(i+1)).toUpperCase()+" · "+(plate.pressed?"HELD":"FREE"):(plate.pressed?"PLATE HELD":"WEIGHT PLATE");
       worldLabel(ctx,camera,plate.x+plate.width/2,plate.y-.45,label,colour);ctx.restore();
     }
   }

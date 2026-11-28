@@ -55,5 +55,13 @@ export function archivesSituation(room,p=null){
   if(!safe)return travel("seek-refuge",{...secondConfig,traverse:p?.checkpoint==="catalogue-refuge"?"Return to the visited balcony to get clear of the ladder's path.":"Reach the catalogue balcony so the ladder can travel below you."});
   return translation("second-cast",o,[39,3],secondConfig);
  }
+ if(room.id==="archives-21"||room.id==="archives-22"){
+  const latch=room.plates.find(p=>p.latch),gate=room.objects.find(o=>o.id===(room.id==="archives-21"?"hold-gate":"exit-gate"));
+  const config={objective:"Open both doors and reach the portal.",obstacle:"Two doors block the corridor. A latch stays open after its weight is removed; a locking recess captures its key.",object:"Follow the links from the mechanisms to the doors. Reserve the only key for the exit, not the spare alcove.",traverse:"Walk right through both open doors to the portal."};
+  if(latch.latched&&gate.open)return finish("exit",config);
+  if(room.shapeSockets?.some(s=>s.id==="alcove-lock"&&s.filled))return travel("recover-lock",{...config,traverse:"The only key is captured in the spare alcove. Undo the locking cast or Reset to recover it."});
+  if(!latch.latched)return translation("latch",room.objects.find(o=>o.id===(room.id==="archives-21"?"latch-weight":"passage-weight")),[10,8],config);
+  return room.id==="archives-21"?translation("hold",room.objects.find(o=>o.id==="latch-weight"),[18,8],config):translation("lock",room.objects.find(o=>o.id==="passage-key"),[18,10],config);
+ }
  return null;
 }

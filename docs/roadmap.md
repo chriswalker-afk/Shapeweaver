@@ -61,5 +61,8 @@ Chapter VI opens with Levels 25–26, fractional scale factors and physical clea
 ## Historical milestone: PR29
 Levels 27–28 introduce separately selectable movable sockets and attached beams, with atomic rigid carrying transformations. PR30 adds two-state selectors and multi-stage alchemist puzzles (One Opens, One Closes and The Alchemist’s Trial).
 
-## Current milestone: PR30
+## Historical milestone: PR30
 Chapter VI closes with a complementary-gate airlock and five-cast bridge-reuse trial. Review gate: run the full recorded/hinted campaign audit and independent workshop replays; review chapter progression and keep browser/manual QA distinct. PR31 opens The Celestial Observatory with The Wandering Mirror and The Astronomer’s Bridge (movable mirror lines and combined reference-point mechanisms).
+
+## Current milestone: PR31
+Chapter VII begins with live vertical mirror sliders and reuse of a translated, rotated, then reflected attached bridge. PR32 adds distinct alternative routes (Three Ways Across) and a crystal-delivery objective (The Lost Star). Keep full CI and browser QA as the merge gate.

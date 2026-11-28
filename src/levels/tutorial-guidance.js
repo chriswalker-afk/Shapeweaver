@@ -3,6 +3,7 @@ import {gardenSituation} from "./garden-guidance.js";
 import {clockworkSituation} from "./clockwork-guidance.js";
 import {riverworksSituation} from "./riverworks-guidance.js";
 import {archivesSituation} from "./archives-guidance.js";
+import {observatorySituation} from "./observatory-guidance.js";
 import {alchemistSituation} from "./alchemist-guidance.js";
 import {referencePoints} from "../transformations/preview-math.js";
 import {previewTranslation} from "../transformations/translation.js";
@@ -60,6 +61,7 @@ export function tutorialConfig(room){return CONFIG[room?.id]??null;}
  * usable arrangement (including common alternate placements); it is guidance only,
  * never a completion gate or an exhaustive solver. */
 export function tutorialSituation(room,player=null){
+  if(room?.chapter===7)return observatorySituation(room,player);
   if(room?.chapter===6)return alchemistSituation(room,player);
   if(room?.chapter===5)return archivesSituation(room,player);
   if(room?.chapter===2)return gardenSituation(room);
@@ -139,7 +141,9 @@ const CHALLENGE_GOALS=deepFreeze({
  "alchemist-27":"Cross the wandering pivot channel.",
  "alchemist-28":"Cross the mirrored channel.",
  "alchemist-29":"Reach the far side of the airlock.",
- "alchemist-30":"Reach the final workshop portal."
+ "alchemist-30":"Reach the final workshop portal.",
+ "observatory-31":"Cross the star channel.",
+ "observatory-32":"Cross both observatory channels."
 });
 export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
 const FIELD_GUIDES=Object.freeze({

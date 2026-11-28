@@ -5,6 +5,7 @@ import {resolveMechanisms,obstructedGate,multiPlateEffects} from "../mechanisms/
 import {ladderSegment,isSolidObject,isBridgeDeck} from "../mechanisms/transformable-ladders.js";
 import {dockedSocket,samePoint} from "../mechanisms/hinge-sockets.js";
 import {unsupportedBearing,validateBearingDefinition} from "../mechanisms/structural-bearings.js";
+import {validateMirrors,mirrorRailFor,railMirrorValue,railEquation} from "../mechanisms/movable-mirrors.js";
 import {attachedObjects,attachedImages,stationarySolids,applyCastGeometry,validateAttachments} from "../mechanisms/attached-pivots.js";
 import {TYPES,parsePreviewRequest,previewGeometry,referencePoints,isIdentity} from "../transformations/preview-math.js";
 
@@ -28,7 +29,7 @@ export function validateObjectDefinitions(room){
     if(o.fixedCentre!==undefined&&(!Array.isArray(o.fixedCentre)||o.fixedCentre.length!==2||!o.fixedCentre.every(Number.isFinite)||o.support!=="enchanted"||o.vertexIds?.includes("Centre")||o.hinge||o.dockable||o.pivotOnly||o.permissions.length!==1||o.permissions[0]!=="rotate"||pointPolygonDistance(o.fixedCentre,o.vertices)<=GEOMETRY_EPS||o.fixedCentre[0]<room.bounds.minX||o.fixedCentre[0]>room.bounds.maxX||o.fixedCentre[1]<room.bounds.minY||o.fixedCentre[1]>room.bounds.maxY))throw new Error("Invalid external centre: "+o.id);
     if(o.permissions.includes("enlarge")&&(!Array.isArray(o.scaleRange)||o.scaleRange.length!==2||!o.scaleRange.every(Number.isFinite)||o.scaleRange[0]<=0||o.scaleRange[1]<o.scaleRange[0]))throw new Error("Invalid scale range: "+o.id);
   }
-  return validateAttachments(room);
+  validateAttachments(room);return validateMirrors(room);
 }
 /** Nearest interior hit first, then a small CSS-pixel-derived tolerance for thin beams. */
 export function hitObject(room,point,tolerance=0){
@@ -55,6 +56,9 @@ export function previewObject(room,player,id,type,raw){
   if(!object.permissions.includes(type))return failure("permission","That transformation is not permitted for "+name(object)+".");
   const request=parsePreviewRequest(type,raw);
   if(!request)return failure("parameters","Enter all required mathematical parameters.");
+  if(object.kind==="mirror-rail"&&(request.type!=="translate"||Math.abs(request.dy)>GEOMETRY_EPS))return failure("mirror-rail-axis","The mirror slider moves horizontally. Use a translation with vertical component zero.");
+  const rail=mirrorRailFor(room,object);
+  if(type==="reflect"&&rail&&(request.line.kind!=="x"||Math.abs(request.line.value-railMirrorValue(rail))>GEOMETRY_EPS))return failure("mirror-line","Use the current movable mirror line "+railEquation(rail)+". Translate the mirror slider to change it.");
   if(object.support==="hinged"&&(request.type!=="rotate"||Math.hypot(request.centre[0]-object.hinge[0],request.centre[1]-object.hinge[1])>GEOMETRY_EPS))return failure("hinge","Use the fixed hinge as the centre of rotation.");
   if(type==="rotate"&&object.fixedCentre&&!samePoint(request.centre,object.fixedCentre))return failure("external-centre","Use the marked external centre at its exact coordinates.");
   if(type==="rotate"&&object.dockable&&!dockedSocket(room,object))return failure("not-docked","Align the beam hinge with its socket using a translation before rotating.");
@@ -104,6 +108,8 @@ export function previewObject(room,player,id,type,raw){
     if(obstructedGate(candidate))return failure("gate-obstructed","A linked gate would close on an object. Clear the gate first.",extra);
     if(player&&candidate.objects.some(o=>o.kind==="linked-gate"&&!o.open&&polygonIntersectsBox(o.vertices,playerBox(player))))return failure("gate-obstructed","A linked gate would close on the apprentice. Move clear first.",extra);
   }
+  if(object.kind==="mirror-rail")extra.mechanismEffects=[...(extra.mechanismEffects??[]),"Mirror line will move from "+railEquation(object)+" to "+railEquation({...object,vertices:geometry.vertices})+"."];
+  if(type==="reflect"&&rail)extra.mechanismEffects=[...(extra.mechanismEffects??[]),"Reflection uses the current linked mirror "+railEquation(rail)+"."];
   if(object.dockable){const socket=dockedSocket(room,object,geometry.hinge);extra.mechanismEffects=[...(extra.mechanismEffects??[]),socket?"Hinge will dock at "+(socket.label??socket.id)+". Rotation available.":"Hinge will be undocked. Rotation requires a socket."];}
   if(object.kind==="ladder"){const image={...object,vertices:geometry.vertices};extra.mechanismEffects=[...(extra.mechanismEffects??[]),ladderSegment(image)?"Ladder will be upright and climbable.":isBridgeDeck(image)?"Ladder will form a solid walkable bridge.":"Ladder will not be climbable in this orientation."];}
   return {ok:true,code:"final-clear",scope:"final-pose",message:"Final position is clear. Travel path is not yet checked; Apply is unavailable.",...extra};

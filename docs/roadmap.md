@@ -99,3 +99,6 @@ Reserved projection grid space, accessible navigation labels and responsive home
 
 ## PR41 — Chapter-first puzzle library
 Replace the word-heavy simultaneous chapter/level grid with a seven-chapter illustrated atlas, chapter-specific numbered puzzles and one selected-puzzle inspector. Keep optional cross-campaign search filters and all 36 puzzles freely available. See [library redesign](library-redesign.md). Public puzzle workshop deferred until the navigation is accepted.
+
+## PR42 — CI performance optimisation
+Split campaign browser QA into four independent 36-level viewport jobs, run focused acceptance alongside them, cache the pinned browser download, retain representative screenshots plus failures and verify all 144 unique combinations in the stable browser-smoke gate. See [CI performance](ci-performance.md). After merging and verifying the production deployment, inspect the actual library on classroom devices and resume planning the public puzzle workshop.

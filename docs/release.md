@@ -62,3 +62,6 @@ If a deployed commit is defective, use a revert PR on main, run full CI, merge, 
 ## After release
 
 First publish and confirm HTTPS, then link the live game from the games directory, then conduct the documented classroom trial. Optional next development milestone PR37: public drag-and-drop level workshop; defer that until the base game is reliably published and tested. A GitHub v1.0.0 tag/release can be created after the hosted commit is verified, not in advance.
+
+### PR42 browser CI layout
+The original Browser QA merge requirement is unchanged. Its `browser-smoke` job now depends on all four campaign shards and the focused production/menu/workshop job, then downloads and validates exact-commit coverage reports. See [CI performance](ci-performance.md) for local and full-screenshot diagnostic runs. PR42 changes test infrastructure only.

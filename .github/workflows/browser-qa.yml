@@ -1,12 +1,21 @@
 name: Browser QA
 on:
   workflow_dispatch:
+    inputs:
+      full_screenshots:
+        description: Capture every campaign level and cast phase (slower, larger artifacts)
+        type: boolean
+        default: false
   pull_request:
     branches: [main]
 permissions:
   contents: read
+concurrency:
+  group: browser-qa-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  browser-smoke:
+  focused:
+    name: Production, menus and workshop
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -14,28 +23,97 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-save --package-lock=false playwright@1.51.1
-      - run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/setup-browser
       - run: npm run build
       - run: node tools/production-smoke.mjs
       - run: node tools/home-polish-qa.mjs
       - run: node tools/library-qa.mjs
-      - run: node tools/browser-qa.mjs
       - run: node tools/workshop-browser-qa.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: shapeweaver-browser-qa
-          path: browser-qa/
+          name: shapeweaver-focused-review
+          path: |
+            browser-qa/production-*
+            browser-qa/workshop-*
+          if-no-files-found: warn
+          overwrite: true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: shapeweaver-home-review
           path: browser-qa/home-review/
           if-no-files-found: warn
+          overwrite: true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: shapeweaver-library-review
           path: browser-qa/library-review/
           if-no-files-found: warn
+          overwrite: true
+  campaign:
+    name: Campaign (${{ matrix.viewport }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        viewport: [desktop, small-desktop, landscape-phone, portrait-phone]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: ./.github/actions/setup-browser
+      - name: Exercise all 36 levels in this viewport
+        env:
+          QA_VIEWPORT: ${{ matrix.viewport }}
+          QA_SCREENSHOTS: ${{ inputs.full_screenshots && 'all' || 'review' }}
+        run: node tools/browser-qa.mjs --viewport "$QA_VIEWPORT" --screenshots "$QA_SCREENSHOTS"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shapeweaver-campaign-${{ matrix.viewport }}
+          path: browser-qa/campaign-${{ matrix.viewport }}/*.png
+          if-no-files-found: warn
+          overwrite: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shapeweaver-campaign-report-${{ matrix.viewport }}
+          path: browser-qa/campaign-${{ matrix.viewport }}/*.json
+          if-no-files-found: error
+          overwrite: true
+  browser-smoke:
+    # Preserve the existing required job name.
+    name: browser-smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    needs: [focused, campaign]
+    if: always()
+    steps:
+      - name: Require all browser jobs to succeed
+        env:
+          FOCUSED_RESULT: ${{ needs.focused.result }}
+          CAMPAIGN_RESULT: ${{ needs.campaign.result }}
+        run: |
+          test "$FOCUSED_RESULT" = success
+          test "$CAMPAIGN_RESULT" = success
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: shapeweaver-campaign-report-*
+          path: browser-qa/shard-reports/
+          merge-multiple: false
+      - run: node tools/verify-browser-coverage.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shapeweaver-browser-qa
+          path: browser-qa/summary/
+          if-no-files-found: error
+          overwrite: true

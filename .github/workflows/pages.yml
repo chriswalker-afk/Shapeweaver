@@ -24,8 +24,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm run release:check
-      - run: npm install --no-save --package-lock=false playwright@1.51.1
-      - run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/setup-browser
       - run: node tools/production-smoke.mjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

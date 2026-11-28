@@ -91,3 +91,8 @@ Run `npm run workshop` and open http://127.0.0.1:4173/workshop/index.html. Load 
 
 ### Home-screen acceptance
 The four-action menu, bespoke illustrations and optional spell showcase are covered by the normal release checks and by `node tools/home-polish-qa.mjs` (requires the existing optional Playwright/Chromium QA installation). The Browser QA workflow publishes a small `shapeweaver-home-review` screenshot/report artifact for human visual review, separately from full campaign screenshots. See [Home acceptance](docs/home-acceptance.md).
+
+### Browser QA and screenshots
+Browser QA runs the four campaign viewports independently and in parallel, alongside production smoke, home, library and workshop checks. The original `browser-smoke` gate succeeds only after all jobs succeed and the merged reports prove 144 unique level/viewport cases and four complete showcase checks. The `shapeweaver-browser-qa` artifact contains the consolidated reports, not duplicate screenshots. Visual evidence is in the four `shapeweaver-campaign-<viewport>` artifacts and the focused, home and library review artifacts.
+
+For local testing, install the optional pinned QA dependency with `npm install --no-save --package-lock=false playwright@1.51.1` and `npx playwright install --with-deps chromium`. Run `node tools/browser-qa.mjs` for the original full local run (all screenshots), or `node tools/browser-qa.mjs --viewport desktop --screenshots review` for one viewport with representative screenshots. The workflow's manual dispatch has a full-screenshots option; ordinary PRs use representative captures without skipping tests. See [CI performance](docs/ci-performance.md).

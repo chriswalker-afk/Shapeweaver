@@ -70,7 +70,7 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
   on(document.getElementById("open-level2"), () => show("level2"));
   on(document.getElementById("open-level3"), () => show("level3"));
   on(document.getElementById("open-level4"), () => show("level4"));
-  on(document.getElementById("close-room"), () => show("title"));
+  on(document.getElementById("close-room"), () => show(campaign&&state.view!=="room"?"campaign":"title"));
   select(state.selectedSpell);
   return { select, show, destroy() { for (const [element, fn] of listeners) element.removeEventListener("click", fn); } };
 }

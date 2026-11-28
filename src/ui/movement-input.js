@@ -6,24 +6,25 @@ export function mountMovementInput(document,view,enabled,onChange=()=>{}){
   let jump=false;
   function on(el,event,fn){if(!el?.addEventListener)return;el.addEventListener(event,fn);listeners.push([el,event,fn]);}
   const pressed=action=>Array.from(held.values()).includes(action);
+  const buttons=Array.from(document.querySelectorAll?.("[data-move]")??[]);
+  function changed(){for(const button of buttons)button.setAttribute?.("data-held",String(pressed(button.dataset.move)));onChange();}
   function press(source,action){
     if(!enabled()||!ACTIONS.has(action))return false;
     if(action==="jump"&&!pressed("jump"))jump=true;
-    held.set(source,action);onChange();return true;
+    held.set(source,action);changed();return true;
   }
-  function release(source){if(held.delete(source))onChange();}
-  function clear(){held.clear();jump=false;onChange();}
+  function release(source){if(held.delete(source))changed();}
+  function clear(){held.clear();jump=false;changed();}
   function editable(target,code){return Boolean(target?.closest?.("input, select, textarea, [contenteditable]")||(code==="Space"&&target?.closest?.("button, a")));}
   on(view,"keydown",event=>{
     const action=KEY[event.code];
-    if(!action||!enabled()||editable(event.target,event.code)||event.altKey||event.ctrlKey||event.metaKey)return;
+    if(event.defaultPrevented||!action||!enabled()||editable(event.target,event.code)||event.altKey||event.ctrlKey||event.metaKey)return;
     event.preventDefault();
     if(!event.repeat)press("key:"+event.code,action);
   });
   on(view,"keyup",event=>{if(KEY[event.code])release("key:"+event.code);});
   on(view,"blur",clear);
   on(document,"visibilitychange",()=>{if(document.hidden)clear();});
-  const buttons=Array.from(document.querySelectorAll?.("[data-move]")??[]);
   for(const button of buttons){
     const action=button.dataset.move;
     on(button,"pointerdown",event=>{

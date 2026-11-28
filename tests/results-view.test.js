@@ -8,7 +8,7 @@ function node(tag="div"){
   addEventListener(k,v){listeners.set(k,v);},removeEventListener(k,v){if(listeners.get(k)===v)listeners.delete(k);},click(){listeners.get("click")?.();}};
 }
 function fixture(){
- const ids="results-view results-heading results-level results-stars results-message results-stats results-thresholds results-best results-history results-empty results-replay results-next results-title".split(" ");
+ const ids="results-view results-heading results-level results-stars results-message results-stats results-thresholds results-best results-history results-empty results-campaign-progress results-replay results-next results-title".split(" ");
  const els=Object.fromEntries(ids.map(id=>[id,node()])),routes=[];
  const view=mountResults({getElementById:id=>els[id],createElement:node},r=>routes.push(r));
  return {els,routes,view};
@@ -46,4 +46,15 @@ test("last released level, no phantom next, session best, zero-move and cleared 
  view.show({...result,stars:3,moves:0,entries:[]},null,"level1","level2");
  assert.equal(els["results-empty"].hidden,false);assert.equal(els["results-history"].children.length,0);
  assert.equal(els["results-next"].hidden,false);view.clear();assert.equal(view.getResult(),null);els["results-next"].click();assert.deepEqual(routes,["level4"]);
+});
+
+test("campaign completion is based on all puzzles, not reaching the last portal alone",()=>{
+ const {els,view,routes}=fixture();
+ const last={...result,number:36,title:"The Final Ascent",stars:3};
+ view.show(last,null,"level36",null,{completed:1,total:36,stars:3,maximum:108,next:{number:1,route:"level1"}});
+ assert.equal(els["results-heading"].textContent,"Summit reached!");assert.match(els["results-campaign-progress"].textContent,/1 \/ 36 puzzles/);assert.equal(els["results-next"].hidden,false);
+ els["results-next"].click();assert.deepEqual(routes,["level1"]);
+ view.show({...result,number:2},null,"level2","level3",{completed:36,total:36,stars:102,maximum:108,next:{number:1,route:"level1"}});
+ assert.equal(els["results-heading"].textContent,"Adventure complete!");assert.equal(els["results-next"].hidden,true);assert.match(els["results-campaign-progress"].textContent,/102 \/ 108 stars.*improve/);
+ view.show(last,null,"level36",null,{completed:36,total:36,stars:108,maximum:108,next:{number:1,route:"level1"}});assert.match(els["results-campaign-progress"].textContent,/Every star earned/);
 });

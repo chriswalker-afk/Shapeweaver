@@ -29,9 +29,13 @@ export function mountResults(document,onNavigate){
     const state=el("span",entry.undone?"Undone · still counted":"Applied","result-cast-state");
     item.append(symbol,details,state);return item;
   }
-  function show(result,bestUpdate,currentRoute,followingRoute){
-    current=result;route=currentRoute;nextRoute=followingRoute;
-    heading.textContent="Level complete!";
+  function show(result,bestUpdate,currentRoute,followingRoute,progress=null){
+    const all=Boolean(progress&&progress.completed===progress.total),summit=Boolean(progress&&result.number===progress.total);
+    current=result;route=currentRoute;nextRoute=all?null:followingRoute??(summit?progress.next?.route:null);
+    heading.textContent=all?"Adventure complete!":summit?"Summit reached!":"Level complete!";
+    root.setAttribute("data-campaign-complete",String(all));
+    const campaignStatus=$("results-campaign-progress");
+    if(campaignStatus){campaignStatus.hidden=!progress;campaignStatus.textContent=progress?(all?"All seven chapters completed. ":"Journey progress: ")+progress.completed+" / "+progress.total+" puzzles · "+progress.stars+" / "+progress.maximum+" stars."+(all&&progress.stars<progress.maximum?" Revisit the library to improve your stars.":all?" Every star earned!":""):"";}
     level.textContent="Level "+result.number+" · "+result.title;
     stars.replaceChildren(...Array.from({length:3},(_,i)=>{
       const s=el("span",i<result.stars?"★":"☆",i<result.stars?"earned-star":"empty-star");s.setAttribute("aria-hidden","true");return s;
@@ -43,12 +47,12 @@ export function mountResults(document,onNavigate){
     best.textContent=bestUpdate?(bestUpdate.improved?"Personal best! ":"Personal best: ")+starText(bestUpdate.best.stars)+" · "+moveText(bestUpdate.best.moves)+(bestUpdate.persisted?" · Saved on this browser":" · This session only"):"";
     list.replaceChildren(...result.entries.map(historyRow));list.scrollTop=0;
     const empty=$("results-empty");if(empty)empty.hidden=result.entries.length!==0;
-    next.hidden=!followingRoute;next.disabled=!followingRoute;
-    next.textContent=followingRoute?"Next level →":"";
+    next.hidden=!nextRoute;next.disabled=!nextRoute;
+    next.textContent=nextRoute?(followingRoute?"Next level →":"Continue · Level "+progress.next.number+" →"):"";
     replay.disabled=!route;
   }
   on(replay,()=>{if(current&&route)onNavigate(route);});
   on(next,()=>{if(current&&nextRoute)onNavigate(nextRoute);});
-  on(title,()=>onNavigate("title"));
+  on(title,()=>onNavigate($("campaign-view")?"campaign":"title"));
   return {show,getResult:()=>current,clear(){current=null;route=null;nextRoute=null;},destroy(){for(const [el,fn] of listeners)el.removeEventListener("click",fn);}};
 }

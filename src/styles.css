@@ -329,3 +329,51 @@ body:has(#room-view:not([hidden])) .game-viewport{overflow:visible}
 .chapter-card:disabled{opacity:.65;cursor:default;border-style:dashed}.chapter-card:not(:disabled):hover,.library-level:hover{background:#514064}
 .chapter-card small,.library-level small{color:#d5c5c6}.level-number,.library-score{color:#efc474;font-weight:700}
 .library-filters{margin-bottom:.8rem}.library-filters label{display:grid;gap:.2rem;font-size:.8rem}.library-filters select{min-height:36px;background:#302438;color:#f3e4c7;border:1px solid #9c805b;padding:.3rem}
+
+/* PR35: presentation controls, responsive focus mode and accessible feedback. */
+.presentation-controls,.locate-controls{display:flex;align-items:center;flex-wrap:wrap;gap:.25rem}
+.presentation-controls button[aria-pressed="true"],#quick-camera[aria-pressed="true"]{border-color:#f6d9a2;background:#e6c18c;color:#302438;font-weight:700}
+.room-view[data-focus="true"] .room-heading p,.room-view[data-focus="true"] #room-status{display:none}
+.room-view[data-focus="true"] .room-toolbar{padding:.18rem .45rem;gap:.18rem .3rem}
+.room-view[data-focus="true"] .room-heading h2{font-size:1rem}
+.room-view[data-focus="true"] .room-footer{padding:.18rem .45rem}
+.room-view[data-focus="true"] #tutorial-guide{font-size:.72rem}
+.room-view[data-focus="true"] .play-info{gap:.06rem}
+.room-toolbar,.room-footer,.object-panel,.coordinate-panel{min-width:0}
+.room-toolbar button,.room-footer button{white-space:nowrap}
+.room-heading h2{overflow-wrap:anywhere}
+.object-top{align-items:center}
+.locate-controls button:disabled{opacity:.48;cursor:default}
+#object-references,#object-result{color:#fff0d6}
+#object-result[data-state="clear"]{color:#c8f4c8}
+#object-result[data-state="invalid"]{color:#ffd1c9}
+.movement-controls button[data-held="true"]{background:#e6c18c;color:#302438;border-color:#fff0c5;box-shadow:inset 0 0 0 2px #fff0c5}
+.room-stage{isolation:isolate}
+.room-stage:focus-within{box-shadow:inset 0 0 0 2px #e2bb79}
+#room-canvas:focus-visible{outline:3px solid #ffe3a7;outline-offset:-3px}
+@media(pointer:coarse){
+ .room-toolbar button,.object-panel button,.object-panel select,.coordinate-panel button,.coordinate-panel select{min-height:40px}
+ .movement-controls button{min-height:44px;min-width:44px}
+}
+@media(max-width:650px) and (orientation:portrait){
+ .room-toolbar>.room-heading{flex:1 0 100%}
+ .room-toolbar>.coordinate-controls{flex:1 1 100%}
+ .room-toolbar>.coordinate-controls button{flex:1 1 auto}
+ .room-view[data-focus="true"] .room-toolbar>.room-heading{flex:1 1 9rem}
+ .room-view[data-focus="true"] .room-toolbar>.coordinate-controls{flex:0 1 auto}
+ .locate-controls{flex:1 1 auto}
+ .room-footer .play-info{overflow-wrap:anywhere}
+}
+@media(max-height:600px) and (orientation:landscape){
+ .room-toolbar{column-gap:.24rem}
+ .room-view[data-focus="true"] .room-heading{min-width:6rem}
+ .room-view[data-focus="true"] .room-secondary-tools{padding-top:.1rem}
+ .room-footer .play-info{font-size:.72rem;line-height:1.3}
+}
+:root[data-motion="reduced"] *, :root[data-motion="reduced"] *::before, :root[data-motion="reduced"] *::after{animation:none!important;transition:none!important}
+
+.campaign-celebration{margin:.6rem 0 0;padding:.6rem .8rem;border:1px solid #c6a46f;border-radius:.3rem;color:#ffe8b8;background:#42344c;font-size:.9rem;line-height:1.45;font-weight:650}
+.results-view[data-campaign-complete="true"] .results-sheet{border-color:#e5c187;background:radial-gradient(ellipse at top,#51405d,#272033 75%)}
+.results-view[data-campaign-complete="true"] .results-header h2{color:#ffe6b0}
+@keyframes earned-star-arrive{from{transform:scale(.76);opacity:.65}to{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:no-preference){.results-view:not([hidden]) .earned-star{animation:earned-star-arrive .3s ease-out both}.results-view:not([hidden]) .earned-star:nth-child(2){animation-delay:.08s}.results-view:not([hidden]) .earned-star:nth-child(3){animation-delay:.16s}}

@@ -11,6 +11,7 @@ export function mountCampaign(document,best,navigate){
   const p=campaignProgress(best);next=p.next;
   progress.textContent=p.completed+" / "+p.total+" released puzzles complete · "+p.stars+" / "+p.maximum+" stars"+(best.persisted?" · Saved on this browser":" · Session only");
   resume.textContent=p.completed===p.total?"Replay the adventure":"Continue · Level "+next.number;
+  const celebration=$("campaign-celebration");if(celebration){celebration.hidden=p.completed!==p.total;celebration.textContent=p.stars===p.maximum?"Master Shapeweaver — all 36 puzzles and all 108 stars!":"Adventure complete — all 36 puzzles solved. Choose any puzzle to improve your stars or explore a different strategy.";}
   map.replaceChildren(...CHAPTERS.map(c=>{
    const available=LEVELS.filter(l=>l.chapter===c.id),done=available.filter(l=>best.get(l.id)).length;
    const b=node("button",undefined,"chapter-card");b.type="button";b.disabled=!available.length;

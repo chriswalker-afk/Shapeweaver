@@ -1,3 +1,7 @@
+import {createPresentationPreferences} from "../core/presentation.js";
+import {createGameAudio} from "../core/game-audio.js";
+import {polygonBounds} from "../geometry/world.js";
+import {deliveryFilled} from "../mechanisms/delivery.js";
 import { GATEHOUSE_PREVIEW, validateRoom } from "../levels/gatehouse-preview.js";
 import {LEVELS as CAMPAIGN_LEVELS} from "../levels/campaign.js";
 import { previewReflection, commitReflection, reflectedFrame } from "../transformations/reflection.js";
@@ -10,7 +14,7 @@ import {resolveMechanisms} from "../mechanisms/pressure-plates.js";
 import {createAttemptHistory,rememberSafePosition,recordCast,undoLastCast,attemptSummary} from "../core/attempt-history.js";
 import {completedResult} from "../core/level-results.js";
 import {HINT_STAGES,tutorialSituation,contextualGuide,tutorialHint,castStatusMessage} from "../levels/tutorial-guidance.js";
-import { createCamera, panCamera, zoomCamera, MAX_ZOOM, ZOOM_STEP } from "../rendering/camera.js";
+import { createCamera, panCamera, zoomCamera, frameBoundsCamera, MAX_ZOOM, ZOOM_STEP } from "../rendering/camera.js";
 import { loadWorldArt, renderWorld } from "../rendering/world-art.js";
 import { mountViewport } from "../rendering/viewport.js";
 import { drawCoordinateOverlay } from "../rendering/coordinate-grid.js";
@@ -59,28 +63,42 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   const tutorial=()=>TUTORIALS[roomSpells(room)[0]];
   const actionLabel=()=>TUTORIALS[animation?.type]?.label??"Transformation";
   const readyMessage=()=>castStatusMessage(room,situation,guidanceEnabled,tutorial()?.ready);
-  const reducedMotion=()=>Boolean(view.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
-  let follow=true;
+  const preferences=createPresentationPreferences(view),audio=createGameAudio(view,preferences),root=$("room-view");
+  const focusButton=$("focus-toggle"),soundButton=$("sound-toggle"),motionButton=$("motion-toggle"),quickCamera=$("quick-camera"),locateButton=$("object-locate"),imageButton=$("object-image");
+  const reducedMotion=()=>preferences.reduceMotion;
+  let follow=true,focusView=false,locating=false,dirty=true;
+  function cue(name){if(!document.hidden)audio.play(name);}
+  function updatePresentation(){
+    root?.setAttribute?.("data-focus",String(focusView));
+    document.documentElement?.setAttribute?.("data-motion",preferences.reduced?"reduced":"system");
+    focusButton?.setAttribute("aria-pressed",String(focusView));setText(focusButton,focusView?"Focus: on":"Focus view");
+    soundButton?.setAttribute("aria-pressed",String(preferences.sound));setText(soundButton,preferences.sound?"Sound: on":"Sound: off");
+    motionButton?.setAttribute("aria-pressed",String(preferences.reduced));setText(motionButton,preferences.reduced?"Motion: reduced":reducedMotion()?"Motion: system (reduced)":"Motion: system");
+  }
+  updatePresentation();
   const input=mountMovementInput(document,view,()=>active&&!animation&&!picking&&!objectMode&&!player.completed&&!player.blockedRespawn);
   const loop=createFixedLoop(view,()=>{
     if(!active||document.hidden)return;
-    if(animation){animation.elapsed+=FIXED_DT;if(animation.elapsed>=animation.duration){animation=null;if(playStatus)playStatus.textContent=readyMessage();updateGuide();}return;}
+    if(animation){dirty=true;animation.elapsed+=FIXED_DT;if(reducedMotion()||animation.elapsed>=animation.duration){if(animation.mechanismChanged)cue("mechanism");animation=null;if(playStatus)playStatus.textContent=readyMessage();updateGuide();}return;}
     if(picking||objectMode)return;
-    const next=stepPlayer(physics,player,input.sample());
+    const previous=player,next=stepPlayer(physics,player,input.sample());
+    const moved=["x","y","pose","facing","phase","checkpoint","grounded","completed","blockedRespawn"].some(k=>next[k]!==previous[k]);
+    if(moved||next.event)dirty=true;
     player=next;lastSafe=rememberSafePosition(physics,player,lastSafe);
     if(next.event&&next.event!==lastEvent){
       if(next.event==="respawn"||next.event==="exit"||next.event==="reset-required")input.clear();
+      if(next.event==="checkpoint")cue("checkpoint");else if(next.event==="respawn"||next.event==="reset-required")cue("return");else if(next.event==="exit")cue("complete");
       if(playStatus)playStatus.textContent=next.event==="respawn"?(player.checkpoint?"Returned to the last safe checkpoint.":"Returned to the start.")+" Your transformations are kept.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?(room.tutorial?"Level "+room.number+" complete! "+(room.chapter!==1?"You reached the portal.":tutorial().finished)+" Reset to try again.":"Gatehouse practice complete! Reset to play again."):"No safe return point. "+(canUndo()?"Undo a transformation or reset.":"Reset to start a fresh attempt.");
     }
     lastEvent=next.event;
     // Refresh movement-dependent guidance only on stage changes.
-    if(room.chapter>=5){const nextSituation=tutorialSituation(room,player);if(nextSituation?.phase!==situation?.phase){situation=nextSituation;hintStage=0;updateGuide();}else situation=nextSituation;}
+    if(room.chapter>=5&&(moved||next.event)){const nextSituation=tutorialSituation(room,player);if(nextSituation?.phase!==situation?.phase){situation=nextSituation;hintStage=0;updateGuide();}else situation=nextSituation;}
     if(["exit","respawn","reset-required"].includes(next.event))updateGuide();
     if(next.event==="exit"&&!result){
       result=completedResult(room,player,history);
       if(result)onComplete(result);
     }
-  },()=>viewport?.resize());
+  },()=>{if(dirty&&active&&!document.hidden){dirty=false;viewport?.redraw();}});
   const controls=Object.fromEntries(["overview","inspect","left","right","up","down","zoom-in","zoom-out"].map(id=>[id,$("camera-"+id)]));
   const gridButton=$("grid-toggle"),axesButton=$("axes-toggle"),pickButton=$("pick-toggle"),panel=$("coordinate-panel");
   const snapInput=$("coordinate-snap"),xInput=$("coordinate-x"),yInput=$("coordinate-y"),form=$("coordinate-form"),message=$("coordinate-result");
@@ -114,6 +132,8 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     }
     if(controls["zoom-in"])controls["zoom-in"].disabled=camera.zoom>=MAX_ZOOM-e;
     if(controls["zoom-out"])controls["zoom-out"].disabled=camera.zoom<=1+e;
+    quickCamera?.setAttribute("aria-pressed",String(mode==="inspect"));setText(quickCamera,mode==="inspect"?"Full room":"Close-up");
+    const inspection=inspector?.getState();if(locateButton)locateButton.disabled=!objectMode||!inspection?.selected;if(imageButton)imageButton.disabled=!objectMode||!inspection?.preview?.geometry;
     const gridStatus=grid&&plan?" · Grid "+plan.minorStep+(plan.minorStep===1?" unit":" units"):"";
     const zoomLabel=Number(camera.zoom.toFixed(2));
     const label=(mode==="overview"?"Full room":"Inspect · "+zoomLabel+"× fit")+gridStatus+" · "+(animation?"Casting "+actionLabel().toLowerCase():picking||objectMode?"Movement paused":room.tutorial?"Level "+room.number:"Practice room");
@@ -129,20 +149,30 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     mode=camera.mode;zoom=camera.zoom;focus={x:camera.cx,y:camera.cy};
     const progress=animation?castProgress(animation.elapsed/animation.duration):0;
     const frame=animation?resolveMechanisms(TUTORIALS[animation.type].frame(room,animation.transition,progress)):room;
-    renderWorld(ctx,metrics,camera,frame,images.art,player,reducedMotion());
+    renderWorld(ctx,metrics,camera,frame,images.art,player,reducedMotion(),{axes});
     plan=drawCoordinateOverlay(ctx,camera,room.bounds,{grid,axes,picking,point});
     if(animation?.type==="reflect")drawReflectionFlash(ctx,camera,room.bounds,animation.transition.line,progress);
-    if(animation&&animation.type!=="reflect"&&!reducedMotion())drawCastAura(ctx,camera,frame.objects.find(o=>o.id===animation.transition.id),animation.type,progress);
-    if(objectMode&&inspector){const s=inspector.getState();drawObjectOverlay(ctx,camera,room.bounds,s.objects,s.selected,s.preview,{shapeSockets:room.shapeSockets??[],gridPlan:plan,axes});}
+    if(animation&&animation.type!=="reflect"&&!reducedMotion())for(const id of [animation.transition.id,...(animation.transition.attached??[]).map(o=>o.id)])drawCastAura(ctx,camera,frame.objects.find(o=>o.id===id),animation.type,progress);
+    if(objectMode&&inspector){const s=inspector.getState();drawObjectOverlay(ctx,camera,room.bounds,s.objects,s.selected,s.preview,{shapeSockets:room.shapeSockets??[],deliveries:(room.deliveries??[]).map(t=>({...t,filled:deliveryFilled(room,t)})),gridPlan:plan,axes});}
     updateControls();
   });
   if(!viewport)status.textContent="Canvas 2D is unavailable in this browser.";
   const listeners=[];
   function on(element,event,fn){if(!element?.addEventListener)return;element.addEventListener(event,fn);listeners.push([element,event,fn]);}
-  function redraw(){viewport?.resize();if(!camera)updateControls();}
+  function redraw(){dirty=false;viewport?.resize();if(!camera)updateControls();}
+  function locateGeometry(image=false){
+    if(!objectMode||!camera)return false;
+    const s=inspector?.getState(),object=s?.objects.find(o=>o.id===s.selected);
+    const geometry=image?s?.preview?.geometry:object;if(!geometry)return false;
+    const points=[...geometry.vertices,...(geometry.hinge?[geometry.hinge]:[]),...(!image&&object.fixedCentre?[object.fixedCentre]:[])];
+    if(image)for(const part of s.preview.attachedImages??[])points.push(...part.geometry.vertices);
+    const box=polygonBounds(points),next=frameBoundsCamera(camera,room.bounds,box);
+    locating=true;follow=false;useCamera(next);return true;
+  }
+  function setFocusView(value){focusView=Boolean(value);if(focusView)setToolsOpen(false);updatePresentation();redraw();return focusView;}
   function setMode(next){
     if(next!=="overview"&&next!=="inspect")return false;
-    mode=next;zoom=null;follow=true;focus=next==="overview"?null:{x:camera?.cx??16,y:camera?.cy??7};
+    mode=next;zoom=null;follow=true;locating=false;focus=next==="overview"?null:{x:player.x,y:player.y+.8};
     redraw();return true;
   }
   function useCamera(next){mode=next.mode;zoom=next.zoom;focus={x:next.cx,y:next.cy};redraw();}
@@ -169,7 +199,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     objectMode=Boolean(value);
     if(objectMode)picking=false;
     inspector.setActive(objectMode);input.clear();updateGuide();redraw();
-    if(!objectMode)canvas.focus?.({preventScroll:true});
+    if(!objectMode){if(locating){follow=true;locating=false;redraw();}canvas.focus?.({preventScroll:true});}
     return objectMode;
   }
   function setSnap(value){if(!SNAP_STEPS.includes(value))return false;snap=value;return true;}
@@ -198,7 +228,14 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   on(pickButton,"click",()=>setPicking(!picking));
   on($("coordinate-close"),"click",()=>{setPicking(false);canvas.focus?.({preventScroll:true});});
   on(toolsButton,"click",()=>setToolsOpen(!toolsOpen));
+  on(quickCamera,"click",()=>setMode(mode==="overview"?"inspect":"overview"));
+  on(locateButton,"click",()=>locateGeometry(false));on(imageButton,"click",()=>locateGeometry(true));
+  on(focusButton,"click",()=>{setFocusView(!focusView);canvas.focus?.({preventScroll:true});});
+  on(soundButton,"click",()=>{audio.setEnabled(!preferences.sound);updatePresentation();if(preferences.sound)cue("checkpoint");});
+  on(motionButton,"click",()=>{preferences.setReduced(!preferences.reduced);updatePresentation();redraw();});
+  on(document,"pointerdown",()=>{if(active&&preferences.sound)audio.unlock();});
   on(document,"keydown",event=>{
+    if(active&&preferences.sound)audio.unlock();
     if(!active||event.code!=="Escape"||animation)return;
     if(hintStage){setHintStage(0);hintButton?.focus?.({preventScroll:true});}
     else if(picking){setPicking(false);canvas.focus?.({preventScroll:true});}
@@ -217,7 +254,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   });
   function setActive(value){
     active=Boolean(value);input.clear();
-    if(active){viewport?.resize();loop.start();}else{loop.stop();animation=null;objectMode=false;inspector?.setActive(false);}
+    if(active){dirty=true;updatePresentation();viewport?.resize();loop.start();}else{loop.stop();if(!result)audio.silence();animation=null;objectMode=false;inspector?.setActive(false);}
     if(!active)hintStage=0;
     updateGuide();
   }
@@ -265,14 +302,17 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(!tx.ok)return tx;
     // Commit geometry + collision index together; animation is presentation only.
     history=recordCast(history,physics,player,lastSafe,tx.record);
+    const mechanismChanged=room.objects.some(o=>o.kind==="linked-gate"&&o.open!==tx.room.objects.find(v=>v.id===o.id)?.open)||(room.deliveries??[]).some(t=>deliveryFilled(room,t)!==deliveryFilled(tx.room,t));
     room=tx.room;physics=tx.physics;situation=tutorialSituation(room,player);lastSafe=rememberSafePosition(physics,player,lastSafe);hintStage=0;
     objectMode=false;inspector?.setActive(false);inspector?.replaceRoom(room);input.clear();
-    if(!reducedMotion())animation={type,transition:tx.transition,elapsed:0,duration:TUTORIALS[type].duration};
+    if(locating){follow=true;locating=false;}
+    cue(reducedMotion()&&mechanismChanged?"mechanism":type);
+    if(!reducedMotion())animation={type,transition:tx.transition,elapsed:0,duration:TUTORIALS[type].duration,mechanismChanged};
     if(playStatus)playStatus.textContent=animation?TUTORIALS[type].label+" applied. Wait for the object to settle.":readyMessage();
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return tx;
   }
   function clearRecoveryInteraction(){
-    animation=null;hintStage=0;lastEvent=null;input.clear();follow=true;objectMode=false;picking=false;point=null;
+    animation=null;hintStage=0;lastEvent=null;input.clear();follow=true;locating=false;objectMode=false;picking=false;point=null;
     inspector?.setActive(false);inspector?.replaceRoom(room);
     if(xInput)xInput.value="";if(yInput)yInput.value="";
     if(message)message.textContent="No point selected";
@@ -283,7 +323,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(!tx.ok){if(playStatus)playStatus.textContent=tx.message;return false;}
     history=tx.history;room=tx.room;physics=tx.physics;player=tx.player;situation=tutorialSituation(room,player);
     lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
-    if(playStatus)playStatus.textContent="Last transformation undone. Restored a safe earlier position. The original move still counts.";
+    cue("undo");if(playStatus)playStatus.textContent="Last transformation undone. Restored a safe earlier position. The original move still counts.";
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return true;
   }
   function recoverPlayer(){
@@ -291,11 +331,11 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     const tx=returnToSafety(physics,player,MOTION.coyote);
     if(!tx.ok){if(playStatus)playStatus.textContent="No safe checkpoint or start in the current world. "+(canUndo()?"Try Undo or Reset.":"Try Reset.");return false;}
     player={...tx.player,event:null};situation=tutorialSituation(room,player);lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
-    if(playStatus)playStatus.textContent=(tx.code==="checkpoint"?"Returned to the last safe checkpoint.":"Returned to the start.")+" Your transformations and moves are kept.";
+    cue("return");if(playStatus)playStatus.textContent=(tx.code==="checkpoint"?"Returned to the last safe checkpoint.":"Returned to the start.")+" Your transformations and moves are kept.";
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return true;
   }
   function resetPlayer(){
-    room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);history=createAttemptHistory();result=null;situation=tutorialSituation(room,player);
+    audio.silence();room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);history=createAttemptHistory();result=null;situation=tutorialSituation(room,player);
     lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
     if(playStatus)playStatus.textContent=room.tutorial?"Arrows / WASD · Space to jump":"Practice restarted.";
     updateGuide();redraw();
@@ -305,6 +345,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     mode="overview";zoom=null;focus=null;toolsOpen=false;
     const heading=$("room-heading"),chapter=$("room-chapter");
     if(heading)heading.textContent=initialRoom.title;
+    canvas.setAttribute("aria-label",initialRoom.title+". Arrow keys or WASD to move; Space or Z to jump. Coordinate picking and object inspection pause movement.");
     if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter "+(["","I","II","III","IV","V","VI","VII"][initialRoom.chapter]??String(initialRoom.chapter))+" · Level "+initialRoom.number+" · "+roomSpells(initialRoom).map(t=>TUTORIALS[t].label).join(" + "):"Chapter I · Interactive object practice";
     resetPlayer();
   }
@@ -320,7 +361,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   on(host,"click",()=>{if(!picking&&!objectMode)canvas.focus?.({preventScroll:true});});
   updateControls();updateGuide();
   return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getResult:()=>result,setToolsOpen,getToolsOpen:()=>toolsOpen,setGuidance,setHintStage,getTutorialState:()=>({guidanceEnabled,hintStage,step:contextualGuide(room,player,inspector?.getState(),{casting:Boolean(animation),picking,canUndo:canUndo(),moves:history.entries.length,situation})?.step??null}),getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
-    getCamera:()=>camera,getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),
+    getCamera:()=>camera,locateGeometry,setFocusView,getPresentation:()=>({focus:focusView,sound:preferences.sound,reduced:reducedMotion()}),getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),
     refresh:()=>viewport?.resize(),
-    destroy(){loop.stop();input.destroy();inspector?.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};
+    destroy(){loop.stop();audio.destroy();input.destroy();inspector?.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};
 }

@@ -4,7 +4,7 @@ import { mountIdentity } from "./ui/identity.js";
 import { mountRoomPreview } from "./ui/room-preview.js";
 import { mountResults } from "./ui/results.js";
 import { createBestResults } from "./core/best-results.js";
-import {LEVEL_ROUTES} from "./levels/campaign.js";
+import {LEVEL_ROUTES,campaignProgress} from "./levels/campaign.js";
 import {mountCampaign} from "./ui/campaign.js";
 
 /** Export startup separately so it can be tested without loading a browser. */
@@ -27,7 +27,7 @@ export function startApp(document, view) {
     if(!results||!identity)return;
     const index=LEVEL_ROUTES.indexOf(state.view);
     if(index<0)return;
-    results.show(result,best,LEVEL_ROUTES[index],LEVEL_ROUTES[index+1]??null);
+    results.show(result,best,LEVEL_ROUTES[index],LEVEL_ROUTES[index+1]??null,campaignProgress(bestResults));
     identity.show("results");
   }}):null;
   identity=typeof document.querySelectorAll==="function"?mountIdentity(document,state,next=>{
@@ -46,7 +46,7 @@ if (typeof window !== "undefined" && typeof document !== "undefined") {
     startApp(document, window);
   } catch (error) {
     const status = document.getElementById("app-status");
-    if (status) status.textContent = "The development preview could not start. Try refreshing the page.";
+    if (status) status.textContent = "Shapeweaver could not start. Try refreshing the page.";
     console.error("Shapeweaver startup failed", error);
   }
 }

@@ -25,9 +25,10 @@ export function drawPlaceholder(context, metrics) {
 export function mountViewport(canvas, host, view = globalThis.window, draw = drawPlaceholder) {
   const context = canvas.getContext("2d");
   if (!context) return null;
+  let metrics=null;
   function resize() {
     const { width, height } = host.getBoundingClientRect();
-    const metrics = canvasMetrics(width, height, view.devicePixelRatio);
+    metrics = canvasMetrics(width, height, view.devicePixelRatio);
     if (!metrics) return;
     if (canvas.width !== metrics.pixelWidth) canvas.width = metrics.pixelWidth;
     if (canvas.height !== metrics.pixelHeight) canvas.height = metrics.pixelHeight;
@@ -39,6 +40,9 @@ export function mountViewport(canvas, host, view = globalThis.window, draw = dra
   resize();
   return {
     resize,
+    // ResizeObserver and window resize maintain cached CSS/backing-store sizes.
+    // Browsers without ResizeObserver retain the safe measurement fallback.
+    redraw(){if(!observer||!metrics)return resize();draw(context,metrics);},
     destroy() {
       observer?.disconnect();
       view.removeEventListener("resize", resize);

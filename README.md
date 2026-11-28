@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR26 — The Mirror Archives: Levels 21–22. Twenty-two released puzzles; one-way latches, locking recesses and key scarcity. Next: PR27 Levels 23–24.
+PR27 — The Mirror Archives: Levels 23–24. Twenty-four released puzzles; compound seals and mixed plate/key dependencies. Next: PR28 — The Alchemist’s Workshop: Levels 25–26.
 
 ## Design documents
 
@@ -14,6 +14,8 @@ PR26 — The Mirror Archives: Levels 21–22. Twenty-two released puzzles; one-w
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Mirror Archives finale](docs/archives-finale.md) — rigid compound assemblies and linked pressure/shape mechanisms.
+- [Mirror Archives latches](docs/archives-latches.md) — one-way latches and key capture.
 - [Mirror Archives opening](docs/mirror-archives.md) — reusable pieces, intermediate safe checkpoints and interleaved replay.
 - [Riverworks finale](docs/riverworks-finale.md) — waterwheel rotor and external-centre orbiting walkway.
 - [Riverworks mechanisms](docs/riverworks-mechanisms.md) — simultaneous pressure plates, diagonal mirror lines and compound dock supports.

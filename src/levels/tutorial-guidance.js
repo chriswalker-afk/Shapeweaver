@@ -127,7 +127,11 @@ const CHALLENGE_GOALS=deepFreeze({
  "riverworks-17":"Reach the elevated mill quay.",
  "riverworks-18":"Build a route across the tower and both channels.",
  "archives-19":"Reach the far reading room.",
- "archives-20":"Reach the upper catalogue."
+ "archives-20":"Reach the upper catalogue.",
+ "archives-21":"Reach the far archive door.",
+ "archives-22":"Reach the exit without losing the only key.",
+ "archives-23":"Open the double seal gate.",
+ "archives-24":"Reach the final archive portal."
 });
 export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
 const FIELD_GUIDES=Object.freeze({
@@ -159,7 +163,7 @@ export function contextualGuide(room,player,inspection,{casting=false,picking=fa
     return {step:"Enter parameters",text:(room.chapter===1&&inspection.type===c.type?c.fields:(FIELD_GUIDES[inspection.type]??"Enter the mathematical parameters."))+" Preview is free."};
   }
   if(situation.ready||situation.travel)return {step:"Traverse",text:c.traverse};
-  return {step:"Explore",text:room.chapter===1?c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional.":room.chapter===2?campaignGoal(room)+" Inspect the objects and plan how they could work together. Hints are optional.":room.chapter===3?campaignGoal(room)+" Plan a sequence on the same object. Use Hints only if needed.":room.chapter===4?campaignGoal(room)+" Consider how the pieces can support one another. Hints are optional.":campaignGoal(room)+" Decide when to move and when to reuse an object. Hints are optional."};
+  return {step:"Explore",text:room.chapter===1?c.objective+" Move: arrows / WASD or on-screen buttons. Jump: Space. Open Objects to inspect. Hints are optional.":room.chapter===2?campaignGoal(room)+" Inspect the objects and plan how they could work together. Hints are optional.":room.chapter===3?campaignGoal(room)+" Plan a sequence on the same object. Use Hints only if needed.":room.chapter===4?campaignGoal(room)+" Consider how the pieces can support one another. Hints are optional.":campaignGoal(room)+" Consider which objects and mechanisms are linked, and plan the order of casts and movement. Hints are optional."};
 }
 /** Stage 5 is the only stage that supplies parameter values as a worked answer.
  * Validate the proposed cast against the live world and apprentice before suggesting Apply.

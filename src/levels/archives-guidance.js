@@ -1,6 +1,7 @@
 import {polygonBounds} from "../geometry/world.js";
 import {isBridgeDeck,ladderSegment} from "../mechanisms/transformable-ladders.js";
-import {referencePoints} from "../transformations/preview-math.js";
+import {referencePoints,previewGeometry,parsePreviewRequest} from "../transformations/preview-math.js";
+import {DOUBLE_SEAL_TARGET} from "./archives-finale.js";
 const near=(a,b)=>Math.abs(a-b)<1e-7,round=n=>Number(n.toFixed(8)),point=p=>"("+p.map(round).join(", ")+")";
 const ref=(o,id)=>referencePoints(o).find(p=>p.id===id).point;
 const state=(phase,config,{ready=false,travel=false,reasoning="",worked="",raw=null}={})=>({phase,config,ready,travel,reasoning,worked,raw});
@@ -18,6 +19,20 @@ function rotation(phase,o,direction,config){
  return state(phase,{...config,objectId:o.id,type:"rotate",name:"Rotation",spell:"Rotate about the marked pivot in its current position. Horizontal deck geometry becomes an upright climbable ladder.",fields:"Enter angle, direction and both centre coordinates."},{
  reasoning:"H = "+point(h)+". A = "+point(ref(o,"A"))+". Compare the long edge with the required direction and choose a clear quarter-turn.",
  worked:"Rotate 90° "+direction+" about "+point(h)+". The pivot remains fixed.",raw});
+}
+// Compare corresponding vertices up to a translation. The target outlines do
+// not move or rotate automatically; the hint supplies parameters only.
+function orientOrTranslate(phase,o,target,config){
+ const matches=vs=>vs.length===target.length&&vs.every((v,i)=>near(v[0]-vs[0][0],target[i][0]-target[0][0])&&near(v[1]-vs[0][1],target[i][1]-target[0][1]));
+ if(matches(o.vertices))return translation(phase+"-translate",o,target[0],config);
+ for(const [angle,direction] of [[90,"clockwise"],[90,"anticlockwise"],[180,"clockwise"]]){
+  const [cx,cy]=o.hinge,raw={angle,direction,cx,cy};
+  if(!matches(previewGeometry(o,parsePreviewRequest("rotate",raw)).vertices))continue;
+  return state(phase+"-rotate",{...config,objectId:o.id,type:"rotate",name:"Rotation",spell:"Rotate the entire rigid shape about its marked pivot. Every vertex turns through the same angle.",fields:"Enter angle, direction and the current centre coordinates."},{
+   reasoning:"Compare the direction of the connected edges with the target. The marked pivot is "+point(o.hinge)+".",
+   worked:"Rotate "+angle+"° "+direction+" about "+point(o.hinge)+". Then compare the image with the target.",raw});
+ }
+ return state(phase+"-recover",config,{reasoning:"The current orientation is not the intended one.",worked:"Undo or Reset to restore a known arrangement."});
 }
 export function archivesSituation(room,p=null){
  if(room.id==="archives-19"){
@@ -62,6 +77,18 @@ export function archivesSituation(room,p=null){
   if(room.shapeSockets?.some(s=>s.id==="alcove-lock"&&s.filled))return travel("recover-lock",{...config,traverse:"The only key is captured in the spare alcove. Undo the locking cast or Reset to recover it."});
   if(!latch.latched)return translation("latch",room.objects.find(o=>o.id===(room.id==="archives-21"?"latch-weight":"passage-weight")),[10,8],config);
   return room.id==="archives-21"?translation("hold",room.objects.find(o=>o.id==="latch-weight"),[18,8],config):translation("lock",room.objects.find(o=>o.id==="passage-key"),[18,10],config);
+ }
+ if(room.id==="archives-23"){
+  const o=room.objects.find(o=>o.id==="double-seal"),g=room.objects.find(o=>o.id==="double-gate");
+  const config={objective:"Align both connected seals.",obstacle:"Two plates control the same gate. A raised pin obstructs the flat side of the brass assembly.",object:"The two feet are joined. Rotate the complete shape until both feet point down, then align them with the plates around the pin.",traverse:"Walk through the opened double seal gate to the portal."};
+  return g.open?finish("exit",config):orientOrTranslate("seal",o,DOUBLE_SEAL_TARGET,config);
+ }
+ if(room.id==="archives-24"){
+  const o=room.objects.find(o=>o.id==="chain-comb"),k=room.objects.find(o=>o.id==="chain-key"),g=room.objects.find(o=>o.id==="chain-gate"),slot=room.shapeSockets.find(s=>s.id==="chain-recess");
+  const config={objective:"Solve the linked archive machinery.",obstacle:"Two plates open the transit gate. The final gate requires both the third plate and the fitted key.",object:"Move the joined triple seal so all three feet hold plates. Then orient the key and move it through the open transit gate. Keep the triple seal in place.",traverse:"Walk through both gates and reach the portal."};
+  if(g.open&&room.objects.find(o=>o.id==="transit-gate").open)return finish("exit",config);
+  if(!room.plates.every(p=>p.pressed))return translation("chain-plates",o,[12,8],config);
+  return orientOrTranslate("chain-key",k,slot.vertices,config);
  }
  return null;
 }

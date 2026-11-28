@@ -11,12 +11,16 @@ function node(tag="div"){
   addEventListener(k,v){listeners.set(k,v)},removeEventListener(k,v){if(listeners.get(k)===v)listeners.delete(k)},
   fire(k,event={}){listeners.get(k)?.({preventDefault(){},...event})},focus(){this.focused=true}};
 }
-function fixture(reduce,withApp=false){
+function fixture(reduce,withApp=false,modal=false){
  const ids="room-canvas room-stage room-status quick-camera focus-toggle motion-toggle sound-toggle object-locate object-image room-tools-toggle room-secondary-tools climb-controls coordinate-close play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-guidance-toggle tutorial-hint-panel tutorial-hint-title tutorial-hint-text tutorial-hint-previous tutorial-hint-next tutorial-hint-close tutorial-moves reset-practice undo-cast return-safety recovery-count world app-status title-view spellbook-view title-art room-view spell-name spell-description spell-example spell-image spell-detail translation-vector open-spellbook close-spellbook spellbook-heading open-room open-continue open-home continue-detail continue-note home-progress-text home-stars-text home-progress-bar close-room results-view results-heading results-level results-stars results-message results-stats results-thresholds results-best results-history results-empty results-replay results-next results-title".split(" ");
  const els=Object.fromEntries(ids.map(id=>[id,node()])),rect={left:0,top:0,width:1000,height:500};
  const ctx={save(){},restore(){},setTransform(){},createLinearGradient(){return{addColorStop(){}}},createRadialGradient(){return{addColorStop(){}}},
  fillRect(){},drawImage(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){},stroke(){},clip(){},rect(){},translate(){},rotate(){},ellipse(){},arc(){},strokeRect(){},quadraticCurveTo(){},strokeText(){},fillText(){},measureText(s){return{width:s.length*7}},setLineDash(){}};
  els["room-canvas"].getContext=()=>ctx;els["room-canvas"].getBoundingClientRect=()=>rect;els["room-stage"].getBoundingClientRect=()=>rect;
+ if(modal){
+  for(const id of ["room-reset-dialog","room-reset-cancel","room-reset-confirm"])els[id]=node();
+  const dialog=els["room-reset-dialog"];dialog.open=false;dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;};
+ }
  const view=node();view.Image=class{};view.devicePixelRatio=1;view.matchMedia=()=>({matches:reduce});
  let time=0,id=0;const callbacks=new Map();
  view.requestAnimationFrame=fn=>{callbacks.set(++id,fn);return id};view.cancelAnimationFrame=i=>callbacks.delete(i);
@@ -684,4 +688,23 @@ test("home Continue restores a paused campaign attempt after practice, including
  app.identity.show("title");app.identity.show("level3");app.identity.show("title");
  assert.match(els["continue-detail"].textContent,/Resume Level 3/);click("open-continue");assert.equal(c.room.id,"gatehouse-03");assert.equal(c.getAttemptSummary().moves,0);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+
+test("reset confirmation pauses movement, cancellation keeps the attempt and confirm restarts it",()=>{
+ const f=fixture(true,false,true),{els,view,controller:c,frame}=f,click=id=>els[id].fire("click");
+ c.setLevel("level1");c.setActive(true);
+ assert.equal(cast(f,"brook-beam","translate",{dx:12,dy:0}).ok,true);
+ const before=JSON.stringify(c.room),start=c.getPlayer();
+ click("room-tools-toggle");click("reset-practice");assert.equal(els["room-reset-dialog"].open,true);
+ assert.equal(els["room-reset-cancel"].focused,true);
+ view.fire("keydown",{code:"ArrowRight"});frame(40);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(c.getPlayer().x,start.x);assert.equal(c.getPlayer().y,start.y);
+ assert.equal(c.getAttemptSummary().moves,1);
+ click("room-reset-cancel");assert.equal(els["room-reset-dialog"].open,false);
+ assert.equal(els["reset-practice"].focused,true);assert.equal(JSON.stringify(c.room),before);
+ click("reset-practice");els["room-reset-dialog"].fire("cancel");assert.equal(els["room-reset-dialog"].open,false);assert.equal(c.getAttemptSummary().moves,1);
+ click("reset-practice");click("room-reset-confirm");assert.equal(els["room-reset-dialog"].open,false);
+ assert.equal(c.getRecords().length,0);assert.equal(c.room.objects[0].vertices[0][0],3);assert.equal(c.getToolsOpen(),false);
+ click("room-tools-toggle");click("reset-practice");c.setActive(false);assert.equal(els["room-reset-dialog"].open,false);
+ c.destroy();
 });

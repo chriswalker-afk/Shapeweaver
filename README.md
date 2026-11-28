@@ -6,10 +6,12 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR35 — Final polish. Presentation preferences, close-up and object/image framing, visual feedback, responsive controls, efficient redraw and campaign completion. Next: PR36 — Production release.
+PR36 — Production release candidate v1.0.0. All 36 campaign levels are implemented; deployment requires GitHub Pages activation and a successful hosted verification.
 
 ## Design documents
 
+- [Player and teacher guide](docs/player-teacher-guide.md) — controls, learning objectives, classroom use and local progress.
+- [Release checklist](docs/release.md) — activation, deployment verification, custom domain, rollback and manual QA.
 - [Game design](docs/game-design.md) — player experience, mathematics, rules, recovery, accessibility and visual direction.
 - [Campaign](docs/campaign.md) — 36 authored levels across seven chapters, new mechanics and validation targets.
 - [Final polish](docs/final-polish.md) — controls, visual feedback, audio, accessibility, performance and QA checklist.
@@ -60,9 +62,9 @@ PR35 — Final polish. Presentation preferences, close-up and object/image frami
 - A large gameplay viewport and a distinct illustrated fantasy identity.
 - Direct access to released puzzles for classroom use, without accounts or a server.
 
-Target: a static browser game hosted on GitHub Pages, eventually at `shapeweaver.mrwalkermaths.com`. Hosting and domain configuration are not yet set up.
+Expected GitHub Pages address after activation: https://chriswalker-afk.github.io/Shapeweaver/. Planned custom domain: `shapeweaver.mrwalkermaths.com`. Neither address is claimed live until a successful hosted verification.
 
-See the roadmap before starting the next PR. Level briefs are proposals, not certified solutions; geometry, move targets and traversability must be verified during implementation.
+See the final campaign audit for verified recorded routes and limitations; difficulty ratings are author estimates rather than classroom outcome measurements.
 
 ## Development
 
@@ -73,16 +75,14 @@ Requires Node.js 22 or later and npm. No third-party runtime or development depe
 - `npm run build` — copy the public application into a clean `dist/` directory.
 - `npm run preview` — build and serve the production output locally.
 - `npm run check` — run tests and build.
+- `npm run release:check` — tests, build, full campaign integrity and public artifact verification.
+- `npm run verify:dist` — verify the exact public artifact, version, imports and asset manifest.
 
 The dev server binds only to localhost. Set `PORT=...` if needed, or `BASE_PATH=/Shapeweaver/` to simulate the GitHub Pages project subpath. For example, `BASE_PATH=/Shapeweaver/ npm run preview` (POSIX shell); open http://127.0.0.1:4173/Shapeweaver/. Use relative module and asset URLs so the app works at a custom domain as well.
 
 ## Deployment
 
-CI tests and builds on pull requests and main pushes. To publish the static site, an administrator must first choose **GitHub Actions** in Settings → Pages → Build and deployment → Source. Then manually run the **Deploy to GitHub Pages** workflow on main. It tests, builds, uploads only `dist/`, and deploys via the protected github-pages environment. No deployment is claimed until Pages is configured and the workflow succeeds. Automatic deployment and custom-domain configuration can follow at release.
-
-## Scaffold scope
-
-The entry module mounts a responsive high-DPI canvas beneath an illustrated title and accessible spellbook. Title artwork and the reference apprentice are original SVG files, not playable collision geometry. PR03 adds the separate world renderer and camera; PR04 adds the mathematical overlay and coordinate picker; PR05 implements deterministic player movement; PR06 introduces interactive objects.
+On first release, enable GitHub Actions publishing in Settings → Pages, then run the **Deploy to GitHub Pages** workflow on merged main. Once Pages is enabled, main pushes also trigger deployment. The workflow verifies the campaign and production artifact, tests actual browser gameplay at both supported hosting paths, deploys only `dist/` and verifies the hosted version and exact commit over HTTPS. See [release checklist](docs/release.md) for all steps. The internal workshop, tests and developer documentation are excluded from the deployed site. Progress is saved locally on the browser and origin; there are no player accounts or analytics.
 
 ### Internal developer workshop
 

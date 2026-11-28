@@ -18,5 +18,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm run check
-      - run: npm run audit:campaign
+      - run: npm run release:check

@@ -1,6 +1,6 @@
 {
   "name": "shapeweaver",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "A mathematical transformation puzzle platformer.",
@@ -15,6 +15,8 @@
     "check": "npm test && npm run build",
     "audit:campaign": "node tools/campaign-audit.mjs",
     "workshop": "node tools/serve.mjs --workshop",
-    "verify:level": "node tools/verify-level.mjs"
+    "verify:level": "node tools/verify-level.mjs",
+    "verify:dist": "node tools/verify-dist.mjs",
+    "release:check": "npm run check && npm run audit:campaign && npm run verify:dist"
   }
 }

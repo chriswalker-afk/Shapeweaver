@@ -1,11 +1,14 @@
 // Optional browser-only QA dependency installed by .github/workflows/browser-qa.yml.
 import {chromium} from "playwright";
 import {createStaticServer} from "./serve.mjs";
+import {build} from "./build.mjs";
+import {verifyDist} from "./verify-dist.mjs";
 import {mkdir,writeFile} from "node:fs/promises";
 import assert from "node:assert/strict";
-const server=createStaticServer();
+const dist=await build();await verifyDist(dist);
+const server=createStaticServer({root:dist,basePath:"/Shapeweaver/"});
 await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
-const origin="http://127.0.0.1:"+server.address().port+"/";
+const origin="http://127.0.0.1:"+server.address().port+"/Shapeweaver/";
 const browser=await chromium.launch({headless:true});
 const out="browser-qa";await mkdir(out,{recursive:true});
 async function backToTitle(page){await page.locator("#close-room").click();await page.locator("#campaign-view").waitFor();await page.locator("#close-campaign").click();}
@@ -152,7 +155,7 @@ try{
   await page.close();
  }
  assert.equal(report.length,36*viewports.length,"All 144 level/viewport combinations covered");
- console.log("BROWSER COVERAGE: "+report.length+"/144 initial-level and cast-setup combinations; screenshots saved for manual review.");
+ console.log("BROWSER COVERAGE: "+report.length+"/144 initial-level and cast-setup combinations from production dist at /Shapeweaver/; screenshots saved for manual review.");
 }finally{
  await writeFile(out+"/layout-report.json",JSON.stringify(report,null,2));
  await browser.close();await new Promise(resolve=>server.close(resolve));

@@ -76,5 +76,8 @@ All 36 levels are authored. The Observatory Machine combines a compound selector
 ## Historical milestone: PR34
 Full-campaign acceptance review, exact coordinate oracle, live preview/rejection and recovery fork checks, independent workshop verification for every recorded/alternative route, catalog and browser coverage guards. See [Final campaign audit](final-campaign-audit.md). PR35 addresses audio, animation, accessibility, touch, responsive layout and performance; manual playtesting remains a separate release gate before PR36.
 
-## Current milestone: PR35
+## Historical milestone: PR35
 Presentation polish only: fast close-up, object/image locator, bounded labels, focus view, touch feedback, opt-in audio, system/user reduced motion, redraw efficiency and campaign completion. Geometry and scoring unchanged. Full automated audit and browser QA required before merge. PR36: production release, deployment, documentation, final regression and manual/device review.
+
+## Current milestone: PR36 — v1.0.0 release candidate
+The original 36-PR development roadmap is implemented. Production artifact verification, actual browser completion at both supported paths, gated Pages deployment and hosted commit verification are in place. Pages activation is a repository administrator action, followed by deployment, HTTPS/custom-domain configuration and manual classroom acceptance. See [release checklist](release.md). After release, choose optional PR37 (public drag-and-drop level workshop) only if useful; no additional campaign content is required for v1.0.0.

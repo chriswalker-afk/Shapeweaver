@@ -1,6 +1,7 @@
 import {polygonBounds,boundsContain,deepFreeze} from "../geometry/world.js";
 import {pointPolygonDistance,polygonsOverlap,triangulate,GEOMETRY_EPS} from "../geometry/polygons.js";
 import {playerBox,polygonIntersectsBox} from "../physics/collision.js";
+import {deliveryEffects} from "../mechanisms/delivery.js";
 import {resolveMechanisms,obstructedGate,multiPlateEffects} from "../mechanisms/pressure-plates.js";
 import {ladderSegment,isSolidObject,isBridgeDeck} from "../mechanisms/transformable-ladders.js";
 import {dockedSocket,samePoint} from "../mechanisms/hinge-sockets.js";
@@ -108,6 +109,7 @@ export function previewObject(room,player,id,type,raw){
     if(obstructedGate(candidate))return failure("gate-obstructed","A linked gate would close on an object. Clear the gate first.",extra);
     if(player&&candidate.objects.some(o=>o.kind==="linked-gate"&&!o.open&&polygonIntersectsBox(o.vertices,playerBox(player))))return failure("gate-obstructed","A linked gate would close on the apprentice. Move clear first.",extra);
   }
+  if(room.deliveries?.length)extra.mechanismEffects=[...(extra.mechanismEffects??[]),...deliveryEffects(room,candidate)];
   if(object.kind==="mirror-rail")extra.mechanismEffects=[...(extra.mechanismEffects??[]),"Mirror line will move from "+railEquation(object)+" to "+railEquation({...object,vertices:geometry.vertices})+"."];
   if(type==="reflect"&&rail)extra.mechanismEffects=[...(extra.mechanismEffects??[]),"Reflection uses the current linked mirror "+railEquation(rail)+"."];
   if(object.dockable){const socket=dockedSocket(room,object,geometry.hinge);extra.mechanismEffects=[...(extra.mechanismEffects??[]),socket?"Hinge will dock at "+(socket.label??socket.id)+". Rotation available.":"Hinge will be undocked. Rotation requires a socket."];}

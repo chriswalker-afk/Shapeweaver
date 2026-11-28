@@ -64,5 +64,8 @@ Levels 27–28 introduce separately selectable movable sockets and attached beam
 ## Historical milestone: PR30
 Chapter VI closes with a complementary-gate airlock and five-cast bridge-reuse trial. Review gate: run the full recorded/hinted campaign audit and independent workshop replays; review chapter progression and keep browser/manual QA distinct. PR31 opens The Celestial Observatory with The Wandering Mirror and The Astronomer’s Bridge (movable mirror lines and combined reference-point mechanisms).
 
-## Current milestone: PR31
+## Historical milestone: PR31
 Chapter VII begins with live vertical mirror sliders and reuse of a translated, rotated, then reflected attached bridge. PR32 adds distinct alternative routes (Three Ways Across) and a crystal-delivery objective (The Lost Star). Keep full CI and browser QA as the merge gate.
+
+## Current milestone: PR32
+Levels 33–34 introduce three genuine solution routes with different object usage and a crystal delivery condition independent of traversal. PR33 finishes the campaign with The Observatory Machine and The Final Ascent: interconnected mechanisms and all four transformations. PR34 is the final campaign audit.

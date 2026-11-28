@@ -1,4 +1,5 @@
 import {deepFreeze} from "../geometry/world.js";
+import {deliveryReady} from "../mechanisms/delivery.js";
 import {attemptSummary} from "./attempt-history.js";
 
 const count=n=>Number.isSafeInteger(n)&&n>=0;
@@ -28,7 +29,7 @@ export function describeCast(record){
 }
 /** No score for previews, unfinished attempts, blocked respawns or practice. */
 export function completedResult(room,player,history){
-  if(!player?.completed||player.blockedRespawn)return null;
+  if(!player?.completed||player.blockedRespawn||!deliveryReady(room))return null;
   const thresholds=starThresholds(room);if(!thresholds)return null;
   const summary=attemptSummary(history,player);
   return deepFreeze({

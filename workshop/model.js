@@ -8,13 +8,13 @@ import {createPhysicsWorld} from "../src/physics/collision.js";
 import {createPlayer} from "../src/physics/platformer.js";
 import {isSafePosition} from "../src/physics/recovery.js";
 
-export const GROUPS=Object.freeze(["terrain","hazards","objects","ladders","checkpoints","decor","plates","sockets","shapeSockets"]);
+export const GROUPS=Object.freeze(["terrain","hazards","objects","ladders","checkpoints","decor","plates","sockets","shapeSockets","deliveries"]);
 export const copy=value=>JSON.parse(JSON.stringify(value));
 const finite=n=>typeof n==="number"&&Number.isFinite(n)&&Math.abs(n)<=1000;
 const point=p=>Array.isArray(p)&&p.length===2&&p.every(finite);
 const xy=p=>p&&finite(p.x)&&finite(p.y);
 const require=(ok,message)=>{if(!ok)throw Error(message);};
-const polygonGroups=new Set(["terrain","hazards","objects","shapeSockets"]);
+const polygonGroups=new Set(["terrain","hazards","objects","shapeSockets","deliveries"]);
 /** Structural checks allow temporarily unlinked mechanisms and invalid placements in a draft.
  * The stricter game validation runs before playtest, not on every drag. */
 export function prepareDraft(value){

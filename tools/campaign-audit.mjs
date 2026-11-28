@@ -19,6 +19,7 @@ import {TOO_BIG_CASTS,SMALL_NOW_CASTS} from "../src/levels/alchemist-workshop.js
 import {WANDERING_PIVOT_CASTS,MIRRORED_MECHANISM_CASTS} from "../src/levels/alchemist-pivots.js";
 import {AIRLOCK_CASTS,TRIAL_CASTS} from "../src/levels/alchemist-finale.js";
 import {WANDERING_MIRROR_CASTS,ASTRONOMERS_BRIDGE_CASTS} from "../src/levels/observatory-mirrors.js";
+import {LONG_DECK_CASTS,TWO_SPAN_CASTS,REUSE_DECK_CASTS,LOST_STAR_CASTS} from "../src/levels/observatory-routes.js";
 import {attachedObjects} from "../src/mechanisms/attached-pivots.js";
 import {createPhysicsWorld} from "../src/physics/collision.js";
 import {createPlayer,stepPlayer} from "../src/physics/platformer.js";
@@ -70,8 +71,14 @@ export const RECORDED_ROUTES=deepFreeze([
  [29,AIRLOCK_CASTS,[[[380,1,0]],[[400,1,0]]]],
  [30,TRIAL_CASTS,[[],[],[[400,1,0],[110,1,1],[100,1,0],[120,1,1]],[],[[70,1,0],[80,0,0],[120,1,1],[500,1,0]]]],
  [31,WANDERING_MIRROR_CASTS,[[],[[300,1,0],[120,1,1],[500,1,0]]]],
- [32,ASTRONOMERS_BRIDGE_CASTS,[[],[[300,1,0],[120,1,1],[210,1,0]],[],[[45,1,0],[120,1,1],[500,1,0]]]]
+ [32,ASTRONOMERS_BRIDGE_CASTS,[[],[[300,1,0],[120,1,1],[210,1,0]],[],[[45,1,0],[120,1,1],[500,1,0]]]],
+ [33,LONG_DECK_CASTS,[[[300,1,0],[120,1,1],[850,1,0]]]],
+ [34,LOST_STAR_CASTS,[[],[[300,1,0],[120,1,1],[500,1,0]]]]
 ].map(([number,casts,segments])=>({number,casts,segments,route:segments.flat()}))));
+export const ALTERNATIVE_ROUTES=deepFreeze([
+ {number:33,name:"Two independent spans",casts:TWO_SPAN_CASTS,segments:[[],[[300,1,0],[120,1,1],[255,1,0],[120,1,1],[500,1,0]]],expectedStars:2},
+ {number:33,name:"Reflect and reuse",casts:REUSE_DECK_CASTS,segments:[[[300,1,0],[120,1,1],[210,1,0]],[[45,1,0],[120,1,1],[500,1,0]]],expectedStars:2}
+].map(f=>({...f,route:f.segments.flat()})));
 export function replayRoute(world,route,start=createPlayer(world)){
  let player=start,ticks=0;
  for(const [n,move,jump,climb=0] of route){
@@ -240,11 +247,19 @@ export function auditLevel(fixture,{probe=false}={}){
  if(!hintReplay.completed||hintReplay.respawns||!tutorialSituation(hinted.room)?.ready)errors.push("Worked-hint route did not complete");
  return {number:level.number,id:level.id,title:level.title,math:level.math,puzzle:level.puzzle,moves:result?.moves??null,stars:result?.stars??null,respawns:player.respawns,ticks,hintCasts,initialBypass:initialReplay.completed,partialRoutes,sampledShortcuts,errors};
 }
+export function auditAlternativeRoute(fixture){
+ const level=LEVELS.find(l=>l.number===fixture.number),run=timedReplay(fixture,createPhysicsWorld(validateRoom(level.room))),errors=[...run.errors];
+ if(!run.result||run.result.moves!==fixture.casts.length||run.result.stars!==fixture.expectedStars||run.player.respawns)errors.push("Alternative route failed completion, scoring or recovery requirement");
+ return {number:fixture.number,alternative:fixture.name,moves:run.result?.moves??null,stars:run.result?.stars??null,respawns:run.player.respawns,ticks:run.ticks,errors};
+}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const report=RECORDED_ROUTES.map(f=>auditLevel(f,{probe:true}));
  for(const r of report)console.log(JSON.stringify(r));
  console.log("CAMPAIGN AUDIT: "+report.filter(r=>!r.errors.length).length+"/"+report.length+" recorded + hinted routes passed; "+report.reduce((n,r)=>n+r.sampledShortcuts.length,0)+" sampled shortcut hits.");
- if(report.some(r=>r.errors.length))process.exitCode=1;
+ const alternatives=ALTERNATIVE_ROUTES.map(auditAlternativeRoute);
+ for(const a of alternatives)console.log(JSON.stringify(a));
+ console.log("ALTERNATIVE ROUTES: "+alternatives.filter(a=>!a.errors.length).length+"/"+alternatives.length+" passed.");
+ if([...report,...alternatives].some(r=>r.errors.length))process.exitCode=1;
  // New shortcut hits are evidence for review, not automatic proof of a broken
  // level: genuine alternative solutions must not be prohibited arbitrarily.
 }

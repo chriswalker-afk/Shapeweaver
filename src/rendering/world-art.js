@@ -1,3 +1,4 @@
+import {deliveryReady,deliveryFilled} from "../mechanisms/delivery.js";
 import {mirrorRails,railMirrorValue,railEquation} from "../mechanisms/movable-mirrors.js";
 import {isBridgeDeck,ladderSegment} from "../mechanisms/transformable-ladders.js";
 import {plateGroups,mixedGateProgress,selectorPlates,plateHeld} from "../mechanisms/pressure-plates.js";
@@ -162,6 +163,12 @@ function object(ctx,camera,item,art) {
       for(let y=b.y;y<b.y+b.h;y+=camera.scale*1.2){ctx.fillStyle="#bca878";ctx.fillRect(b.x,y,b.w,Math.max(2,camera.scale*.1));}
       outline(ctx,camera,item.vertices,"#394c42",2);
     }
+  }else if(item.kind==="crystal"){
+    const b=screenBounds(camera,item.vertices),g=ctx.createLinearGradient(b.x,b.y,b.x+b.w,b.y+b.h);
+    g.addColorStop(0,"#e4fbff");g.addColorStop(.4,"#75cfda");g.addColorStop(1,"#4775ab");
+    ctx.save();polygon(ctx,camera,item.vertices);ctx.fillStyle=g;ctx.fill();ctx.clip();
+    ctx.beginPath();ctx.moveTo(b.x+b.w*.5,b.y);ctx.lineTo(b.x+b.w*.66,b.y+b.h*.62);ctx.lineTo(b.x+b.w*.3,b.y+b.h);
+    ctx.strokeStyle="#e5f9f9aa";ctx.lineWidth=2;ctx.stroke();ctx.restore();outline(ctx,camera,item.vertices,"#d3faff",1.7);
   }else if(item.material==="brass"){
     const b=screenBounds(camera,item.vertices);
     polygon(ctx,camera,item.vertices);ctx.fillStyle="#c79e5e";ctx.fill();
@@ -365,6 +372,14 @@ function drawSockets(ctx,camera,room){
     worldLabel(ctx,camera,socket.x,socket.y-.8,held?"S · DOCKED":"S · SOCKET",colour);
   }
 }
+function drawDeliveries(ctx,camera,room){
+ for(const t of room.deliveries??[]){
+  const filled=deliveryFilled(room,t),b=polygonBounds(t.vertices),colour=filled?"#b8edb1":"#c6d8ff";
+  ctx.save();polygon(ctx,camera,t.vertices);ctx.fillStyle=filled?"#b8edb122":"#19294388";ctx.fill();
+  ctx.strokeStyle=colour;ctx.lineWidth=2;ctx.setLineDash(filled?[]:[5,3]);ctx.stroke();ctx.restore();
+  worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.55,filled?"STAR DELIVERED":"CRYSTAL RECEIVER",colour);
+ }
+}
 function drawShapeSockets(ctx,camera,room,foreground=false){
   for(const slot of room.shapeSockets??[]){
     const b=polygonBounds(slot.vertices),g=room.objects.find(o=>o.id===slot.gateId),gb=polygonBounds(g.vertices);
@@ -523,6 +538,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   }
   drawPlateGateStates(ctx,camera,room);
   drawShapeSockets(ctx,camera,room,true);
+  drawDeliveries(ctx,camera,room);
   for(const item of room.checkpoints??[])checkpoint(ctx,camera,item,player.checkpoint===item.id);
   for(const item of room.decor)decorate(ctx,camera,item);
   portal(ctx,camera,room.exit,art);apprentice(ctx,camera,player,art,reducedMotion);
@@ -538,6 +554,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   if(room.id==="archives-20")worldLabel(ctx,camera,36,6.35,"SAFE BALCONY","#e9cffa");
    if(room.id==="alchemist-25")worldLabel(ctx,camera,29,8.2,"RAISED WORKBENCH","#d1eac9");
    if(room.id==="alchemist-26"){worldLabel(ctx,camera,21,13.45,"NARROW CHANNEL","#d1eac9");worldLabel(ctx,camera,21,10.15,"1.6 UNITS CLEAR","#d1eac9");}
+  if(room.id==="observatory-33")worldLabel(ctx,camera,39,3.8,"STAR ISLAND","#e5d7ff");
   if(room.id==="observatory-32")worldLabel(ctx,camera,39,5.35,"SAFE STAR PLATFORM","#e5d7ff");
   if(room.id==="alchemist-29")worldLabel(ctx,camera,24,5.4,"SAFE CHAMBER","#d1eac9");
   if(room.id==="alchemist-30"){worldLabel(ctx,camera,21,12.8,"NARROW CHANNEL","#d1eac9");worldLabel(ctx,camera,44.5,8.85,"SAFE WORKBENCH","#d1eac9");}
@@ -545,7 +562,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   for(const o of room.objects)if(o.bridgeDeck){const b=polygonBounds(o.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.45,isBridgeDeck(o)?"BRIDGE":ladderSegment(o)?"LADDER":"TURNING","#f7d7a1");}
   if(room.id==="riverworks-14")worldLabel(ctx,camera,6,5.6,"STORAGE RACK","#f7d7a1");
   if(room.id==="clockwork-10")worldLabel(ctx,camera,21.5,6.65,"LOW ARCH","#f1d09b");
-  if(room.tutorial){objectRunes(ctx,camera,room);worldLabel(ctx,camera,room.exit.x,room.exit.y+room.exit.height+.35,"EXIT","#ffe2a5");}
+  if(room.tutorial){objectRunes(ctx,camera,room);worldLabel(ctx,camera,room.exit.x,room.exit.y+room.exit.height+.35,deliveryReady(room)?"EXIT":"EXIT · STAR REQUIRED",deliveryReady(room)?"#ffe2a5":"#c6d8ff");}
   ctx.restore();
   // Subtle vignette establishes the playable area without darkening the whole room.
   const v=ctx.createLinearGradient(0,0,0,metrics.height);v.addColorStop(0,"#28223930");v.addColorStop(.28,"#28223900");v.addColorStop(.82,"#28223900");v.addColorStop(1,"#28223950");

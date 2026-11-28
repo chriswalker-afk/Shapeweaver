@@ -1,5 +1,6 @@
 import {inHazard,supported,sweepAxis,walkHorizontal,PLAYER_SIZE} from "./collision.js";
 import {isSafePosition,returnToSafety} from "./recovery.js";
+import {deliveryReady} from "../mechanisms/delivery.js";
 import {onMushroomCap,MUSHROOM_JUMP_SPEED} from "../mechanisms/mushroom.js";
 export const FIXED_DT=1/120;
 export const MOTION=Object.freeze({speed:7.2,groundAcceleration:65,airAcceleration:34,gravity:25,jumpSpeed:12.2,terminalSpeed:18,climbSpeed:3.8,coyote:.11,buffer:.12});
@@ -27,7 +28,7 @@ function finishStep(world,p,previous){
   }
   const e=world.room.exit;
   // Require the feet to enter the usable portal from the level, not merely overlap its artwork while falling.
-  if(p.grounded&&Math.abs(p.x-e.x)<=e.width/2-.1&&p.y>=e.y-.035&&p.y<e.y+e.height*.35){
+  if(p.grounded&&Math.abs(p.x-e.x)<=e.width/2-.1&&p.y>=e.y-.035&&p.y<e.y+e.height*.35&&deliveryReady(world.room)){
     p.completed=true;p.vx=0;p.vy=0;p.pose="idle";p.event="exit";return p;
   }
   const distance=Math.hypot(p.x-previous.x,p.y-previous.y);

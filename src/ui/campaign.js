@@ -8,7 +8,7 @@ const chapterLevels=id=>LEVELS.filter(l=>l.chapter===id);
 
 export function mountCampaign(document,best,navigate){
  const $=id=>document.getElementById(id),root=$("campaign-view");if(!root)return null;
- const ids="campaign-map campaign-levels campaign-progress campaign-resume campaign-clear filter-spell filter-math filter-puzzle filter-chapter library-atlas library-puzzles library-find library-find-secondary library-back library-heading library-chapter-banner library-chapter-art library-chapter-name library-chapter-progress library-search library-count library-detail library-detail-number library-detail-title library-detail-spells library-detail-ratings library-detail-score library-play library-empty library-completed library-stars library-progress-bar".split(" ");
+ const ids="campaign-map campaign-levels campaign-progress campaign-resume campaign-clear filter-spell filter-math filter-puzzle filter-chapter library-atlas library-puzzles library-find library-find-secondary library-back library-heading library-chapter-banner library-chapter-art library-chapter-name library-chapter-progress library-search library-count library-selected-detail library-detail-number library-detail-title library-detail-spells library-detail-ratings library-detail-score library-play library-empty library-completed library-stars library-progress-bar".split(" ");
  if(ids.some(id=>!$(id)))return null;
  const map=$("campaign-map"),list=$("campaign-levels"),filters=["spell","math","puzzle","chapter"].map(k=>[k,$("filter-"+k)]);
  let next=null,mode="atlas",chapter=null,selected=null,visibleLevels=[],tiles=new Map();const listeners=[];
@@ -51,7 +51,7 @@ export function mountCampaign(document,best,navigate){
  }
  function updateDetail(){
   const l=visibleLevels.find(x=>x.route===selected);
-  $("library-detail").hidden=!l;$("library-empty").hidden=Boolean(visibleLevels.length);$("library-play").disabled=!l;
+  $("library-selected-detail").hidden=!l;$("library-empty").hidden=Boolean(visibleLevels.length);$("library-play").disabled=!l;
   for(const [route,tile] of tiles){tile.setAttribute("aria-pressed",String(route===selected));tile.tabIndex=route===selected?0:-1;}
   if(!l)return;
   const score=best.get(l.id),spells=l.spells.map(getSpell);
@@ -100,7 +100,7 @@ export function mountCampaign(document,best,navigate){
   root.setAttribute("data-library-mode",mode);
   $("library-atlas").hidden=mode!=="atlas";$("library-puzzles").hidden=mode==="atlas";
   renderProgress();
-  if(mode==="atlas"){visibleLevels=[];tiles.clear();list.replaceChildren();$("library-detail").hidden=true;renderAtlas();}
+  if(mode==="atlas"){visibleLevels=[];tiles.clear();list.replaceChildren();$("library-selected-detail").hidden=true;renderAtlas();}
   else renderPuzzles();
   if(focus)(mode==="atlas"?$("library-find"):$("library-heading")).focus?.({preventScroll:true});
  }

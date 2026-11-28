@@ -44,7 +44,7 @@ function element(){
  fire(type,event={}){if(!this.disabled)listeners.get(type)?.({preventDefault(){},...event});},focus(){this.focused=true;}};
 }
 function fixture(){
- const ids="campaign-view campaign-map campaign-levels campaign-progress campaign-resume campaign-clear filter-spell filter-math filter-puzzle filter-chapter library-atlas library-puzzles library-find library-find-secondary library-back library-heading library-chapter-banner library-chapter-art library-chapter-name library-chapter-progress library-search library-count library-detail library-detail-number library-detail-title library-detail-spells library-detail-ratings library-detail-score library-play library-empty library-completed library-stars library-progress-bar campaign-celebration".split(" ");
+ const ids="campaign-view campaign-map campaign-levels campaign-progress campaign-resume campaign-clear filter-spell filter-math filter-puzzle filter-chapter library-atlas library-puzzles library-find library-find-secondary library-back library-heading library-chapter-banner library-chapter-art library-chapter-name library-chapter-progress library-search library-count library-selected-detail library-detail-number library-detail-title library-detail-spells library-detail-ratings library-detail-score library-play library-empty library-completed library-stars library-progress-bar campaign-celebration".split(" ");
  const els=Object.fromEntries(ids.map(id=>[id,element()]));
  const routes=[],best=createBestResults({});
  const ui=mountCampaign({getElementById:id=>els[id],createElement:()=>element()},best,route=>routes.push(route));

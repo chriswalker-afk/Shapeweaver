@@ -14,3 +14,11 @@ test("all seven chapter illustrations are original, distinct, local and within b
  }
  assert.equal(new Set(files).size,7);assert.ok(files.reduce((n,s)=>n+Buffer.byteLength(s),0)<65*1024);
 });
+
+test("application shell has unique IDs and distinct home and selected-puzzle details",async()=>{
+ const html=await readFile(new URL("../index.html",import.meta.url),"utf8");
+ const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
+ assert.equal(new Set(ids).size,ids.length,"duplicate HTML IDs");
+ assert.match(html,/<span id="library-detail">Explore all 36 puzzles/);
+ assert.match(html,/<aside id="library-selected-detail"[^>]*hidden/);
+});

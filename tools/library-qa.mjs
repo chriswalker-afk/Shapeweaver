@@ -58,6 +58,8 @@ try{
    const gate=cards.filter({hasText:"The Gatehouse"});
    if(v.touch)await gate.tap();else{await gate.focus();await page.keyboard.press("Enter");}
    assert.equal(await root.getAttribute("data-library-mode"),"chapter");assert.equal(await map.isHidden(),true);
+   assert.equal(await page.locator("#library-selected-detail").isVisible(),true);
+   assert.equal(await play.isVisible(),true);
    assert.equal(await tiles.count(),4);assert.equal(await page.locator("#library-search").isHidden(),true);
    assert.equal(await page.locator('.library-level[aria-pressed="true"]').getAttribute("data-level"),"2");
    const first=page.locator('.library-level[data-level="1"]');

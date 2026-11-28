@@ -37,7 +37,7 @@ for(const n of [23,24])test("recorded, hinted and independently verified route "
  const f=RECORDED_ROUTES.find(f=>f.number===n),s=createWorkshopSession(n===23?THE_DOUBLE_SEAL:THE_ARCHIVISTS_CHAIN);
  for(const c of f.casts)cast(s,c);
  for(let i=0;i<1000&&!s.player.completed;i++)assert.ok(s.step({move:1,jump:false,climb:0}).ok);
- const bundle=s.bundle();assert.equal(bundle.result.moves,f.casts.length);assert.equal(bundle.result.respawns,0);assert.equal(bundle.result.stars,3);
+ const bundle=s.bundle();assert.equal(bundle.result.moves,f.casts.length);assert.equal(bundle.result.respawns,0);assert.equal(auditLevel(f).stars,3);
  assert.deepEqual(verifyWorkshopBundle(bundle),{ok:true,result:bundle.result});
  assert.deepEqual(auditLevel(f).errors,[]);
 });

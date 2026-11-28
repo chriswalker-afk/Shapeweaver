@@ -65,7 +65,7 @@ In 9–12 use constrained pivots, capabilities, and clearance when needed to mak
 | --- | --- | --- | --- |
 | 31 | The Wandering Mirror | Translate mirror rail, reflect object across new permitted line. | Movable mirror lines |
 | 32 | The Astronomer's Bridge | Move pivot and mirror to assemble route with unusual shapes. | Recombine |
-| 33 | Three Ways Across | Build bridge, staircase or reusable platform route. | Deliberately distinct solution routes |
+| 33 | Three Ways Across | Build one long deck, two separate spans at different heights, or a reusable reflected deck. | Deliberately distinct solution routes |
 | 34 | The Lost Star | Deliver crystal to receiver and build player route. | Secondary delivery objective |
 | 35 | The Observatory Machine | Compound shapes, selectors and reused platforms activate exit. | Recombine |
 | 36 | The Final Ascent | All four transformations and several objects; alternate solutions. | Mastery |

@@ -62,15 +62,15 @@ function drawDraft(room,metrics){
  ctx.setTransform(metrics.scaleX,0,0,metrics.scaleY,0,0);ctx.fillStyle="#34434b";ctx.fillRect(0,0,metrics.width,metrics.height);
  const a=screen(room.bounds.minX,room.bounds.maxY),b=screen(room.bounds.maxX,room.bounds.minY);
  ctx.save();ctx.beginPath();ctx.rect(a.x,a.y,b.x-a.x,b.y-a.y);ctx.clip();ctx.fillStyle="#4a615a";ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y);
- const colours={terrain:"#9d9b93",hazards:"#619dae",objects:"#c5a072",shapeSockets:"#655579",plates:"#dfbc74",ladders:"#bb966c",sockets:"#e6c786",spawn:"#88d7ba",exit:"#eed6a0",checkpoints:"#85c2dc",decor:"#88ae85"};
+ const colours={terrain:"#9d9b93",hazards:"#619dae",objects:"#c5a072",shapeSockets:"#655579",deliveries:"#729cbd",plates:"#dfbc74",ladders:"#bb966c",sockets:"#e6c786",spawn:"#88d7ba",exit:"#eed6a0",checkpoints:"#85c2dc",decor:"#88ae85"};
  for(const e of itemEntries(room).sort((a,b)=>Number(["spawn","exit"].includes(a.group))-Number(["spawn","exit"].includes(b.group)))){
   const {group,id,item:o}=e,active=selection?.group===group&&selection?.id===id,bb=itemBounds(group,o),tl=screen(bb.minX,bb.maxY),br=screen(bb.maxX,bb.minY);
   ctx.beginPath();if(o.vertices){for(const [i,[x,y]] of o.vertices.entries()){const p=screen(x,y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y);}ctx.closePath();}else ctx.rect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);
-  ctx.fillStyle=colours[group];ctx.globalAlpha=group==="shapeSockets"?.35:.95;ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=active?3:1.2;ctx.strokeStyle=active?"#ffec9b":"#2c3339";if(group==="shapeSockets")ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=colours[group];ctx.globalAlpha=["shapeSockets","deliveries"].includes(group)?.35:.95;ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=active?3:1.2;ctx.strokeStyle=active?"#ffec9b":"#2c3339";if(["shapeSockets","deliveries"].includes(group))ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
   if(o.fixedCentre){const h=screen(...o.fixedCentre),c=screen((bb.minX+bb.maxX)/2,(bb.minY+bb.maxY)/2);ctx.setLineDash([4,3]);line(h,c,"#fce2a4");ctx.setLineDash([]);ctx.fillStyle="#fce2a4";ctx.beginPath();ctx.arc(h.x,h.y,4,0,Math.PI*2);ctx.fill();}
   if(o.hinge){const h=screen(...o.hinge);ctx.fillStyle="#fce2a4";ctx.beginPath();ctx.arc(h.x,h.y,4,0,Math.PI*2);ctx.fill();}
   if(active&&o.vertices)for(const [x,y] of o.vertices){const p=screen(x,y);ctx.fillStyle="#ffec9b";ctx.fillRect(p.x-2.5,p.y-2.5,5,5);}
-  if(active||["spawn","exit","plates","sockets","shapeSockets","checkpoints"].includes(group)){ctx.font="600 11px system-ui";ctx.fillStyle="#fff1d2";ctx.strokeStyle="#232433";ctx.lineWidth=3;const label=group==="spawn"?"START":group==="exit"?"EXIT":id;ctx.strokeText(label,tl.x+3,tl.y-5);ctx.fillText(label,tl.x+3,tl.y-5);}
+  if(active||["spawn","exit","plates","sockets","shapeSockets","deliveries","checkpoints"].includes(group)){ctx.font="600 11px system-ui";ctx.fillStyle="#fff1d2";ctx.strokeStyle="#232433";ctx.lineWidth=3;const label=group==="spawn"?"START":group==="exit"?"EXIT":id;ctx.strokeText(label,tl.x+3,tl.y-5);ctx.fillText(label,tl.x+3,tl.y-5);}
  }
  ctx.restore();
 }
@@ -87,7 +87,7 @@ function draw(){
 function coordinate(event){const r=canvas.getBoundingClientRect(),p=screenToWorld(camera,{x:(event.clientX-r.left)*camera.width/r.width,y:(event.clientY-r.top)*camera.height/r.height});return p;}
 const snap=n=>Number((Math.round(n/Number($("snap").value))*Number($("snap").value)).toFixed(8));
 function hit(p){
- const entries=itemEntries(draft),priority=["spawn","exit","objects","plates","sockets","shapeSockets","ladders","checkpoints","decor","hazards","terrain"];
+ const entries=itemEntries(draft),priority=["spawn","exit","objects","plates","sockets","shapeSockets","deliveries","ladders","checkpoints","decor","hazards","terrain"];
  for(const group of priority)for(const e of entries.filter(v=>v.group===group).reverse()){
   if(e.item.vertices){if(pointPolygonDistance([p.x,p.y],e.item.vertices)<=5/camera.scale)return e;}
   else{const b=itemBounds(group,e.item),t=6/camera.scale;if(p.x>=b.minX-t&&p.x<=b.maxX+t&&p.y>=b.minY-t&&p.y<=b.maxY+t)return e;}
@@ -154,7 +154,7 @@ function refreshTypes(){
  const o=session.room.objects.find(o=>o.id===$("spell-object").value),keep=$("spell-type").value;
  $("spell-type").replaceChildren(option("","Choose spell…"),...(o?.permissions??[]).map(t=>option(t,{translate:"Translation",rotate:"Rotation",enlarge:"Enlargement",reflect:"Reflection"}[t])));
  if(o?.permissions.includes(keep))$("spell-type").value=keep;else if(o?.permissions.length===1)$("spell-type").value=o.permissions[0];
- const slot=session.room.shapeSockets?.find(s=>s.objectId===o?.id);
+ const slot=session.room.shapeSockets?.find(s=>s.objectId===o?.id)??session.room.deliveries?.find(s=>s.objectId===o?.id);
  $("references").textContent=o?referencePoints(o).map(p=>p.id+" ("+p.point.join(", ")+")").join(" · ")+(slot?" · Target "+slot.vertices.map((p,i)=>"S"+(i+1)+" ("+p.join(", ")+")").join(" · "):""):"";
  refreshFields();
 }

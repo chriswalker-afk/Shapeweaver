@@ -1,4 +1,6 @@
 import {polygonBounds} from "../geometry/world.js";
+import {deliveryReady} from "../mechanisms/delivery.js";
+import {shapeFits} from "../mechanisms/shape-sockets.js";
 import {railMirrorValue} from "../mechanisms/movable-mirrors.js";
 import {previewGeometry,parsePreviewRequest} from "../transformations/preview-math.js";
 const near=(a,b)=>Math.abs(a-b)<1e-6,round=n=>Number(n.toFixed(8)),pt=(x,y)=>"("+round(x)+", "+round(y)+")";
@@ -37,6 +39,36 @@ export function observatorySituation(room,player=null){
    if(covers(image,22,34))return state("rotate-star-beam",{...config,objectId:beam.id,type:"rotate",name:"Rotation",spell:"Rotate only the attached beam about the current shared pivot.",fields:"Enter angle, direction and current centre."},{reasoning:"The pivot is now H = "+pt(cx,cy)+". Find the turn that makes the bridge horizontal across the first gap.",worked:"Rotate "+angle+"° "+direction+" about "+pt(cx,cy)+".",raw});
   }
   return state("recover-star",config,{reasoning:"The assembly is not aligned with the first crossing.",worked:"Undo or Reset to restore a known arrangement."});
+ }
+ if(room.id==="observatory-33"){
+  const long=room.objects.find(o=>o.id==="long-star-deck"),short=room.objects.find(o=>o.id==="short-star-deck"),raised=room.objects.find(o=>o.id==="raised-star-beam"),lb=polygonBounds(long.vertices),sb=polygonBounds(short.vertices),rb=polygonBounds(raised.vertices),x=player?.x??room.spawn.x;
+  const first=covers(sb,22,34),second=covers(sb,44,56)||covers(rb,44,56);
+  const config={objective:"Choose your own bridge-building strategy.",obstacle:"Two wide channels are separated by an island. There is more than one valid route.",object:"Compare the long deck, the reusable short deck and the hinged span. A single long bridge is efficient; two separate spans or a reused deck also work.",traverse:"Jump onto the bridge, cross the available spans and reach the portal. On the separate spans, stop on the island and jump across the second gap."};
+  if(covers(lb,22,56)||second&&(first||x>34.5))return ready(config);
+  if(first&&!second){
+   if(x<35||x>43||!player?.grounded)return state("island-first",{...config,traverse:"Cross the first bridge and stop on the safe island. Then reflect the short deck or turn the raised span."},{travel:true});
+   const a=round((sb.minX+56)/2);
+   return state("reuse-short",{...config,objectId:short.id,type:"reflect",name:"Reflection",spell:"A vertical mirror keeps the height and maps each x to twice the mirror coordinate minus x.",fields:"Enter the mirror line equation."},{reasoning:"The left edge of the bridge must become the right edge of the second crossing. Find the midpoint of "+round(sb.minX)+" and 56.",worked:"Reflect in x = "+a+". Alternatively rotate the raised span 90 degrees anticlockwise about (56, 4.8).",raw:{line:"x = "+a}});
+  }
+  if(second&&!first){
+   const dx=round(22-sb.minX),dy=round(4-sb.minY);
+   return state("first-short",{...config,objectId:short.id,type:"translate",name:"Translation",spell:"Translate the short deck to the first channel.",fields:"Enter both vector components."},{reasoning:"Map the lower-left corner to (22, 4).",worked:"Translate by vector "+pt(dx,dy)+".",raw:{dx,dy}});
+  }
+  const dx=round(22-lb.minX),dy=round(4-lb.minY);
+  return state("long-bridge",{...config,objectId:long.id,type:"translate",name:"Translation",spell:"A translation moves every vertex by the same vector. The long deck can span both channels.",fields:"Enter both vector components."},{reasoning:"The two outer banks are 34 units apart. Map the lower-left corner of the long deck onto (22, 4).",worked:"Translate the long deck by vector "+pt(dx,dy)+". This is one efficient route; the shorter pieces permit other routes.",raw:{dx,dy}});
+ }
+ if(room.id==="observatory-34"){
+  const o=room.objects.find(o=>o.id==="rescue-deck"),b=polygonBounds(o.vertices),crystal=room.objects.find(o=>o.id==="lost-crystal"),cb=polygonBounds(crystal.vertices),target=room.deliveries[0],tb=polygonBounds(target.vertices);
+  const config={objective:"Restore the missing star and cross the channel.",obstacle:"The channel needs a bridge and the exit requires the crystal to fit its receiver.",object:"Move the rescue deck into the channel and reflect the asymmetric crystal into the receiver outline. Either objective can be done first.",traverse:"Both objectives are satisfied. Jump onto the rescue bridge, cross the channel and enter the portal."};
+  if(!covers(b,22,34)){
+   const dx=round(22-b.minX),dy=round(4-b.minY);
+   return state("rescue-bridge",{...config,objectId:o.id,type:"translate",name:"Translation",spell:"Translate the rescue bridge without changing its size or orientation.",fields:"Enter both vector components."},{reasoning:"Map the lower-left corner onto (22, 4).",worked:"Translate by vector "+pt(dx,dy)+".",raw:{dx,dy}});
+  }
+  if(deliveryReady(room))return ready(config);
+  const a=round((cb.minX+tb.maxX)/2),raw={line:"x = "+a};
+  const c={...config,objectId:crystal.id,type:"reflect",name:"Reflection",spell:"Use corresponding vertices to find the perpendicular bisector. The asymmetric crystal must match the receiver, not only its bounding rectangle.",fields:"Enter the mirror line equation."};
+  if(shapeFits(previewGeometry(crystal,parsePreviewRequest("reflect",raw)).vertices,target.vertices))return state("deliver-star",c,{reasoning:"The crystal's left edge must become the receiver's right edge. The mirror is their midpoint.",worked:"Reflect in x = ("+round(cb.minX)+" + "+round(tb.maxX)+") / 2 = "+a+". The portal will become available once the receiver is filled.",raw});
+  return state("recover-crystal",c,{reasoning:"The crystal orientation does not match the intended reflection.",worked:"Undo to the original orientation, or Reset, and compare the corresponding vertices."});
  }
  return null;
 }

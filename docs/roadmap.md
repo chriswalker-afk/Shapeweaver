@@ -88,5 +88,8 @@ The title now has four illustrated actions and clear progress-aware Continue; ob
 - PR39 — Ambient animated background: lightweight sequential spell demonstrations, particles and static/reduced-motion fallback.
 - PR40 — Home page polish and QA: responsive, keyboard, touch, visual and performance review.
 
-## Current milestone: PR38 — Home artwork
+## Historical milestone: PR38 — Home artwork
 The four bespoke illustrated navigation cards and twilight kingdom hero are authored. Run full CI, browser QA and inspect the retained home screenshots before merge. PR39 introduces the ambient mathematically accurate spell showcase on the static backdrop; PR40 is final visual and cross-device polish.
+
+## Current milestone: PR39 — Ambient spell showcase
+A home-only decorative projection cycles through four exact transformation examples, with system/game reduced-motion fallback, an auxiliary pause control, and no hidden-view frame work. See [Home showcase](home-showcase.md). PR40 completes cross-device, visual, accessibility and performance QA.

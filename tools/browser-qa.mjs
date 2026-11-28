@@ -30,7 +30,23 @@ try{
  for(const [name,width,height,touch] of [["desktop",1366,768,false],["small-desktop",1024,600,false],["landscape-phone",844,390,true],["portrait-phone",390,844,true]]){
   const page=await browser.newPage({viewport:{width,height},hasTouch:touch,reducedMotion:"reduce"});
   const errors=[];page.on("pageerror",e=>errors.push(e.message));
-  await page.goto(origin);await page.locator("#open-level1").waitFor();
+  await page.goto(origin);await page.locator("#open-continue").waitFor();
+  const home=page.locator("#title-view"),cards=home.locator(".home-card");
+  assert.equal(await home.locator("button").count(),4);
+  assert.deepEqual(await cards.locator("strong").allTextContents(),["Continue","Puzzle Library","Spellbook","Practice Room"]);
+  assert.match(await page.locator("#continue-detail").innerText(),/Begin · Level 1/);
+  for(const card of await cards.all()){
+   const b=await card.boundingBox();assert.ok(b&&b.x>=0&&b.x+b.width<=width+1&&b.y>=0&&b.y+b.height<=height+1,name+" home card fits");
+   assert.ok(b.height>=44);assert.ok(await card.locator("img").evaluate(img=>img.complete&&img.naturalWidth>0));
+  }
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+" no horizontal overflow");
+  await page.screenshot({path:out+"/"+name+"-home.png",fullPage:true});
+  await page.locator("#open-continue").focus();await page.keyboard.press("Enter");
+  assert.match(await page.locator("#room-heading").innerText(),/Across the Brook/);await backToTitle(page);
+  assert.match(await page.locator("#continue-detail").innerText(),/Resume Level 1/);
+  await page.locator("#open-spellbook").click();await page.locator("#spellbook-view").waitFor();await page.locator("#close-spellbook").click();
+  await page.locator("#open-room").click();await page.locator("#room-view").waitFor();await page.locator("#close-room").click();
+  await page.locator("#title-view").waitFor();assert.match(await page.locator("#continue-detail").innerText(),/Resume Level 1/);
   await page.locator("#open-campaign").click();
   await page.locator("#campaign-view").waitFor();
   assert.equal(await page.locator(".chapter-card").count(),7);
@@ -49,7 +65,8 @@ try{
   assert.match(await page.locator("#room-heading").innerText(),/Across the Brook/);
   await backToTitle(page);
   for(const [index,[id,type,fields]] of cases.entries()){
-   await page.locator("#open-level"+(index+1)).click();
+   await page.locator("#open-campaign").click();await page.locator("#campaign-clear").click();
+   await page.locator(".library-level").nth(index).click();
    await page.locator("#room-canvas").waitFor();
    const initial=await page.locator("#room-stage").boundingBox();
    assert.ok(initial&&initial.height>=138,name+" stage");

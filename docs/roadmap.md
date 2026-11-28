@@ -79,5 +79,11 @@ Full-campaign acceptance review, exact coordinate oracle, live preview/rejection
 ## Historical milestone: PR35
 Presentation polish only: fast close-up, object/image locator, bounded labels, focus view, touch feedback, opt-in audio, system/user reduced motion, redraw efficiency and campaign completion. Geometry and scoring unchanged. Full automated audit and browser QA required before merge. PR36: production release, deployment, documentation, final regression and manual/device review.
 
-## Current milestone: PR36 — v1.0.0 release candidate
+## Historical milestone: PR36 — v1.0.0 release candidate
 The original 36-PR development roadmap is implemented. Production artifact verification, actual browser completion at both supported paths, gated Pages deployment and hosted commit verification are in place. Pages activation is a repository administrator action, followed by deployment, HTTPS/custom-domain configuration and manual classroom acceptance. See [release checklist](release.md). After release, choose optional PR37 (public drag-and-drop level workshop) only if useful; no additional campaign content is required for v1.0.0.
+
+## Current milestone: PR37 — Home page redesign
+The title now has four illustrated actions and clear progress-aware Continue; obsolete direct tutorial shortcuts have been removed. See [home redesign](home-redesign.md). This post-release UX series takes precedence over the earlier optional public level workshop numbering; defer the workshop until after PR40.
+- PR38 — Home page art and card illustrations: create richer bespoke illustration assets, coherent storybook art direction, and improve the hero scene/composition.
+- PR39 — Ambient animated background: lightweight sequential spell demonstrations, particles and static/reduced-motion fallback.
+- PR40 — Home page polish and QA: responsive, keyboard, touch, visual and performance review.

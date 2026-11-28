@@ -12,7 +12,7 @@ function node(tag="div"){
   fire(k,event={}){listeners.get(k)?.({preventDefault(){},...event})},focus(){this.focused=true}};
 }
 function fixture(reduce,withApp=false){
- const ids="room-canvas room-stage room-status quick-camera focus-toggle motion-toggle sound-toggle object-locate object-image room-tools-toggle room-secondary-tools climb-controls coordinate-close play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-guidance-toggle tutorial-hint-panel tutorial-hint-title tutorial-hint-text tutorial-hint-previous tutorial-hint-next tutorial-hint-close tutorial-moves reset-practice undo-cast return-safety recovery-count world app-status title-view spellbook-view title-art room-view spell-name spell-description spell-example spell-image spell-detail translation-vector open-spellbook close-spellbook spellbook-heading open-room open-level1 open-level2 open-level3 open-level4 close-room results-view results-heading results-level results-stars results-message results-stats results-thresholds results-best results-history results-empty results-replay results-next results-title".split(" ");
+ const ids="room-canvas room-stage room-status quick-camera focus-toggle motion-toggle sound-toggle object-locate object-image room-tools-toggle room-secondary-tools climb-controls coordinate-close play-status room-heading room-chapter movement-controls camera-overview camera-inspect camera-left camera-right camera-up camera-down camera-zoom-in camera-zoom-out grid-toggle axes-toggle pick-toggle coordinate-panel coordinate-snap coordinate-x coordinate-y coordinate-form coordinate-result coordinate-clear object-panel object-toggle object-select object-spell object-form object-fields object-result object-references object-permissions object-close object-clear object-apply object-preview-note tutorial-tools tutorial-guide tutorial-hint tutorial-guidance-toggle tutorial-hint-panel tutorial-hint-title tutorial-hint-text tutorial-hint-previous tutorial-hint-next tutorial-hint-close tutorial-moves reset-practice undo-cast return-safety recovery-count world app-status title-view spellbook-view title-art room-view spell-name spell-description spell-example spell-image spell-detail translation-vector open-spellbook close-spellbook spellbook-heading open-room open-continue open-home continue-detail continue-note home-progress-text home-stars-text home-progress-bar close-room results-view results-heading results-level results-stars results-message results-stats results-thresholds results-best results-history results-empty results-replay results-next results-title".split(" ");
  const els=Object.fromEntries(ids.map(id=>[id,node()])),rect={left:0,top:0,width:1000,height:500};
  const ctx={save(){},restore(){},setTransform(){},createLinearGradient(){return{addColorStop(){}}},createRadialGradient(){return{addColorStop(){}}},
  fillRect(){},drawImage(){},beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){},stroke(){},clip(){},rect(){},translate(){},rotate(){},ellipse(){},arc(){},strokeRect(){},quadraticCurveTo(){},strokeText(){},fillText(){},measureText(s){return{width:s.length*7}},setLineDash(){}};
@@ -267,7 +267,7 @@ test("actual completion routes to results once, replay and next level start clea
  const raw={angle:90,direction:"anticlockwise",cx:14,cy:8};
  const openGate=()=>assert.equal(cast(f,"stubborn-gate","rotate",raw).ok,true);
  const walk=()=>{view.fire("keydown",{code:"ArrowRight"});frame(300);view.fire("keyup",{code:"ArrowRight"});};
- click("open-level2");assert.equal(app.state.view,"level2");assert.equal(c.getResult(),null);
+ app.identity.show("level2");assert.equal(app.state.view,"level2");assert.equal(c.getResult(),null);
  openGate();assert.equal(c.undoCast(),true);openGate();
  assert.equal(c.getResult(),null);assert.equal(app.bestResults.get("gatehouse-02"),null);
  walk();
@@ -293,7 +293,7 @@ test("actual completion routes to results once, replay and next level start clea
 });
 test("Level 4 continues into the Enchanted Gardens",()=>{
  const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
- els["open-level4"].fire("click");
+ app.identity.show("level4");
  assert.equal(cast(f,"missing-barrel","reflect",{line:"x=15"}).ok,true);
  const down=code=>view.fire("keydown",{code}),up=code=>view.fire("keyup",{code});
  frame(2);down("ArrowRight");frame(88);down("Space");frame(30);up("Space");up("ArrowRight");frame(20);
@@ -663,4 +663,23 @@ test("presentation controls locate actual geometry without casting and restore m
  click("object-locate");assert.ok(c.getCamera().zoom>1);c.inspector.selectType("reflect");assert.ok(c.inspector.showPreview({line:"x=45"}).ok);click("object-image");assert.ok(c.getCamera().cx>60);
  c.setObjectMode(false);assert.ok(c.getCamera().cx<40);assert.equal(JSON.stringify(c.room),initial);assert.equal(c.getAttemptSummary().moves,0);
  click("focus-toggle");assert.equal(c.getPresentation().focus,true);click("motion-toggle");assert.equal(c.getPresentation().reduced,true);click("sound-toggle");assert.equal(c.getPresentation().sound,true);click("sound-toggle");assert.equal(c.getPresentation().sound,false);c.destroy();
+});
+
+test("home Continue restores a paused campaign attempt after practice, including undo history",()=>{
+ const {controller:c,els,app,saved}=fixture(true,true),click=id=>els[id].fire("click");
+ assert.match(els["continue-detail"].textContent,/Begin · Level 1/);
+ click("open-continue");assert.equal(app.state.view,"level1");
+ c.setObjectMode(true);c.inspector.selectObject("brook-beam");c.inspector.selectType("translate");
+ assert.ok(c.inspector.showPreview({dx:12,dy:0}).ok);click("object-apply");
+ assert.equal(c.getAttemptSummary().moves,1);const geometry=JSON.stringify(c.room),pose=c.getPlayer();
+ click("close-room");assert.match(els["continue-detail"].textContent,/Resume Level 1/);
+ assert.equal(JSON.parse(saved.get("shapeweaver.resume-level.v1")).route,"level1");
+ click("open-room");assert.equal(app.state.view,"room");assert.equal(c.getAttemptSummary().moves,0);
+ click("close-room");click("open-continue");assert.equal(app.state.view,"level1");
+ assert.equal(JSON.stringify(c.room),geometry);assert.equal(c.getAttemptSummary().moves,1);assert.equal(c.getPlayer().x,pose.x);assert.equal(c.getPlayer().y,pose.y);
+ assert.ok(c.undoCast());assert.equal(c.getAttemptSummary().undos,1);
+ assert.equal(c.getAttemptSummary().moves,1);
+ app.identity.show("title");app.identity.show("level3");app.identity.show("title");
+ assert.match(els["continue-detail"].textContent,/Resume Level 3/);click("open-continue");assert.equal(c.room.id,"gatehouse-03");assert.equal(c.getAttemptSummary().moves,0);
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });

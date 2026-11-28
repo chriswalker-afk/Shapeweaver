@@ -90,42 +90,25 @@ test("title opens the room, refreshes the renderer and returns to the title", ()
   assert.equal(elements["open-room"].listeners.size,0);
 });
 
-test("title can open the first official tutorial separately from practice",()=>{
-  const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","translation-vector","room-view","title-art","open-room","open-level1","close-room","room-heading","open-spellbook"];
-  const els=Object.fromEntries(ids.map(id=>[id,element()]));
-  const state=createAppState(),changes=[];
-  const ui=mountIdentity({getElementById:id=>els[id],querySelectorAll:()=>[]},state,v=>changes.push(v));
-  els["open-level1"].click();assert.equal(state.view,"level1");assert.equal(els["room-view"].hidden,false);assert.equal(els["title-art"].hidden,true);
-  els["close-room"].click();els["open-room"].click();assert.equal(state.view,"room");
-  assert.deepEqual(changes,["level1","title","room"]);ui.destroy();
+test("Continue uses the current target and the other three cards navigate independently",()=>{
+ const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","translation-vector","room-view","title-art","open-home","open-room","open-continue","close-room","room-heading","open-spellbook","close-spellbook","campaign-view","open-campaign","close-campaign","campaign-heading"];
+ const els=Object.fromEntries(ids.map(id=>[id,element()])),state=createAppState(),changes=[];let target="level1";
+ const ui=mountIdentity({getElementById:id=>els[id],querySelectorAll:()=>[]},state,(v,options)=>changes.push([v,options.resume===true]),{continueRoute:()=>target});
+ els["open-continue"].click();assert.equal(state.view,"level1");assert.equal(els["room-view"].hidden,false);assert.equal(els["title-art"].hidden,true);
+ els["close-room"].click();assert.equal(state.view,"campaign");
+ els["close-campaign"].click();assert.ok(els["open-continue"].focused);
+ target="level17";els["open-continue"].click();assert.equal(state.view,"level17");
+ els["close-room"].click();els["close-campaign"].click();
+ els["open-room"].click();assert.equal(state.view,"room");els["close-room"].click();assert.equal(state.view,"title");
+ els["open-spellbook"].click();assert.equal(state.view,"spellbook");els["close-spellbook"].click();
+ els["open-campaign"].click();assert.equal(state.view,"campaign");els["open-home"].click();assert.equal(state.view,"title");
+ target="campaign";els["open-continue"].click();assert.equal(state.view,"campaign");
+ assert.deepEqual(changes.filter(([,resume])=>resume),[["level1",true],["level17",true],["campaign",true]]);
+ ui.destroy();assert.equal(els["open-continue"].listeners.size,0);
 });
-
-test("title can open Level 2 directly",()=>{
- const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","translation-vector","room-view","title-art","open-room","open-level1","open-level2","close-room","room-heading","open-spellbook"];
- const els=Object.fromEntries(ids.map(id=>[id,element()]));
- const state=createAppState(),changes=[],ui=mountIdentity({getElementById:id=>els[id],querySelectorAll:()=>[]},state,v=>changes.push(v));
- els["open-level2"].click();assert.equal(state.view,"level2");assert.equal(els["room-view"].hidden,false);assert.equal(els["room-heading"].focused,true);
- els["close-room"].click();els["open-level1"].click();assert.deepEqual(changes,["level2","title","level1"]);ui.destroy();
-});
-
-test("title can open Level 3 directly",()=>{
- const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","translation-vector","room-view","title-art","open-room","open-level1","open-level2","open-level3","close-room","room-heading","open-spellbook"];
- const els=Object.fromEntries(ids.map(id=>[id,element()]));
- const state=createAppState(),changes=[],ui=mountIdentity({getElementById:id=>els[id],querySelectorAll:()=>[]},state,v=>changes.push(v));
- els["open-level3"].click();assert.equal(state.view,"level3");assert.equal(els["room-view"].hidden,false);assert.equal(els["room-heading"].focused,true);
- els["close-room"].click();els["open-level2"].click();assert.deepEqual(changes,["level3","title","level2"]);ui.destroy();
-});
-
-test("title can open Level 4 directly",()=>{
- const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","translation-vector","room-view","title-art","open-room","open-level1","open-level2","open-level3","open-level4","close-room","room-heading","open-spellbook"];
- const els=Object.fromEntries(ids.map(id=>[id,element()]));
- const state=createAppState(),changes=[],ui=mountIdentity({getElementById:id=>els[id],querySelectorAll:()=>[]},state,v=>changes.push(v));
- els["open-level4"].click();assert.equal(state.view,"level4");assert.equal(els["room-view"].hidden,false);assert.equal(els["room-heading"].focused,true);
- els["close-room"].click();els["open-level3"].click();assert.deepEqual(changes,["level4","title","level3"]);ui.destroy();
-});
-
+ 
 test("results is an exclusive view with completion heading focus",()=>{
- const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","translation-vector","room-view","title-art","open-room","open-level2","close-room","room-heading","open-spellbook","results-view","results-heading"];
+ const ids=["title-view","spellbook-view","spell-name","spell-description","spell-example","spell-image","spell-detail","translation-vector","room-view","title-art","open-room","close-room","room-heading","open-spellbook","results-view","results-heading"];
  const els=Object.fromEntries(ids.map(id=>[id,element()]));
  const state=createAppState(),changes=[],ui=mountIdentity({getElementById:id=>els[id],querySelectorAll:()=>[]},state,v=>changes.push(v));
  ui.show("level2");ui.show("results");

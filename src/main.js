@@ -28,11 +28,11 @@ export function startApp(document, view) {
   const campaign=typeof document.createElement==="function"?mountCampaign(document,bestResults,next=>identity?.show(next)):null;
   const results=typeof document.createElement==="function"?mountResults(document,next=>identity?.show(next)):null;
   const room=typeof view.Image==="function"?mountRoomPreview(document,view,{onComplete(result){
+    const index=LEVEL_ROUTES.indexOf(state.view);
+    if(index<0)return;
     const best=bestResults.record(result);
     paused=null;resumeLevel.clear();
     if(!results||!identity)return;
-    const index=LEVEL_ROUTES.indexOf(state.view);
-    if(index<0)return;
     results.show(result,best,LEVEL_ROUTES[index],LEVEL_ROUTES[index+1]??null,campaignProgress(bestResults));
     identity.show("results");
   }}):null;

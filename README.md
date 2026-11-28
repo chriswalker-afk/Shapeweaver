@@ -6,10 +6,11 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR36 — Production release candidate v1.0.0. All 36 campaign levels are implemented; deployment requires GitHub Pages activation and a successful hosted verification.
+PR37 — Home page redesign. The 36-level campaign is unchanged; a four-action home and session-local Continue are ready for review. Next: PR38 — Home page art and card illustrations.
 
 ## Design documents
 
+- [Home page redesign](docs/home-redesign.md) — navigation, continuation contract, responsive layout and artwork roadmap.
 - [Player and teacher guide](docs/player-teacher-guide.md) — controls, learning objectives, classroom use and local progress.
 - [Release checklist](docs/release.md) — activation, deployment verification, custom domain, rollback and manual QA.
 - [Game design](docs/game-design.md) — player experience, mathematics, rules, recovery, accessibility and visual direction.

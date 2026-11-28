@@ -271,6 +271,27 @@ function clockworkBackdrop(ctx,camera,room){
   const a=worldToScreen(camera,{x:room.bounds.minX,y:10.5}),b=worldToScreen(camera,{x:room.bounds.maxX,y:10.5});
   ctx.strokeStyle="#aa90664d";ctx.lineWidth=Math.max(2,s*.26);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
 }
+function alchemistBackdrop(ctx,camera,room){
+ const s=camera.scale,b=room.bounds;
+ // Muted laboratory shelving, round flasks and copper pipes. Scenery only.
+ ctx.save();
+ for(let i=0;i<Math.ceil((b.maxX-b.minX)/8);i++){
+  const q=worldToScreen(camera,{x:b.minX+1+i*8,y:4}),w=6*s,h=(b.maxY-4)*s;
+  ctx.fillStyle="#253c4266";ctx.fillRect(q.x,q.y-h,w,h);
+  ctx.strokeStyle="#a8a58d44";ctx.lineWidth=Math.max(1,s*.12);ctx.strokeRect(q.x,q.y-h,w,h);
+  for(let j=0;j<Math.floor(h/(4*s));j++){
+   const y=q.y-h+(j+1)*4*s;ctx.fillStyle="#857b5c77";ctx.fillRect(q.x,y,w,Math.max(1,s*.12));
+   for(let k=0;k<3;k++){
+    const x=q.x+s*(1+k*1.7),radius=s*(.52+((i+k+j)%3)*.12);
+    ctx.fillStyle=["#82c7ae55","#d6ba8255","#9c9ace55"][(i+j+k)%3];
+    ctx.beginPath();ctx.ellipse(x,y-radius,radius,radius,0,0,Math.PI*2);ctx.fill();
+    ctx.fillRect(x-radius*.22,y-radius*2.55,radius*.44,radius*.9);
+    ctx.strokeStyle="#b9d2c555";ctx.beginPath();ctx.ellipse(x,y-radius,radius,radius,0,0,Math.PI*2);ctx.stroke();
+   }
+  }
+ }
+ ctx.restore();
+}
 function archivesBackdrop(ctx,camera,room){
  const b=room.bounds,s=camera.scale;
  // Scenic bookcases and violet arched windows, not collision geometry.
@@ -433,8 +454,8 @@ function apprentice(ctx,camera,player,art,reducedMotion) {
 /** A deterministic scene draw. Art never modifies the room or collision polygons. */
 export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,reducedMotion=false) {
   ctx.setTransform(metrics.scaleX,0,0,metrics.scaleY,0,0);
-  const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===5?"#302b45":room.chapter===4?"#31596d":room.chapter===3?"#34434e":room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===5?"#9c8ba9":room.chapter===4?"#b4d0ca":room.chapter===3?"#a6a99b":room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
-  if(![2,3,4,5].includes(room.chapter)){backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);}
+  const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===6?"#263e43":room.chapter===5?"#302b45":room.chapter===4?"#31596d":room.chapter===3?"#34434e":room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===6?"#8ca79b":room.chapter===5?"#9c8ba9":room.chapter===4?"#b4d0ca":room.chapter===3?"#a6a99b":room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
+  if(![2,3,4,5,6].includes(room.chapter)){backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);}
   ctx.save();
   const b=room.bounds,tl=worldToScreen(camera,{x:b.minX,y:b.maxY}),br=worldToScreen(camera,{x:b.maxX,y:b.minY});
   ctx.beginPath();ctx.rect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.clip();
@@ -442,6 +463,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   if(room.chapter===3)clockworkBackdrop(ctx,camera,room);
   if(room.chapter===4)riverworksBackdrop(ctx,camera,room);
   if(room.chapter===5)archivesBackdrop(ctx,camera,room);
+   if(room.chapter===6)alchemistBackdrop(ctx,camera,room);
   sceneDetails(ctx,camera,room);
   for(const item of room.hazards)hazard(ctx,camera,item,art);
   for(const item of room.terrain)terrain(ctx,camera,item,art);
@@ -468,6 +490,8 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   }
   if(room.id==="archives-19")worldLabel(ctx,camera,34,7.35,"READING BALCONY","#e9cffa");
   if(room.id==="archives-20")worldLabel(ctx,camera,36,6.35,"SAFE BALCONY","#e9cffa");
+   if(room.id==="alchemist-25")worldLabel(ctx,camera,29,8.2,"RAISED WORKBENCH","#d1eac9");
+   if(room.id==="alchemist-26"){worldLabel(ctx,camera,21,13.45,"NARROW CHANNEL","#d1eac9");worldLabel(ctx,camera,21,10.15,"1.6 UNITS CLEAR","#d1eac9");}
   for(const o of room.objects)if(o.bridgeDeck){const b=polygonBounds(o.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.45,isBridgeDeck(o)?"BRIDGE":ladderSegment(o)?"LADDER":"TURNING","#f7d7a1");}
   if(room.id==="riverworks-14")worldLabel(ctx,camera,6,5.6,"STORAGE RACK","#f7d7a1");
   if(room.id==="clockwork-10")worldLabel(ctx,camera,21.5,6.65,"LOW ARCH","#f1d09b");

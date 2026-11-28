@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR27 — The Mirror Archives: Levels 23–24. Twenty-four released puzzles; compound seals and mixed plate/key dependencies. Next: PR28 — The Alchemist’s Workshop: Levels 25–26.
+PR28 — The Alchemist’s Workshop: Levels 25–26. Twenty-six released puzzles; fractional reductions, narrow clearance, shrink–translate–grow. Next: PR29 — The Alchemist’s Workshop: Levels 27–28.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR27 — The Mirror Archives: Levels 23–24. Twenty-four released puzzles; comp
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Alchemist’s Workshop opening](docs/alchemist-workshop.md) — fractional scale factors and physical clearance.
 - [Mirror Archives finale](docs/archives-finale.md) — rigid compound assemblies and linked pressure/shape mechanisms.
 - [Mirror Archives latches](docs/archives-latches.md) — one-way latches and key capture.
 - [Mirror Archives opening](docs/mirror-archives.md) — reusable pieces, intermediate safe checkpoints and interleaved replay.

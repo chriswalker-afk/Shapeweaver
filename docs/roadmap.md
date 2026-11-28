@@ -52,5 +52,8 @@ Review gates: PR06 (playable test room, screen composition); PR14 (first classro
 ## Optional post-release PRs
 37 public drag-and-drop workshop; 38 successful playtest verification; 39 import/export versioned custom level files; 40 custom puzzle library; 41 cosmetics; 42 negative scale factor expansion; 43 Grandmaster challenges. Reassess numbering and scope after main release.
 
-## Current milestone: PR21
+## Historical milestone: PR21
 The internal workshop is local development tooling, outside the public build. It provides precise room authoring, real-engine playtest and versioned replay bundles. PR22 uses it to design and verify Levels 13–14 (modular bridge pieces, central supports and structural staircase combinations). The public custom-level feature remains optional after the production release.
+
+## Current milestone: PR28
+Chapter VI opens with Levels 25–26, fractional scale factors and physical clearance. PR29 introduces movable rotation centres and attached object dependencies (The Wandering Pivot and The Mirrored Mechanism). Keep the PR review gates and do not merge unverified changes.

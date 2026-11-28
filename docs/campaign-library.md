@@ -19,3 +19,5 @@ PR23 adds Double Trouble and Diagonal Dock to Chapter IV. Sixteen released level
 PR24 completes Chapter IV with Watermill and Around the Tower. All six Riverworks puzzles are released. Eighteen released campaign levels, 54 possible stars, four complete chapters.
 
 PR25 opens Chapter V, The Mirror Archives. Twenty released puzzles, 60 possible stars, two of six Archives levels available. Chapter V filter and sequential results navigation are enabled.
+
+PR41 replaces the historical list-first screen with an illustrated chapter atlas and explicit puzzle selection/Play flow. All campaign data, filters, local progress and access remain. See [library redesign](library-redesign.md).

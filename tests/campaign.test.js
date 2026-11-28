@@ -51,7 +51,8 @@ test("library shows only playable puzzles, filters, resumes and refreshes progre
  assert.deepEqual(routes,["level4"]);
  els["filter-math"].value="5";els["filter-math"].fire("change");
  assert.equal(els["campaign-levels"].children.length,1);
- assert.match(els["campaign-levels"].children[0].textContent,/Astronomer/);
+ assert.equal(els["campaign-levels"].children[0].children[0].textContent,"32");
+ assert.match(els["campaign-levels"].children[0].children[1].textContent,/Astronomer/);
  els["filter-chapter"].value="1";els["filter-chapter"].fire("change");assert.match(els["campaign-levels"].children[0].textContent,/No released puzzles/);
  els["campaign-map"].children[1].fire("click");assert.equal(els["filter-spell"].value,"");assert.equal(els["filter-math"].value,"");assert.equal(els["filter-chapter"].value,"2");assert.equal(els["campaign-levels"].children.length,4);
  els["campaign-clear"].fire("click");assert.equal(els["campaign-levels"].children.length,32);

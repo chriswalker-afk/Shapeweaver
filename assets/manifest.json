@@ -114,6 +114,48 @@
       "role": "Home-only static illustrated kingdom, no collision geometry; backdrop for later spell showcase",
       "provenance": "Original storybook vector scene authored for Shapeweaver in PR38; no third-party assets",
       "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "chapters/gatehouse.svg",
+      "role": "The Gatehouse chapter atlas illustration (decorative)",
+      "provenance": "Original storybook chapter landscape authored for Shapeweaver in PR41; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "chapters/gardens.svg",
+      "role": "The Enchanted Gardens chapter atlas illustration (decorative)",
+      "provenance": "Original storybook chapter landscape authored for Shapeweaver in PR41; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "chapters/clockwork.svg",
+      "role": "The Clockwork Gallery chapter atlas illustration (decorative)",
+      "provenance": "Original storybook chapter landscape authored for Shapeweaver in PR41; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "chapters/riverworks.svg",
+      "role": "The Riverworks chapter atlas illustration (decorative)",
+      "provenance": "Original storybook chapter landscape authored for Shapeweaver in PR41; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "chapters/archives.svg",
+      "role": "The Mirror Archives chapter atlas illustration (decorative)",
+      "provenance": "Original storybook chapter landscape authored for Shapeweaver in PR41; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "chapters/alchemist.svg",
+      "role": "The Alchemist’s Workshop chapter atlas illustration (decorative)",
+      "provenance": "Original storybook chapter landscape authored for Shapeweaver in PR41; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "chapters/observatory.svg",
+      "role": "The Celestial Observatory chapter atlas illustration (decorative)",
+      "provenance": "Original storybook chapter landscape authored for Shapeweaver in PR41; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
     }
   ]
 }

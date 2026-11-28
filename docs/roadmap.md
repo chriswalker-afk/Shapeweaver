@@ -96,3 +96,6 @@ A home-only decorative projection cycles through four exact transformation examp
 
 ## Current milestone: PR40 — Home-screen final polish
 Reserved projection grid space, accessible navigation labels and responsive home-only QA across small phones, tablets, classroom desktops, ultrawide and text enlargement. See [Home acceptance](home-acceptance.md). After merge and production verification, complete real-device classroom acceptance before choosing the next optional feature. The deferred public level workshop remains a separate project.
+
+## PR41 — Chapter-first puzzle library
+Replace the word-heavy simultaneous chapter/level grid with a seven-chapter illustrated atlas, chapter-specific numbered puzzles and one selected-puzzle inspector. Keep optional cross-campaign search filters and all 36 puzzles freely available. See [library redesign](library-redesign.md). Public puzzle workshop deferred until the navigation is accepted.

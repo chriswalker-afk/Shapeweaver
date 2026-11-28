@@ -131,22 +131,24 @@ try{
   assert.equal(await page.locator("#title-art").getAttribute("data-home-motion"),"inactive");
   assert.equal(await page.locator(".chapter-card").count(),7);
   assert.equal(await page.locator(".chapter-card:disabled").count(),0);
+  assert.equal(await page.locator(".library-level").count(),0);
+  await page.locator("#library-find").click();
   assert.equal(await page.locator(".library-level").count(),36);
   await page.locator("#filter-spell").selectOption("reflect");
   assert.equal(await page.locator(".library-level").count(),13);
-  await page.locator(".library-level").filter({hasText:"The Missing Barrel"}).click();
+  await page.locator('.library-level[data-level="4"]').click();await page.locator("#library-play").click();
   assert.match(await page.locator("#room-heading").innerText(),/The Missing Barrel/);
   await backToTitle(page);
   await page.locator("#open-campaign").click();
-  await page.locator("#campaign-clear").click();
-  assert.equal(await page.locator(".library-level").count(),36);
+  assert.equal(await page.locator(".library-level").count(),0);
   await page.screenshot({path:out+"/"+name+"-campaign.png",fullPage:true});
   await page.locator("#campaign-resume").click();
   assert.match(await page.locator("#room-heading").innerText(),/Across the Brook/);
   await backToTitle(page);
   for(const [index,[id,type,fields]] of cases.entries()){
-   await page.locator("#open-campaign").click();await page.locator("#campaign-clear").click();
-   await page.locator(".library-level").nth(index).click();
+   await page.locator("#open-campaign").click();await page.locator('.chapter-card[data-chapter="1"]').click();
+   assert.equal(await page.locator(".library-level").count(),4);
+   await page.locator('.library-level[data-level="'+(index+1)+'"]').click();await page.locator("#library-play").click();
    await page.locator("#room-canvas").waitFor();
    const initial=await page.locator("#room-stage").boundingBox();
    assert.ok(initial&&initial.height>=138,name+" stage");
@@ -187,11 +189,10 @@ try{
   }
   for(const [index,spells] of [...gardens,...clockwork,...riverworks,...archives,...alchemists,...observatory].entries()){
    await page.locator("#open-campaign").click();
-   await page.locator("#campaign-clear").click();
    const chapter=index<4?"2":index<8?"3":index<14?"4":index<20?"5":index<26?"6":"7";
-   await page.locator("#filter-chapter").selectOption(chapter);
+   await page.locator('.chapter-card[data-chapter="'+chapter+'"]').click();
    assert.equal(await page.locator(".library-level").count(),chapter==="7"?6:chapter==="6"?6:chapter==="5"?6:chapter==="4"?6:4);
-   await page.locator(".library-level").nth(index<8?index%4:index<14?index-8:index<20?index-14:index<26?index-20:index-26).click();
+   await page.locator('.library-level[data-level="'+(index+5)+'"]').click();await page.locator("#library-play").click();
    await page.locator("#room-canvas").waitFor();
    const initial=await page.locator("#room-stage").boundingBox();
    assert.ok(initial.height>=138);

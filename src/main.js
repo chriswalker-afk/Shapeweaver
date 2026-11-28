@@ -44,7 +44,7 @@ export function startApp(document, view) {
       paused={route:activeRoute,attempt:room.captureAttempt()};
     }
     room?.setActive(false);
-    if(next==="campaign")campaign?.render();
+    if(next==="campaign")campaign?.render({route:LEVEL_ROUTES.includes(activeRoute)?activeRoute:null,reset:true});
     if(next!=="results")results?.clear();
     if(playable){
       if(LEVEL_ROUTES.includes(next)){

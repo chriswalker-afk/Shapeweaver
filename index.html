@@ -100,14 +100,43 @@
         </div>
       </section>
       <section id="campaign-view" class="campaign-view" aria-labelledby="campaign-heading" hidden>
-        <header class="campaign-header"><div><p class="eyebrow">The journey begins</p><h2 id="campaign-heading" tabindex="-1">Adventure &amp; puzzle library</h2><p id="campaign-progress" role="status"></p><p id="campaign-celebration" class="campaign-celebration" hidden></p></div><button id="campaign-resume" class="gold-button" type="button">Continue</button><button id="close-campaign" class="room-back" type="button">← Title</button></header>
-        <h3>Chapter map</h3><div id="campaign-map" class="campaign-map"></div>
-        <h3>Choose any released puzzle</h3><div class="library-filters">
+        <div class="library-shell">
+          <header class="library-header">
+            <div class="library-title"><p class="eyebrow">Your adventure</p><h2 id="campaign-heading" tabindex="-1">Puzzle Library</h2></div>
+            <div class="library-header-actions"><button id="campaign-resume" class="gold-button" type="button">Continue</button><button id="close-campaign" class="room-back" type="button">← Home</button></div>
+            <p id="campaign-progress" class="library-sr-only" role="status"></p>
+            <div class="library-overall" aria-hidden="true"><strong id="library-completed">0 / 36 puzzles</strong><progress id="library-progress-bar" max="36" value="0"></progress><span id="library-stars">★ 0 / 108</span></div>
+          </header>
+          <p id="campaign-celebration" class="campaign-celebration" hidden></p>
+          <div id="library-atlas">
+            <div class="library-section-heading"><div><h3>Choose a chapter</h3><p>Seven places to explore. All puzzles are available.</p></div><button id="library-find" class="room-back" type="button">Find a puzzle <span aria-hidden="true">⌕</span></button></div>
+            <div id="campaign-map" class="campaign-map" aria-label="Seven adventure chapters"></div>
+          </div>
+          <div id="library-puzzles" hidden>
+            <div class="library-section-heading library-puzzle-heading"><button id="library-back" class="room-back" type="button">← Chapters</button><h3 id="library-heading" tabindex="-1">Choose a puzzle</h3><button id="library-find-secondary" class="room-back" type="button">Find a puzzle</button></div>
+            <div id="library-chapter-banner" class="library-chapter-banner" aria-hidden="true"><img id="library-chapter-art" alt="" width="320" height="160"><div><strong id="library-chapter-name"></strong><span id="library-chapter-progress"></span></div></div>
+            <div id="library-search" hidden>
+              <div class="library-filters">
           <label>Transformation <select id="filter-spell"><option value="">All</option><option value="translate">Translation</option><option value="rotate">Rotation</option><option value="enlarge">Enlargement</option><option value="reflect">Reflection</option></select></label>
           <label>Mathematics <select id="filter-math"><option value="">All</option><option value="1">1 · Introductory</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label>
           <label>Puzzle difficulty <select id="filter-puzzle"><option value="">All</option><option value="1">1 · Introductory</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label>
           <label>Chapter <select id="filter-chapter"><option value="">All</option><option value="1">The Gatehouse</option><option value="2">The Enchanted Gardens</option><option value="3">The Clockwork Gallery</option><option value="4">The Riverworks</option><option value="5">The Mirror Archives</option><option value="6">The Alchemist’s Workshop</option><option value="7">The Celestial Observatory</option></select></label><button id="campaign-clear" class="room-back" type="button">Clear filters</button>
-        </div><div id="campaign-levels" class="campaign-levels"></div>
+        </div>
+            </div>
+            <div class="library-puzzle-layout">
+              <div class="library-puzzle-picker"><div class="library-picker-heading"><h4>Choose a puzzle</h4><span id="library-count" role="status"></span></div><div id="campaign-levels" class="campaign-levels" role="group" aria-label="Available puzzles" aria-describedby="library-keyboard-help"></div><p id="library-keyboard-help" class="library-sr-only">Use arrow keys to choose a puzzle, then Tab to its Play button.</p><p class="library-key"><span aria-hidden="true">○</span> Unplayed <span aria-hidden="true">★</span> Stars earned</p></div>
+              <aside id="library-selected-detail" class="library-detail" aria-labelledby="library-detail-title" hidden>
+                <div class="library-detail-eyebrow" id="library-detail-number"></div>
+                <h4 id="library-detail-title" aria-live="polite"></h4>
+                <div id="library-detail-spells" class="library-detail-spells" aria-label="Required transformations"></div>
+                <div id="library-detail-ratings" class="library-detail-ratings"></div>
+                <div id="library-detail-score" class="library-detail-score"></div>
+                <button id="library-play" class="gold-button" type="button">Play puzzle <span aria-hidden="true">›</span></button>
+              </aside>
+              <p id="library-empty" class="library-empty" hidden>No puzzles match these filters. Try clearing a filter.</p>
+            </div>
+          </div>
+        </div>
       </section>
       <section class="spellbook-view" id="spellbook-view" aria-labelledby="spellbook-heading" hidden>
         <div class="spellbook">

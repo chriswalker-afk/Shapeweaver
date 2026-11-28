@@ -1,6 +1,6 @@
-# Campaign — 36 proposed levels
+# Campaign — 36 authored levels
 
-The intended chapter structure is fixed for planning; names, exact geometry, legal solutions and star targets are draft until playtested. A new element must appear at least every three levels (more frequently in tutorials). New can mean a genuinely new gameplay interaction or mathematical requirement. Revisit existing elements in varied combinations.
+All 36 authored levels are registered in the campaign. The chapter structure is fixed; geometry and star targets remain subject to real-device and classroom playtesting. The executable level definitions and replay fixtures are authoritative; see the final campaign audit for the implementation acceptance matrix. A new element must appear at least every three levels (more frequently in tutorials). New can mean a genuinely new gameplay interaction or mathematical requirement. Revisit existing elements in varied combinations.
 
 ## 1. The Gatehouse — one transformation per level
 | Level | Title | Intended puzzle | New element |
@@ -26,7 +26,7 @@ Tutorials use progressive fading: identify coordinates, model one step, prompt p
 | 9 | Find the Hinge | Translate beam to hinge socket, rotate it into bridge. | Dockable hinges |
 | 10 | A Tight Squeeze | Rotate plank to fit opening, then translate to crossing. | Clearance and order |
 | 11 | The Wrong Way Round | Reflect asymmetrical wedge, enlarge about external centre. | External enlargement centre |
-| 12 | The Giant Key | Enlarge L-shaped piece and rotate to fit walkway gap. | Irregular compound silhouette |
+| 12 | The Giant Key | Enlarge L-shaped piece and rotate to fit a matching lock outline. | Irregular compound silhouette |
 
 In 9–12 use constrained pivots, capabilities, and clearance when needed to make the intended operations meaningful. Noncommuting transformations and equivalent compositions are mathematical opportunities, not reasons to reject legal shortcuts.
 
@@ -34,9 +34,9 @@ In 9–12 use constrained pivots, capabilities, and clearance when needed to mak
 | Level | Title | Intended puzzle | New element |
 | --- | --- | --- | --- |
 | 13 | Bridge Builders | Translate two beams onto banks/central support to span river. | Modular structures |
-| 14 | The Broken Staircase | Rotate ladder and translate platforms into continuous staircase. | Recombine |
+| 14 | Broken Staircase | Rotate ladder and translate platforms into continuous staircase. | Recombine |
 | 15 | Double Trouble | Position separate objects on two plates to keep passage open. | Simultaneous switches |
-| 16 | The Diagonal Dock | Reflect L-shaped platform across diagonal line and translate second piece. | Diagonal reflections |
+| 16 | Diagonal Dock | Reflect L-shaped platform across diagonal line and translate second piece. | Diagonal reflections |
 | 17 | The Watermill | Rotate wheel platform, enlarge connecting ramp. | Coordinated wheel platform |
 | 18 | Around the Tower | Rotate about external centre to opposite side of tower, translate beam. | External rotation centre |
 
@@ -46,9 +46,9 @@ In 9–12 use constrained pivots, capabilities, and clearance when needed to mak
 | 19 | Bring It With You | Use crate to climb first ledge, reposition for second. | Object reuse after traversal |
 | 20 | A Bridge and a Ladder | Cross using beam; later move/rotate same beam into ramp. | Multiple purposes |
 | 21 | No Going Back | Fit object into a socket that locks it for the attempt. | One-way latches |
-| 22 | The Locked Passage | Choose which object to lock, preserve scarce pieces for later. | Resource management |
-| 23 | The Unusual Staircase | Transform connected assembly as one rigid shape; add support. | Linked compound objects |
-| 24 | The Librarian's Puzzle | Reuse platform, operate plate and assemble exit route. | Recombine |
+| 22 | Locked Passage | Choose which object to lock, preserve scarce pieces for later. | Resource management |
+| 23 | The Double Seal | Rotate and translate a rigid two-foot seal to hold both plates. | Linked compound objects |
+| 24 | The Archivist’s Chain | Translate triple seal and rotate/translate a locking key to satisfy linked gates. | Recombine |
 
 ## 6. The Alchemist's Workshop — precision and planning
 | Level | Title | Intended puzzle | New element |

@@ -6,12 +6,13 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR33 — The Celestial Observatory: Levels 35–36. All thirty-six planned campaign puzzles implemented; interconnected machinery and a four-transformation summit challenge. Next: PR34 — Final campaign audit.
+PR34 — Final campaign audit. All 36 campaign puzzles implemented; expanded independent coordinate, recovery and replay acceptance checks. Next: PR35 — Final polish.
 
 ## Design documents
 
 - [Game design](docs/game-design.md) — player experience, mathematics, rules, recovery, accessibility and visual direction.
-- [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
+- [Campaign](docs/campaign.md) — 36 authored levels across seven chapters, new mechanics and validation targets.
+- [Final campaign audit](docs/final-campaign-audit.md) — release acceptance matrix, progression review, scope and outstanding QA.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
 - [Observatory finale](docs/observatory-finale.md) — interconnected machine and summit mastery routes.

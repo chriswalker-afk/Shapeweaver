@@ -22,6 +22,11 @@ test("only released levels are playable and planned chapters cover 36 levels",()
  assert.deepEqual(filterLevels({chapter:"7",spell:"rotate"}).map(l=>l.number),[32,33,36]);
  assert.equal(filterLevels({math:"1",puzzle:"1"}).length,4);
 });
+test("all 36 completed gives 108 stars and the replay route; storage failures remain session-only",()=>{
+ const best=createBestResults({get localStorage(){throw Error("storage blocked");}});
+ for(const l of LEVELS)best.record({levelId:l.id,moves:l.room.tutorial.efficientMoves,stars:3});
+ const p=campaignProgress(best);assert.equal(p.completed,36);assert.equal(p.total,36);assert.equal(p.stars,108);assert.equal(p.maximum,108);assert.equal(p.next.number,1);assert.equal(best.persisted,false);
+});
 test("progress uses existing personal bests and resumes first incomplete level",()=>{
  const best=createBestResults({});assert.equal(campaignProgress(best).next.number,1);
  best.record({levelId:"gatehouse-02",moves:1,stars:3});assert.equal(campaignProgress(best).next.number,1);

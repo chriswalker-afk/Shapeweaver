@@ -39,6 +39,10 @@ try{
    await page.locator('#object-form button[type="submit"]').click();
    assert.ok(await page.locator("#object-apply").isEnabled());
    await page.locator("#object-apply").click();
+   await page.locator("#close-room").click();await page.locator("#close-campaign").click();
+   assert.match(await page.locator("#continue-detail").innerText(),/Resume Level 2/);
+   await page.locator("#open-room").click();await page.locator("#close-room").click();
+   await page.locator("#open-continue").click();assert.match(await page.locator("#tutorial-moves").innerText(),/Moves: 1/);
    await page.keyboard.down("ArrowRight");
    try{await page.locator("#results-view").waitFor({state:"visible",timeout:15000});}
    finally{await page.keyboard.up("ArrowRight");}
@@ -48,7 +52,9 @@ try{
    await page.screenshot({path:"browser-qa/production-"+(basePath==="/"?"root":"subpath")+"-results.png",fullPage:true});
    await page.locator("#results-title").click();
    assert.match(await page.locator("#campaign-progress").innerText(),/1 \/ 36 released puzzles complete/);
-   await page.reload();await page.locator("#open-campaign").click();
+   await page.reload();assert.match(await page.locator("#continue-detail").innerText(),/Next · Level 1/);
+   assert.match(await page.locator("#home-stars-text").innerText(),/3 \/ 108 stars/);
+   await page.locator("#open-campaign").click();
    assert.match(await page.locator("#campaign-progress").innerText(),/1 \/ 36 released puzzles complete.*3 \/ 108 stars/);
    assert.equal(await page.locator(".library-level").count(),36);
    assert.deepEqual(errors,[]);assert.deepEqual(failed,[]);assert.deepEqual(external,[]);

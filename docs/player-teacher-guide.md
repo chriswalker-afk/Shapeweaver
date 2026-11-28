@@ -4,7 +4,7 @@ Shapeweaver is a mathematical puzzle platformer for practising transformations. 
 
 ## Quick start for players
 
-1. Open Adventure & puzzle library and select a level, or use Continue to resume the first unfinished puzzle. The first four levels introduce one transformation each. Practice room and Spellbook are available from the title.
+1. Open Puzzle Library and select a level, or use Continue to resume the paused attempt or open the next unfinished puzzle. The first four levels introduce one transformation each. Practice Room and Spellbook are available from the home page. The latest unfinished campaign attempt is kept while this tab is open, including while you use Practice Room; after reloading, Continue remembers the last unfinished level but restarts it at its entrance. Selecting a new level in the library starts a new attempt. If all levels are complete, Continue opens the library unless you have a paused replay.
 2. Look at the obstacle, the grid and the shape's labelled vertices. Read the guide or try the puzzle independently.
 3. Select Objects. Click or tap a highlighted object, or choose one from the object list. Choose a permitted transformation.
 4. Enter the mathematical parameters, select Preview, and compare the exact image coordinates with the intended destination. A rejected preview explains the reason and costs no move. Only Apply changes the world and counts a move.

@@ -14,7 +14,7 @@
 </head>
 <body>
   <header class="app-header">
-    <a class="brand" href="./" aria-label="Shapeweaver home"><img src="./assets/ui/crest.svg" alt="" width="35" height="35"><span>Shapeweaver</span></a>
+    <a class="brand" id="open-home" href="./" aria-label="Shapeweaver home"><img src="./assets/ui/crest.svg" alt="" width="35" height="35"><span>Shapeweaver</span></a>
     <span class="stage-label">v1.0.0 · 36 puzzles · 7 chapters</span>
   </header>
   <main class="app-main" id="app">
@@ -30,17 +30,43 @@
       </div>
       <section class="title-view" id="title-view" aria-labelledby="viewport-title">
         <div class="title-content">
-          <img class="title-crest" src="./assets/ui/crest.svg" alt="">
-          <p class="eyebrow">An adventure in mathematical magic</p>
-          <h1 id="viewport-title">Shapeweaver</h1>
-          <p class="tagline">Reshape the world. Find your way.</p>
-          <div class="ornament" aria-hidden="true"><span></span><b>◆</b><span></span></div>
+          <div class="home-identity">
+            <img class="title-crest" src="./assets/ui/crest.svg" alt="" width="76" height="76">
+            <div><p class="eyebrow">An adventure in mathematical magic</p>
+              <h1 id="viewport-title">Shapeweaver</h1>
+              <p class="tagline">Reshape the world. Find your way.</p>
+            </div>
+          </div>
           <p class="intro">Four spells. A forgotten kingdom. A path only you can create.</p>
-          <div class="title-actions"><button type="button" class="gold-button" id="open-campaign">Adventure &amp; puzzle library <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level1">Level 1 · Across the Brook <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level2">Level 2 · The Stubborn Gate <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level3">Level 3 · A Little Cheesy <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level4">Level 4 · The Missing Barrel <span aria-hidden="true">›</span></button><button type="button" class="secondary-title-button" id="open-room">Practice room</button><button type="button" class="secondary-title-button" id="open-spellbook">Open the spellbook</button></div>
+          <div class="title-actions" role="group" aria-label="Choose your adventure">
+            <button type="button" class="home-card home-card-primary" id="open-continue" data-continuation="begin">
+              <img src="./assets/ui/home-continue.svg" alt="" width="104" height="90">
+              <span class="home-card-copy"><strong>Continue</strong><span id="continue-detail">Begin · Level 1 · Across the Brook</span><small id="continue-note" hidden></small></span>
+              <span class="home-card-arrow" aria-hidden="true">›</span>
+            </button>
+            <button type="button" class="home-card home-card-library" id="open-campaign">
+              <img src="./assets/ui/home-library.svg" alt="" width="104" height="90">
+              <span class="home-card-copy"><strong>Puzzle Library</strong><span>Explore all 36 puzzles and seven chapters.</span></span>
+              <span class="home-card-arrow" aria-hidden="true">›</span>
+            </button>
+            <button type="button" class="home-card home-card-spellbook" id="open-spellbook">
+              <img src="./assets/ui/home-spellbook.svg" alt="" width="104" height="90">
+              <span class="home-card-copy"><strong>Spellbook</strong><span>Learn the four transformation spells.</span></span>
+              <span class="home-card-arrow" aria-hidden="true">›</span>
+            </button>
+            <button type="button" class="home-card home-card-practice" id="open-room">
+              <img src="./assets/ui/home-practice.svg" alt="" width="104" height="90">
+              <span class="home-card-copy"><strong>Practice Room</strong><span>Experiment freely with the spells.</span></span>
+              <span class="home-card-arrow" aria-hidden="true">›</span>
+            </button>
+          </div>
+          <div class="home-progress">
+            <span id="home-progress-text">0 / 36 puzzles</span><progress id="home-progress-bar" max="36" value="0" aria-label="Campaign puzzles completed"></progress><span id="home-stars-text">0 / 108 stars</span>
+          </div>
           <p class="preview-note" id="app-status" role="status">Loading Shapeweaver…</p>
-          <noscript><p class="preview-note">Enable JavaScript to open the spellbook.</p></noscript>
+          <noscript><p class="preview-note">Enable JavaScript to play Shapeweaver.</p></noscript>
         </div>
-        <div class="chapter-marker"><span>Chapter I</span><strong>The Gatehouse</strong></div>
+        <div class="home-scene-space" aria-hidden="true"></div>
       </section>
       <section id="campaign-view" class="campaign-view" aria-labelledby="campaign-heading" hidden>
         <header class="campaign-header"><div><p class="eyebrow">The journey begins</p><h2 id="campaign-heading" tabindex="-1">Adventure &amp; puzzle library</h2><p id="campaign-progress" role="status"></p><p id="campaign-celebration" class="campaign-celebration" hidden></p></div><button id="campaign-resume" class="gold-button" type="button">Continue</button><button id="close-campaign" class="room-back" type="button">← Title</button></header>

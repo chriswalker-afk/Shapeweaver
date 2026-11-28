@@ -4,6 +4,7 @@ import {fileURLToPath} from "node:url";
 import {APP} from "../src/core/app-state.js";
 import {WORLD_ASSETS} from "../src/rendering/world-art.js";
 import {SPELLS} from "../src/ui/identity.js";
+import {HOME_ART} from "../src/ui/home.js";
 
 const projectRoot=fileURLToPath(new URL("../",import.meta.url));
 const publicExtensions={src:new Set([".js",".css"]),assets:new Set([".svg",".json",".md",".png",".jpg",".webp",".woff2",".ogg",".mp3"])};
@@ -51,7 +52,7 @@ export async function verifyDist(dist=resolve(projectRoot,"dist"),expectedCommit
  const manifest=JSON.parse(await readFile(resolve(root,"assets/manifest.json"),"utf8")),listed=manifest.assets.map(a=>a.path);
  if(new Set(listed).size!==listed.length||manifest.assets.some(a=>!a.provenance||!a.rights))throw Error("Asset provenance missing or duplicated");
  for(const path of listed)if(!set.has("assets/"+path))throw Error("Manifest asset missing: "+path);
- for(const path of [...Object.values(WORLD_ASSETS),...SPELLS.map(s=>s.icon.slice("assets/".length))])if(!listed.includes(path))throw Error("Unmanifested runtime asset: "+path);
+ for(const path of [...Object.values(WORLD_ASSETS),...SPELLS.map(s=>s.icon.slice("assets/".length)),...HOME_ART])if(!listed.includes(path))throw Error("Unmanifested runtime asset: "+path);
  const release=JSON.parse(await readFile(resolve(root,"assets/release.json"),"utf8"));
  if(release.name!==APP.name||release.version!==APP.version||!(release.commit===null||/^[a-f0-9]{40}$/.test(release.commit)))throw Error("Invalid artifact release identity");
  if(expectedCommit&&release.commit!==expectedCommit.toLowerCase())throw Error("Artifact commit mismatch");

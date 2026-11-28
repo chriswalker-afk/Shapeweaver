@@ -59,7 +59,7 @@ test("app mounts and reports scaffold readiness", () => {
   const document = { getElementById: id => id === "world" ? f.canvas : status, querySelector: () => f.host };
   const app = startApp(document, f.view);
   assert.equal(app.state.playable, false);
-  assert.match(status.textContent, /Choose a puzzle in the adventure library/);
+  assert.equal(status.textContent, "");
   app.viewport.destroy();
   f.canvas.getContext = () => null;
   assert.equal(startApp(document, f.view).viewport, null);

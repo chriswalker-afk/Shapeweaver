@@ -4,5 +4,8 @@ A transparent magical projection occupies the open scenery, not the menu. It cyc
 
 The projection is decorative, aria-hidden, non-focusable and pointer-transparent. Four navigation cards are unchanged. An auxiliary Pause magic / Play magic header control is available when animation is supported and permitted; pause freezes the phase and fireflies across navigation. System and existing in-game reduced-motion preferences show a stationary complete translation diagram. Static markup works before JavaScript. The cycle stops away from home, when the document is hidden, and on compact portrait screens (650px or shorter) where scenery has no spare room. Resuming never catches up elapsed hidden time. DOM writes are capped at 30 Hz; no canvas allocation, layout reads, external dependencies, audio or gameplay writes. The old scene and static fireflies remain on other menu screens.
 
+## Verification
+Unit tests independently check every endpoint, intermediate geometry, reflection congruence, periodicity, reduced-motion preferences, hidden tabs, pause, navigation and teardown. Production smoke covers the static fallback at both hosting paths. Browser QA checks static and animated layouts at four viewports, pointer transparency, actual pause/navigation, system and stored motion preferences, screenshots of the spell cycle, and all existing campaign and workshop cases. Human visual and real-device review are not yet completed.
+
 ## Next
 PR40 — inspect retained screenshots, review classroom desktop/mobile layouts, keyboard focus, touch targets, reduced-motion behaviour, contrast, performance, full campaign regression and production deployment. Automated checks are not a substitute for a human visual review.

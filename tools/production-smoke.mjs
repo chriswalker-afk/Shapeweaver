@@ -26,6 +26,9 @@ try{
    assert.equal((await page.request.get(url+"docs/roadmap.md")).status(),404);
    await page.goto(url);
    assert.equal(await page.locator('meta[name="application-version"]').getAttribute("content"),APP.version);
+   assert.equal(await page.locator("#title-art").getAttribute("data-home-motion"),"static");
+   assert.equal(await page.locator("#home-showcase").getAttribute("data-showcase-progress"),"1");
+   assert.equal(await page.locator("#home-motion-toggle").isHidden(),true);
    await page.locator("#open-campaign").click();
    assert.equal(await page.locator(".library-level").count(),36);
    await page.locator(".library-level").filter({hasText:"The Stubborn Gate"}).click();

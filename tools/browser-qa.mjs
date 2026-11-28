@@ -12,7 +12,7 @@ const origin="http://127.0.0.1:"+server.address().port+"/Shapeweaver/";
 const browser=await chromium.launch({headless:true});
 const out="browser-qa";await mkdir(out,{recursive:true});
 async function backToTitle(page){await page.locator("#close-room").click();await page.locator("#campaign-view").waitFor();await page.locator("#close-campaign").click();}
-const report=[];
+const report=[],showcaseReport=[];
 const viewports=["desktop","small-desktop","landscape-phone","portrait-phone"];
 const cases=[
  ["brook-beam","translate",{dx:"12",dy:"0"}],
@@ -53,7 +53,71 @@ try{
    assert.ok(artBox.x+artBox.width<=copyBox.x+1||artBox.y+artBox.height<=copyBox.y+1,name+" art never covers copy");
   }
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+" no horizontal overflow");
+  const projection=page.locator("#home-showcase");
+  assert.equal(await projection.isVisible(),true);
+  assert.equal(await projection.getAttribute("aria-hidden"),"true");
+  assert.equal(await page.locator("#title-art").getAttribute("data-home-motion"),"static");
+  assert.equal(await projection.getAttribute("data-showcase-progress"),"1");
+  assert.equal(await page.locator("#home-motion-toggle").isHidden(),true);
+  assert.equal(await page.locator("#showcase-moving").getAttribute("points"),await page.locator("#showcase-target").getAttribute("points"));
+  const projectionBounds=await projection.boundingBox(),menuBounds=await home.locator(".title-content").boundingBox();
+  assert.ok(projectionBounds&&menuBounds&&(projectionBounds.x>=menuBounds.x+menuBounds.width-1||projectionBounds.y+projectionBounds.height<=menuBounds.y+1),name+" projection stays outside menu copy");
   await page.screenshot({path:out+"/"+name+"-home.png",fullPage:true});
+  // Exercise normal motion too, without duplicating the whole campaign.
+  const motion=await browser.newPage({viewport:{width,height},hasTouch:touch,reducedMotion:"no-preference"});
+  const motionErrors=[];motion.on("pageerror",e=>motionErrors.push(e.message));
+  try{
+   await motion.clock.install();
+   await motion.goto(origin);
+   const art=motion.locator("#title-art"),magic=motion.locator("#home-motion-toggle"),svg=motion.locator("#home-showcase"),moving=motion.locator("#showcase-moving");
+   await magic.waitFor();
+   assert.equal(await art.getAttribute("data-home-motion"),"running");
+   assert.equal(await svg.evaluate(el=>getComputedStyle(el).pointerEvents),"none");
+   assert.equal(await motion.locator("#title-view button").count(),4);
+   const motionBox=await svg.boundingBox(),contentBox=await motion.locator(".title-content").boundingBox();
+   assert.ok(motionBox&&contentBox&&(motionBox.x>=contentBox.x+contentBox.width-1||motionBox.y+motionBox.height<=contentBox.y+1),name+" animated art clear of menu");
+   assert.ok(await motion.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+   for(const card of await motion.locator(".home-card").all()){
+    const b=await card.boundingBox();assert.ok(b&&b.y>=0&&b.y+b.height<=height+1&&b.x>=0&&b.x+b.width<=width+1,name+" motion control leaves cards visible");
+   }
+   await motion.clock.runFor(1400);
+   assert.equal(await svg.getAttribute("data-showcase-spell"),"translate");
+   assert.ok(Number(await svg.getAttribute("data-showcase-progress"))>0);
+   await magic.click();assert.equal(await art.getAttribute("data-home-motion"),"paused");
+   const pausedPoints=await moving.getAttribute("points");
+   await motion.clock.runFor(1500);assert.equal(await moving.getAttribute("points"),pausedPoints);
+   await motion.locator("#open-spellbook").click();
+   assert.equal(await svg.isHidden(),true);assert.equal(await magic.isHidden(),true);
+   assert.equal(await art.getAttribute("data-home-motion"),"inactive");
+   await motion.clock.runFor(1000);
+   await motion.locator("#close-spellbook").click();
+   assert.equal(await art.getAttribute("data-home-motion"),"paused");
+   assert.equal(await moving.getAttribute("points"),pausedPoints);
+   await magic.click();assert.equal(await art.getAttribute("data-home-motion"),"running");
+   await motion.clock.runFor(850);
+   // The phase advances after resume; check the complete cycle on desktop.
+   if(name==="desktop"){
+    for(const spell of ["rotate","reflect","enlarge"]){
+     await motion.clock.runFor(6000);
+     assert.equal(await svg.getAttribute("data-showcase-spell"),spell);
+     await motion.screenshot({path:out+"/desktop-home-"+spell+".png",fullPage:true});
+    }
+    await motion.emulateMedia({reducedMotion:"reduce"});
+    await motion.waitForFunction(()=>document.getElementById("title-art").getAttribute("data-home-motion")==="static");
+    assert.equal(await magic.isHidden(),true);
+    assert.equal(await svg.getAttribute("data-showcase-spell"),"translate");
+    assert.equal(await svg.getAttribute("data-showcase-progress"),"1");
+    await motion.emulateMedia({reducedMotion:"no-preference"});
+    await motion.waitForFunction(()=>document.getElementById("title-art").getAttribute("data-home-motion")==="running");
+    // Existing in-game reduced-motion preference is shared, not overridden.
+    await motion.locator("#open-room").click();await motion.locator("#room-tools-toggle").click();
+    await motion.locator("#motion-toggle").click();await motion.locator("#close-room").click();
+    assert.equal(await art.getAttribute("data-home-motion"),"static");
+    assert.equal(await magic.isHidden(),true);
+   }
+   assert.deepEqual(motionErrors,[]);
+   showcaseReport.push({viewport:name,static:true,animated:true,pause:true,navigation:true,unobstructed:true});
+  }finally{await motion.close();}
   await page.locator("#open-continue").focus();await page.keyboard.press("Enter");
   assert.match(await page.locator("#room-heading").innerText(),/Across the Brook/);await backToTitle(page);
   assert.match(await page.locator("#continue-detail").innerText(),/Resume Level 1/);
@@ -63,6 +127,8 @@ try{
   await page.locator("#open-campaign").click();
   await page.locator("#campaign-view").waitFor();
   assert.equal(await hero.isVisible(),false);assert.equal(await legacy.isVisible(),true);
+  assert.equal(await projection.isHidden(),true);
+  assert.equal(await page.locator("#title-art").getAttribute("data-home-motion"),"inactive");
   assert.equal(await page.locator(".chapter-card").count(),7);
   assert.equal(await page.locator(".chapter-card:disabled").count(),0);
   assert.equal(await page.locator(".library-level").count(),36);
@@ -185,6 +251,8 @@ try{
   assert.deepEqual(report.filter(r=>r.viewport===name).map(r=>r.level),Array.from({length:36},(_,i)=>i+1),name+" all campaign levels covered");
   await page.close();
  }
+ assert.equal(showcaseReport.length,viewports.length,"Home showcase at all four viewports");
+ await writeFile(out+"/home-showcase-report.json",JSON.stringify(showcaseReport,null,2));
  assert.equal(report.length,36*viewports.length,"All 144 level/viewport combinations covered");
  console.log("BROWSER COVERAGE: "+report.length+"/144 initial-level and cast-setup combinations from production dist at /Shapeweaver/; screenshots saved for manual review.");
 }finally{

@@ -1,3 +1,4 @@
+import {isBridgeDeck,ladderSegment} from "../mechanisms/transformable-ladders.js";
 import {plateGroups} from "../mechanisms/pressure-plates.js";
 import { polygonBounds } from "../geometry/world.js";
 import { worldToScreen } from "./camera.js";
@@ -125,7 +126,12 @@ function object(ctx,camera,item,art) {
     ctx.beginPath();line(at(a,d,.13),at(b,c,.13));line(at(a,d,.87),at(b,c,.87));ctx.stroke();
     ctx.strokeStyle="#dfb779";ctx.lineWidth=Math.max(1,width*.17);
     ctx.beginPath();line(at(a,d,.13),at(b,c,.13));line(at(a,d,.87),at(b,c,.87));
-    for(let i=1;i<count;i++){line(at(a,b,i/count),at(d,c,i/count));}ctx.stroke();ctx.restore();
+    for(let i=1;i<count;i++){line(at(a,b,i/count),at(d,c,i/count));}ctx.stroke();
+    if(isBridgeDeck(item)){
+      polygon(ctx,camera,item.vertices);ctx.fillStyle="#b89c7355";ctx.fill();
+      ctx.strokeStyle="#f0d3a1";ctx.lineWidth=Math.max(1,camera.scale*.06);ctx.beginPath();line(at(a,d,0),at(b,c,0));line(at(a,d,1),at(b,c,1));ctx.stroke();
+    }
+    ctx.restore();
   }else if(item.kind==="waterwheel"){
     tilePolygon(ctx,camera,item.vertices,art.timber,"#ae825c",2.5,.65);
     outline(ctx,camera,item.vertices,"#58473e",2);
@@ -265,6 +271,29 @@ function clockworkBackdrop(ctx,camera,room){
   const a=worldToScreen(camera,{x:room.bounds.minX,y:10.5}),b=worldToScreen(camera,{x:room.bounds.maxX,y:10.5});
   ctx.strokeStyle="#aa90664d";ctx.lineWidth=Math.max(2,s*.26);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
 }
+function archivesBackdrop(ctx,camera,room){
+ const b=room.bounds,s=camera.scale;
+ // Scenic bookcases and violet arched windows, not collision geometry.
+ ctx.save();
+ for(let i=0;i<Math.ceil((b.maxX-b.minX)/8)+1;i++){
+  const p=worldToScreen(camera,{x:b.minX+i*8+.6,y:b.minY+1}),w=6.8*s,h=(b.maxY-b.minY-2)*s;
+  ctx.fillStyle="#332b465f";ctx.fillRect(p.x,p.y-h,w,h);
+  ctx.strokeStyle="#9e88ae65";ctx.lineWidth=Math.max(1,s*.16);ctx.strokeRect(p.x,p.y-h,w,h);
+  for(let j=0;j<Math.floor(h/(2.8*s));j++){
+   const y=p.y-h+(j+1)*2.8*s;
+   ctx.fillStyle="#9c829668";ctx.fillRect(p.x,y,w,Math.max(1,s*.14));
+   for(let k=0;k<9;k++){
+    const bw=s*(.38+(k%3)*.05),bh=s*(.85+((k+i+j)%4)*.24);
+    ctx.fillStyle=["#ad8b7a55","#8c739755","#c2b08e55","#6c849d55"][(k+i+j)%4];
+    ctx.fillRect(p.x+s*.45+k*s*.64,y-bh,bw,bh);
+   }
+  }
+  if(i%3===1){const q=worldToScreen(camera,{x:b.minX+i*8+4,y:b.maxY-3});
+    ctx.beginPath();ctx.moveTo(q.x-s*.7,q.y+s*1.6);ctx.lineTo(q.x-s*.7,q.y);ctx.quadraticCurveTo(q.x,q.y-s*1.8,q.x+s*.7,q.y);ctx.lineTo(q.x+s*.7,q.y+s*1.6);ctx.closePath();ctx.fillStyle="#c4b0ef42";ctx.fill();ctx.strokeStyle="#c4b0ef75";ctx.stroke();
+  }
+ }
+ ctx.restore();
+}
 function riverworksBackdrop(ctx,camera,room){
   // Hazy aqueducts and dock gantries are scenic silhouettes, never solid.
   const s=camera.scale,b=room.bounds;
@@ -403,14 +432,15 @@ function apprentice(ctx,camera,player,art,reducedMotion) {
 /** A deterministic scene draw. Art never modifies the room or collision polygons. */
 export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,reducedMotion=false) {
   ctx.setTransform(metrics.scaleX,0,0,metrics.scaleY,0,0);
-  const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===4?"#31596d":room.chapter===3?"#34434e":room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===4?"#b4d0ca":room.chapter===3?"#a6a99b":room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
-  if(![2,3,4].includes(room.chapter)){backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);}
+  const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===5?"#302b45":room.chapter===4?"#31596d":room.chapter===3?"#34434e":room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===5?"#9c8ba9":room.chapter===4?"#b4d0ca":room.chapter===3?"#a6a99b":room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
+  if(![2,3,4,5].includes(room.chapter)){backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);}
   ctx.save();
   const b=room.bounds,tl=worldToScreen(camera,{x:b.minX,y:b.maxY}),br=worldToScreen(camera,{x:b.maxX,y:b.minY});
   ctx.beginPath();ctx.rect(tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.clip();
   if(room.chapter===2)gardenBackdrop(ctx,camera,room);
   if(room.chapter===3)clockworkBackdrop(ctx,camera,room);
   if(room.chapter===4)riverworksBackdrop(ctx,camera,room);
+  if(room.chapter===5)archivesBackdrop(ctx,camera,room);
   sceneDetails(ctx,camera,room);
   for(const item of room.hazards)hazard(ctx,camera,item,art);
   for(const item of room.terrain)terrain(ctx,camera,item,art);
@@ -435,6 +465,9 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
     if(!o.decorative&&o.fixedCentre)worldLabel(ctx,camera,o.fixedCentre[0],o.fixedCentre[1]+.55,"EXTERNAL CENTRE","#ffe1a7");
     else if(!o.decorative&&o.kind==="waterwheel"&&o.hinge)worldLabel(ctx,camera,o.hinge[0],o.hinge[1]+.85,"AXLE","#ffe1a7");
   }
+  if(room.id==="archives-19")worldLabel(ctx,camera,34,7.35,"READING BALCONY","#e9cffa");
+  if(room.id==="archives-20")worldLabel(ctx,camera,36,6.35,"SAFE BALCONY","#e9cffa");
+  for(const o of room.objects)if(o.bridgeDeck){const b=polygonBounds(o.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.45,isBridgeDeck(o)?"BRIDGE":ladderSegment(o)?"LADDER":"TURNING","#f7d7a1");}
   if(room.id==="riverworks-14")worldLabel(ctx,camera,6,5.6,"STORAGE RACK","#f7d7a1");
   if(room.id==="clockwork-10")worldLabel(ctx,camera,21.5,6.65,"LOW ARCH","#f1d09b");
   if(room.tutorial){objectRunes(ctx,camera,room);worldLabel(ctx,camera,room.exit.x,room.exit.y+room.exit.height+.35,"EXIT","#ffe2a5");}

@@ -45,8 +45,8 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   let initialRoom=validateRoom(GATEHOUSE_PREVIEW),room=initialRoom;
   const $=id=>document.getElementById(id);
   let physics=createPhysicsWorld(room),animation=null,history=createAttemptHistory(),hintStage=0,result=null;
-  let guidanceEnabled=true,situation=tutorialSituation(room);
   let player=createPlayer(physics),active=false,lastEvent=null,objectMode=false,inspector=null;
+  let guidanceEnabled=true,situation=tutorialSituation(room,player);
   let lastSafe=rememberSafePosition(physics,player);
   const playStatus=$("play-status"),followButton=$("follow-toggle"),movementPanel=$("movement-controls");
   const toolsButton=$("room-tools-toggle"),secondaryTools=$("room-secondary-tools"),climbControls=$("climb-controls");
@@ -73,6 +73,8 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
       if(playStatus)playStatus.textContent=next.event==="respawn"?(player.checkpoint?"Returned to the last safe checkpoint.":"Returned to the start.")+" Your transformations are kept.":next.event==="checkpoint"?"Checkpoint reached.":next.event==="exit"?(room.tutorial?"Level "+room.number+" complete! "+(room.chapter!==1?"You reached the portal.":tutorial().finished)+" Reset to try again.":"Gatehouse practice complete! Reset to play again."):"No safe return point. "+(canUndo()?"Undo a transformation or reset.":"Reset to start a fresh attempt.");
     }
     lastEvent=next.event;
+    // Refresh movement-dependent guidance only on stage changes.
+    if(room.chapter>=5){const nextSituation=tutorialSituation(room,player);if(nextSituation?.phase!==situation?.phase){situation=nextSituation;hintStage=0;updateGuide();}else situation=nextSituation;}
     if(["exit","respawn","reset-required"].includes(next.event))updateGuide();
     if(next.event==="exit"&&!result){
       result=completedResult(room,player,history);
@@ -263,7 +265,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(!tx.ok)return tx;
     // Commit geometry + collision index together; animation is presentation only.
     history=recordCast(history,physics,player,lastSafe,tx.record);
-    room=tx.room;physics=tx.physics;situation=tutorialSituation(room);lastSafe=rememberSafePosition(physics,player,lastSafe);hintStage=0;
+    room=tx.room;physics=tx.physics;situation=tutorialSituation(room,player);lastSafe=rememberSafePosition(physics,player,lastSafe);hintStage=0;
     objectMode=false;inspector?.setActive(false);inspector?.replaceRoom(room);input.clear();
     if(!reducedMotion())animation={type,transition:tx.transition,elapsed:0,duration:TUTORIALS[type].duration};
     if(playStatus)playStatus.textContent=animation?TUTORIALS[type].label+" applied. Wait for the object to settle.":readyMessage();
@@ -279,7 +281,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(!canUndo())return false;
     const tx=undoLastCast(history,player);
     if(!tx.ok){if(playStatus)playStatus.textContent=tx.message;return false;}
-    history=tx.history;room=tx.room;physics=tx.physics;player=tx.player;situation=tutorialSituation(room);
+    history=tx.history;room=tx.room;physics=tx.physics;player=tx.player;situation=tutorialSituation(room,player);
     lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
     if(playStatus)playStatus.textContent="Last transformation undone. Restored a safe earlier position. The original move still counts.";
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return true;
@@ -288,12 +290,12 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(!active||animation||player.completed||player.blockedRespawn)return false;
     const tx=returnToSafety(physics,player,MOTION.coyote);
     if(!tx.ok){if(playStatus)playStatus.textContent="No safe checkpoint or start in the current world. "+(canUndo()?"Try Undo or Reset.":"Try Reset.");return false;}
-    player={...tx.player,event:null};lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
+    player={...tx.player,event:null};situation=tutorialSituation(room,player);lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
     if(playStatus)playStatus.textContent=(tx.code==="checkpoint"?"Returned to the last safe checkpoint.":"Returned to the start.")+" Your transformations and moves are kept.";
     updateGuide();redraw();canvas.focus?.({preventScroll:true});return true;
   }
   function resetPlayer(){
-    room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);history=createAttemptHistory();result=null;situation=tutorialSituation(room);
+    room=initialRoom;physics=createPhysicsWorld(room);player=createPlayer(physics);history=createAttemptHistory();result=null;situation=tutorialSituation(room,player);
     lastSafe=rememberSafePosition(physics,player);clearRecoveryInteraction();
     if(playStatus)playStatus.textContent=room.tutorial?"Arrows / WASD · Space to jump":"Practice restarted.";
     updateGuide();redraw();

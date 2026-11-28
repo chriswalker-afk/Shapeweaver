@@ -12,6 +12,7 @@ import {WEDGE_SOLUTION,KEY_SOLUTION} from "../src/levels/clockwork-finale.js";
 import {BRIDGE_BUILDERS_SOLUTION,BROKEN_STAIRCASE_SOLUTION} from "../src/levels/riverworks.js";
 import {DOUBLE_TROUBLE_SOLUTION,DIAGONAL_DOCK_SOLUTION} from "../src/levels/riverworks-mechanisms.js";
 import {WATERMILL_SOLUTION,AROUND_THE_TOWER_SOLUTION} from "../src/levels/riverworks-finale.js";
+import {BRING_IT_WITH_YOU_CASTS,A_BRIDGE_AND_A_LADDER_CASTS} from "../src/levels/mirror-archives.js";
 import {createPhysicsWorld} from "../src/physics/collision.js";
 import {createPlayer,stepPlayer} from "../src/physics/platformer.js";
 import {commitTranslation} from "../src/transformations/translation.js";
@@ -46,9 +47,21 @@ export const RECORDED_ROUTES=deepFreeze([
  [16,DIAGONAL_DOCK_SOLUTION,[[125,1,0],[120,1,1],[100,1,0],[125,1,1],[600,1,0]]],
  [17,WATERMILL_SOLUTION,[[365,1,0],[120,1,1],[125,1,0],[120,1,1],[400,1,0]]],
  [18,AROUND_THE_TOWER_SOLUTION,[[250,1,0],[120,1,1],[150,1,0],[120,1,1],[550,1,0]]]
-].map(([number,casts,route])=>({number,casts,route})));
-export function replayRoute(world,route){
- let player=createPlayer(world),ticks=0;
+].map(([number,casts,route])=>({number,casts,route})).concat([
+ // Each segment list is executed AFTER its corresponding cast. Keep the
+ // original route format for levels whose geometry is assembled at spawn.
+ [19,BRING_IT_WITH_YOU_CASTS,[
+  [[240,1,0],[100,1,1],[76,1,0],[160,1,1],[20,0,0]],
+  [[57,1,0],[130,1,1],[49,1,0],[120,1,1],[400,1,0]]
+ ]],
+ [20,A_BRIDGE_AND_A_LADDER_CASTS,[
+  [[250,1,0],[120,1,1],[115,1,0],[100,1,1],[25,0,0]],
+  [],
+  [[270,1,0],[25,0,0,1],[420,0,0,1],[1,1,1,0],[250,1,0]]
+ ]]
+].map(([number,casts,segments])=>({number,casts,segments,route:segments.flat()}))));
+export function replayRoute(world,route,start=createPlayer(world)){
+ let player=start,ticks=0;
  for(const [n,move,jump,climb=0] of route){
   for(let i=0;i<n;i++){
    player=stepPlayer(world,player,{move,jump:Boolean(jump&&i===0),climb});ticks++;
@@ -74,10 +87,10 @@ function invariantErrors(before,after,cast){
 /** Bounded, reproducible exploration, not a general platformer or spell solver.
  * Walk right; once each chosen delay elapses, jump from ground at eight-tick
  * intervals. Stop at the first respawn. Record exact timing of any success. */
-export function shortcutProbe(world,maxTicks=1000){
+export function shortcutProbe(world,maxTicks=1000,start=createPlayer(world)){
  const successes=[];
  for(const delay of [0,60,120,180,240,300,360,420]){
-  let p=createPlayer(world);
+  let p={...start};
   for(let tick=0;tick<maxTicks;tick++){
    p=stepPlayer(world,p,{move:1,jump:tick>=delay&&p.grounded&&tick%8===0});
    if(p.completed){successes.push({delay,ticks:tick+1});break;}
@@ -86,10 +99,74 @@ export function shortcutProbe(world,maxTicks=1000){
  }
  return successes;
 }
+/** Shared chronological input stream for the workshop and future level fixtures. */
+export function* campaignActions(fixture){
+ for(const [i,cast] of fixture.casts.entries()){
+  yield {kind:"cast",cast};
+  if(fixture.segments)for(const segment of fixture.segments[i])yield {kind:"move",segment};
+ }
+ if(!fixture.segments)for(const segment of fixture.route)yield {kind:"move",segment};
+}
+/** Replays each cast at its actual physical position, not a fictional spawn.
+ * Subsets omit casts but keep the recorded movement; bounded probes start at
+ * the live intermediate pose. Neither technique is a complete puzzle solver. */
+function timedReplay(fixture,initial,{mask=(1<<fixture.casts.length)-1,hints=false,onPrefix=()=>{}}={}){
+ let world=initial,player=createPlayer(initial),history=createAttemptHistory(),ticks=0,hintCasts=0,legal=true;
+ const errors=[];
+ for(const [i,recorded] of fixture.casts.entries()){
+  if(player.completed||player.blockedRespawn)break;
+  if(mask&(1<<i)){
+   let cast=recorded;
+   if(hints){
+    const snapshot=JSON.stringify(world.room),playerSnapshot=JSON.stringify(player),g=tutorialSituation(world.room,player);
+    if(!g||g.ready||g.travel||!g.raw){errors.push("Missing worked hint at live cast "+(i+1));legal=false;break;}
+    for(let stage=1;stage<=5;stage++){
+     const h=tutorialHint(world.room,player,stage,g);
+     if(h?.stage!==stage||!h.text)errors.push("Invalid live hint stage "+stage);
+     if(stage===5&&!h?.text.includes("Enter these parameters yourself"))errors.push("Live worked hint not validated");
+    }
+    if(JSON.stringify(world.room)!==snapshot||JSON.stringify(player)!==playerSnapshot)errors.push("Hints changed game state");
+    cast={objectId:g.config.objectId,type:g.config.type,...g.raw};hintCasts++;
+   }
+   const before=world.room.objects.find(o=>o.id===cast.objectId);
+   const tx=commits[cast.type](world.room,player,cast.objectId,cast);
+   if(!tx.ok){errors.push("Cast "+(i+1)+" rejected: "+tx.code);legal=false;break;}
+   errors.push(...invariantErrors(before,tx.room.objects.find(o=>o.id===cast.objectId),cast));
+   history=recordCast(history,world,player,null,tx.record);world=tx.physics;
+   onPrefix({index:i,world,player});
+  }
+  const step=replayRoute(world,fixture.segments[i],player);player=step.player;ticks+=step.ticks;
+ }
+ return {world,player,history,ticks,hintCasts,errors,legal,result:completedResult(world.room,player,history)};
+}
+function auditInterleaved(fixture,level,initial,{probe}){
+ const count=fixture.casts.length,fullMask=(1<<count)-1,thresholds=starThresholds(level.room),errors=[],partialRoutes=[],sampledShortcuts=[];
+ const probeTicks=Math.max(1000,fixture.route.reduce((sum,s)=>sum+s[0],0));
+ const initialReplay=timedReplay(fixture,initial,{mask:0});
+ if(initialReplay.player.completed)errors.push("Recorded movement bypasses all spells");
+ if(probe)for(const hit of shortcutProbe(initial,probeTicks))sampledShortcuts.push({casts:0,sequence:"none",...hit});
+ const recorded=timedReplay(fixture,initial,{onPrefix:({index,world,player})=>{
+  if(probe&&index<count-1)for(const hit of shortcutProbe(world,probeTicks,player))sampledShortcuts.push({casts:index+1,sequence:"live prefix "+(index+1),...hit});
+ }});
+ errors.push(...recorded.errors);
+ if(!recorded.result||recorded.result.moves!==count||recorded.result.stars!==3||recorded.player.respawns)errors.push("Recorded interleaved route must complete at target moves with three stars and no returns");
+ for(let mask=1;mask<fullMask;mask++){
+  const run=timedReplay(fixture,initial,{mask});
+  const indexes=fixture.casts.map((_,i)=>i).filter(i=>mask&(1<<i));
+  partialRoutes.push({casts:indexes.length,sequence:"casts "+indexes.map(i=>i+1).join(","),legal:run.legal,completed:run.player.completed});
+  if(run.player.completed)errors.push("Recorded movement succeeds with subset "+mask);
+ }
+ const hinted=timedReplay(fixture,initial,{hints:true});
+ errors.push(...hinted.errors);
+ if(!hinted.player.completed||hinted.player.respawns||hinted.hintCasts!==count||!tutorialSituation(hinted.world.room,hinted.player)?.ready)errors.push("Interleaved worked-hint route did not complete");
+ if(thresholds.threeStar!==count||thresholds.twoStar!==count+2||starsForMoves(count,thresholds)!==3||starsForMoves(count+1,thresholds)!==2||starsForMoves(count+3,thresholds)!==1)errors.push("Unexpected star thresholds");
+ return {number:level.number,id:level.id,title:level.title,math:level.math,puzzle:level.puzzle,moves:recorded.result?.moves??null,stars:recorded.result?.stars??null,respawns:recorded.player.respawns,ticks:recorded.ticks,hintCasts:hinted.hintCasts,interleaved:true,initialBypass:initialReplay.player.completed,partialRoutes,sampledShortcuts,errors};
+}
 export function auditLevel(fixture,{probe=false}={}){
  const level=LEVELS.find(l=>l.number===fixture.number);
  if(!level)throw Error("Missing released level "+fixture.number);
  const room=validateRoom(level.room),initial=createPhysicsWorld(room),spawn=createPlayer(initial);
+ if(fixture.segments)return auditInterleaved(fixture,level,initial,{probe});
  const errors=[],sampledShortcuts=[],partialRoutes=[],thresholds=starThresholds(room);
  const probeTicks=Math.max(1000,fixture.route.reduce((n,segment)=>n+segment[0],0));
  let world=initial,history=createAttemptHistory();

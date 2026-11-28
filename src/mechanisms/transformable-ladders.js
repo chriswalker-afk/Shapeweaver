@@ -13,5 +13,12 @@ export function ladderSegment(object){
 export function roomLadders(room){
  return [...(room.ladders??[]),...room.objects.map(ladderSegment).filter(Boolean)];
 }
-/** Non-solid ladders never count as load-bearing support for other objects. */
-export const isSolidObject=o=>!o.decorative&&o.kind!=="ladder";
+/** A dual-purpose ladder has a solid rectangular deck only while horizontal.
+ * Ordinary ladders retain their permeable behaviour. The committed geometry,
+ * not the animation frame or a cached state flag, determines the mode. */
+export function isBridgeDeck(o){
+ if(o?.kind!=="ladder"||o.bridgeDeck!==true||o.decorative||o.vertices.length!==4)return false;
+ const b=polygonBounds(o.vertices),w=b.maxX-b.minX,h=b.maxY-b.minY;
+ return h>EPS&&w>=2*h&&o.vertices.every(([x,y])=>(Math.abs(x-b.minX)<EPS||Math.abs(x-b.maxX)<EPS)&&(Math.abs(y-b.minY)<EPS||Math.abs(y-b.maxY)<EPS));
+}
+export const isSolidObject=o=>!o.decorative&&(o.kind!=="ladder"||isBridgeDeck(o));

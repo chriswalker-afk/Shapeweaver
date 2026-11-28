@@ -90,7 +90,7 @@ export function removeItem(room,group,id){
  r[group]=r[group].filter(o=>o.id!==id);return prepareDraft(r);
 }
 export const PALETTE=Object.freeze([
- ["terrain","Terrain block"],["water","Water hazard"],["beam","Timber beam"],["bearing-beam","Two-ended bridge piece"],["waterwheel","Waterwheel rotor"],["orbit-beam","External-centre walkway"],["dock-bracket","L-shaped dock piece"],["gate","Hinged gate"],["crate","Step crate"],["barrel","Weighted barrel"],["ladder","Transformable ladder"],["static-ladder","Fixed ladder"],["wedge","Wedge"],["mushroom","Spring mushroom"],["key","L-shaped key"],["linked-gate","Linked gate"],["plate","Pressure plate"],["hinge-socket","Hinge socket"],["shape-socket","Shape socket"],["checkpoint","Checkpoint"],["fern","Fern"],["lantern","Lantern"]
+ ["terrain","Terrain block"],["water","Water hazard"],["beam","Timber beam"],["bearing-beam","Two-ended bridge piece"],["waterwheel","Waterwheel rotor"],["orbit-beam","External-centre walkway"],["dock-bracket","L-shaped dock piece"],["gate","Hinged gate"],["crate","Step crate"],["barrel","Weighted barrel"],["ladder","Transformable ladder"],["bridge-ladder","Bridge ladder"],["static-ladder","Fixed ladder"],["wedge","Wedge"],["mushroom","Spring mushroom"],["key","L-shaped key"],["linked-gate","Linked gate"],["plate","Pressure plate"],["hinge-socket","Hinge socket"],["shape-socket","Shape socket"],["checkpoint","Checkpoint"],["fern","Fern"],["lantern","Lantern"]
 ]);
 export function addTemplate(room,type,x,y){
  require(PALETTE.some(p=>p[0]===type)&&finite(x)&&finite(y),"Invalid palette placement");
@@ -110,6 +110,7 @@ export function addTemplate(room,type,x,y){
  case "crate":o.vertices=rect(2,2);break;
  case "barrel":Object.assign(o,{vertices:rect(2,2.5),permissions:["reflect","translate"],pressesPlates:true});break;
  case "ladder":Object.assign(o,{vertices:rect(4,.6),hinge:[x,y],permissions:["rotate"],support:"hinged"});break;
+ case "bridge-ladder":Object.assign(o,{kind:"ladder",vertices:rect(8,.6),hinge:[x+8,y],permissions:["translate","rotate"],support:"supported",pivotOnly:true,bridgeDeck:true});break;
  case "static-ladder":group="ladders";o={id,x,width:.6,bottom:y,top:y+4};break;
  case "wedge":Object.assign(o,{material:"cheese",vertices:[[x,y],[x+4,y],[x+4,y+2]],permissions:["enlarge","reflect"],scaleRange:[.5,3]});break;
  case "mushroom":Object.assign(o,{material:"fungus",vertices:[[x+.8,y],[x+1.6,y],[x+1.6,y+.7],[x+2.4,y+.7],[x+2.4,y+1.3],[x,y+1.3],[x,y+.7],[x+.8,y+.7]],permissions:["enlarge"],scaleRange:[.5,2]});break;

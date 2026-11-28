@@ -5,7 +5,7 @@ import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {spawnSync} from "node:child_process";
 import {LEVELS} from "../src/levels/campaign.js";
-import {RECORDED_ROUTES} from "../tools/campaign-audit.mjs";
+import {RECORDED_ROUTES,campaignActions} from "../tools/campaign-audit.mjs";
 import {newDraft,copyCampaignRoom,prepareDraft,addTemplate,getItem,itemEntries,moveItem,replaceItem,removeItem,validateDraft,PALETTE,copy} from "../workshop/model.js";
 import {createWorkshopSession,verifyWorkshopBundle,LIMITS} from "../workshop/replay.js";
 const level=n=>LEVELS.find(l=>l.number===n).room;
@@ -15,8 +15,10 @@ function ticks(s,n,move=0,jump=false,climb=0){
 }
 function execute(fixture){
  const s=createWorkshopSession(copyCampaignRoom(level(fixture.number)));
- for(const c of fixture.casts){const r=s.cast(c.type,c.objectId,c);assert.ok(r.ok,r.message);}
- for(const [n,move,jump,climb=0] of fixture.route)ticks(s,n,move,Boolean(jump),climb);
+ for(const action of campaignActions(fixture)){
+  if(action.kind==="cast"){const c=action.cast,r=s.cast(c.type,c.objectId,c);assert.ok(r.ok,r.message);}
+  else{const [n,move,jump,climb=0]=action.segment;ticks(s,n,move,Boolean(jump),climb);}
+ }
  return s;
 }
 test("authoring operations are isolated, exact, and retain mobile pivots",()=>{

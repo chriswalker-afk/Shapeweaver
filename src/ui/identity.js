@@ -12,7 +12,7 @@ export function getSpell(id) {
 }
 
 /** Title and spellbook are real views; no gameplay is simulated by this menu. */
-export function mountIdentity(document, state, onViewChange = () => {}) {
+export function mountIdentity(document, state, onViewChange = () => {}, {continueRoute=()=>"level1"}={}) {
   const title = document.getElementById("title-view");
   const book = document.getElementById("spellbook-view");
   const room = document.getElementById("room-view");
@@ -46,7 +46,7 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
     panel.style.setProperty("--spell-colour", spell.color);
     return true;
   }
-  function show(view) {
+  function show(view,options={}) {
     const isRoom = view==="room"||LEVEL_ROUTES.includes(view);
     if (view !== "title" && view !== "spellbook" && !(isRoom && room) && !(view === "results" && results) && !(view === "campaign" && campaign)) return false;
     state.view = view;
@@ -56,20 +56,18 @@ export function mountIdentity(document, state, onViewChange = () => {}) {
     if (results) results.hidden = view !== "results";
     if (campaign) campaign.hidden = view !== "campaign";
     if (art) art.hidden = isRoom;
-    onViewChange(view);
-    document.getElementById(view === "title" ? "open-spellbook" : isRoom ? "room-heading" : view === "results" ? "results-heading" : view === "campaign" ? "campaign-heading" : "spellbook-heading")?.focus();
+    onViewChange(view,options);
+    document.getElementById(view === "title" ? (document.getElementById("open-continue")?"open-continue":"open-spellbook") : isRoom ? "room-heading" : view === "results" ? "results-heading" : view === "campaign" ? "campaign-heading" : "spellbook-heading")?.focus();
     return true;
   }
   for (const button of buttons) on(button, () => select(button.dataset.spell));
+  on(document.getElementById("open-home"), event=>{if(event&&(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey))return;event?.preventDefault?.();show("title");});
+  on(document.getElementById("open-continue"),()=>show(continueRoute(),{resume:true}));
   on(document.getElementById("open-campaign"), () => show("campaign"));
   on(document.getElementById("close-campaign"), () => show("title"));
   on(document.getElementById("open-spellbook"), () => show("spellbook"));
   on(document.getElementById("close-spellbook"), () => show("title"));
   on(document.getElementById("open-room"), () => show("room"));
-  on(document.getElementById("open-level1"), () => show("level1"));
-  on(document.getElementById("open-level2"), () => show("level2"));
-  on(document.getElementById("open-level3"), () => show("level3"));
-  on(document.getElementById("open-level4"), () => show("level4"));
   on(document.getElementById("close-room"), () => show(campaign&&state.view!=="room"?"campaign":"title"));
   select(state.selectedSpell);
   return { select, show, destroy() { for (const [element, fn] of listeners) element.removeEventListener("click", fn); } };

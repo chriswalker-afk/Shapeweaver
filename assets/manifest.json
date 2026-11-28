@@ -84,6 +84,30 @@
       "role": "Static portal illustration",
       "provenance": "Original vector artwork authored for Shapeweaver in PR03; no third-party assets",
       "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "ui/home-continue.svg",
+      "role": "Home continue card illustration",
+      "provenance": "Original provisional vector illustration authored for Shapeweaver in PR37; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "ui/home-library.svg",
+      "role": "Home library card illustration",
+      "provenance": "Original provisional vector illustration authored for Shapeweaver in PR37; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "ui/home-spellbook.svg",
+      "role": "Home spellbook card illustration",
+      "provenance": "Original provisional vector illustration authored for Shapeweaver in PR37; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
+    },
+    {
+      "path": "ui/home-practice.svg",
+      "role": "Home practice card illustration",
+      "provenance": "Original provisional vector illustration authored for Shapeweaver in PR37; no third-party assets",
+      "rights": "Project-created artwork; no third-party licence required"
     }
   ]
 }

@@ -340,14 +340,19 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
     if(playStatus)playStatus.textContent=room.tutorial?"Arrows / WASD · Space to jump":"Practice restarted.";
     updateGuide();redraw();
   }
-  function setLevel(key){
+  // Session-local trusted snapshot: never serialized or loaded from storage.
+  function captureAttempt(){return {room,player:{...player},history,lastSafe};}
+  function setLevel(key,attempt=null){
     initialRoom=validateRoom(Object.hasOwn(LEVELS,key)?LEVELS[key]:GATEHOUSE_PREVIEW);
     mode="overview";zoom=null;focus=null;toolsOpen=false;
     const heading=$("room-heading"),chapter=$("room-chapter");
     if(heading)heading.textContent=initialRoom.title;
     canvas.setAttribute("aria-label",initialRoom.title+". Arrow keys or WASD to move; Space or Z to jump. Coordinate picking and object inspection pause movement.");
     if(chapter)chapter.textContent=initialRoom.tutorial?"Chapter "+(["","I","II","III","IV","V","VI","VII"][initialRoom.chapter]??String(initialRoom.chapter))+" · Level "+initialRoom.number+" · "+roomSpells(initialRoom).map(t=>TUTORIALS[t].label).join(" + "):"Chapter I · Interactive object practice";
-    resetPlayer();
+    if(attempt?.room?.id===initialRoom.id&&attempt.player&&!attempt.player.completed){
+      room=attempt.room;physics=createPhysicsWorld(room);player={...attempt.player};history=attempt.history;lastSafe=attempt.lastSafe;result=null;situation=tutorialSituation(room,player);
+      clearRecoveryInteraction();if(playStatus)playStatus.textContent="Attempt resumed. Your transformations and moves are kept.";updateGuide();redraw();
+    }else resetPlayer();
   }
   on(guidanceButton,"click",()=>setGuidance(!guidanceEnabled));
   on(hintButton,"click",()=>setHintStage(hintStage?0:1));
@@ -360,7 +365,7 @@ export function mountRoomPreview(document,view,{onComplete=()=>{}}={}) {
   // Click the stage to return keyboard focus to gameplay after inspecting controls.
   on(host,"click",()=>{if(!picking&&!objectMode)canvas.focus?.({preventScroll:true});});
   updateControls();updateGuide();
-  return {get room(){return room;},setLevel,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getResult:()=>result,setToolsOpen,getToolsOpen:()=>toolsOpen,setGuidance,setHintStage,getTutorialState:()=>({guidanceEnabled,hintStage,step:contextualGuide(room,player,inspector?.getState(),{casting:Boolean(animation),picking,canUndo:canUndo(),moves:history.entries.length,situation})?.step??null}),getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
+  return {get room(){return room;},setLevel,captureAttempt,setActive,resetPlayer,setObjectMode,inspector,undoCast,recoverPlayer,getResult:()=>result,setToolsOpen,getToolsOpen:()=>toolsOpen,setGuidance,setHintStage,getTutorialState:()=>({guidanceEnabled,hintStage,step:contextualGuide(room,player,inspector?.getState(),{casting:Boolean(animation),picking,canUndo:canUndo(),moves:history.entries.length,situation})?.step??null}),getAttemptSummary:()=>attemptSummary(history,player),getRecords:()=>history.entries.map(e=>e.record),getPlayer:()=>({...player}),setMode,pan,changeZoom,setOverlay,setPicking,setSnap,pickAt,enterPoint,clearPoint,
     getCamera:()=>camera,locateGeometry,setFocusView,getPresentation:()=>({focus:focusView,sound:preferences.sound,reduced:reducedMotion()}),getCoordinateState:()=>({grid,axes,picking,snap,point:point?{...point}:null}),
     refresh:()=>viewport?.resize(),
     destroy(){loop.stop();audio.destroy();input.destroy();inspector?.destroy();viewport?.destroy();images.destroy();for(const [el,event,fn] of listeners)el.removeEventListener(event,fn);}};

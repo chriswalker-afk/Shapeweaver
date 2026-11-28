@@ -67,5 +67,8 @@ Chapter VI closes with a complementary-gate airlock and five-cast bridge-reuse t
 ## Historical milestone: PR31
 Chapter VII begins with live vertical mirror sliders and reuse of a translated, rotated, then reflected attached bridge. PR32 adds distinct alternative routes (Three Ways Across) and a crystal-delivery objective (The Lost Star). Keep full CI and browser QA as the merge gate.
 
-## Current milestone: PR32
+## Historical milestone: PR32
 Levels 33–34 introduce three genuine solution routes with different object usage and a crystal delivery condition independent of traversal. PR33 finishes the campaign with The Observatory Machine and The Final Ascent: interconnected mechanisms and all four transformations. PR34 is the final campaign audit.
+
+## Current milestone: PR33
+All 36 levels are authored. The Observatory Machine combines a compound selector, an AND-linked seal and shape lock, and a reused deck. The Final Ascent combines all four transformations with two equally efficient five-cast routes and live star delivery. PR34: final campaign audit, review progression and alternative routes, strengthen regression/QA evidence, and resolve blockers before PR35 polish and PR36 release.

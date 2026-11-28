@@ -15,7 +15,9 @@ function mirrorStep(rail,object,target,config){
  }
  return state("reflect-linked",{...config,objectId:object.id,type:"reflect",name:"Reflection",spell:"The linked object reflects in the current mirror. Each x-coordinate maps to 2a − x; y is unchanged.",fields:"Enter the current vertical mirror line equation."},{reasoning:"The slider now marks x = "+a+". This is the perpendicular bisector of each point-image pair.",worked:"Reflect in x = "+a+". Compare the new coordinates with the crossing.",raw:{line:"x = "+a}});
 }
+import {finaleSituation} from "./observatory-finale-guidance.js";
 export function observatorySituation(room,player=null){
+ if(room.id==="observatory-35"||room.id==="observatory-36")return finaleSituation(room,player);
  if(room.id==="observatory-31"){
   const rail=room.objects.find(o=>o.id==="star-mirror"),o=room.objects.find(o=>o.id==="star-deck"),b=polygonBounds(o.vertices);
   const config={objective:"Find a useful position for the mirror and its linked bridge.",obstacle:"The wide star channel needs a deck. The bridge can reflect only in the movable mirror.",object:"Read the bridge endpoints and the edges of the channel. Move the mirror slider so the reflected bridge covers the gap.",traverse:"Approach the channel, jump onto the reflected bridge and continue to the portal."};

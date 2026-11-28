@@ -145,7 +145,9 @@ const CHALLENGE_GOALS=deepFreeze({
  "observatory-31":"Cross the star channel.",
  "observatory-32":"Cross both observatory channels.",
  "observatory-33":"Find a route across both channels.",
- "observatory-34":"Deliver the star crystal and reach the exit."
+ "observatory-34":"Deliver the star crystal and reach the exit.",
+ "observatory-35":"Coordinate the machine, cross both channels and unlock the exit.",
+ "observatory-36":"Restore the summit star and reach the highest portal."
 });
 export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
 const FIELD_GUIDES=Object.freeze({

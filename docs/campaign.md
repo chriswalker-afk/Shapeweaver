@@ -113,3 +113,6 @@ Levels 17–18 combine rotation of a linked two-paddle waterwheel and ramp enlar
 
 ## PR25 — The Mirror Archives opening
 Levels 19–20 reuse a single object after traversing an earlier obstacle. Both have an intermediate raised checkpoint and verified chronological cast/movement fixtures. See [Mirror Archives](mirror-archives.md).
+
+### Observatory finale
+Levels 35–36 recombine existing validated mechanisms rather than introduce a new spell system. See [Observatory finale](observatory-finale.md). All 36 planned levels are authored; PR34 is the whole-campaign review gate before polish and production release.

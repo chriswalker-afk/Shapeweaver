@@ -5,8 +5,8 @@ import {createBestResults} from "../src/core/best-results.js";
 import {mountCampaign} from "../src/ui/campaign.js";
 test("only released levels are playable and planned chapters cover 36 levels",()=>{
  assert.equal(CHAPTERS.length,7);assert.equal(CHAPTERS.at(-1).last,36);
- assert.deepEqual(LEVELS.map(l=>l.number),[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34]);
- assert.deepEqual(filterLevels({spell:"reflect"}).map(l=>l.number),[4,6,8,11,15,16,28,31,32,33,34]);
+ assert.deepEqual(LEVELS.map(l=>l.number),[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36]);
+ assert.deepEqual(filterLevels({spell:"reflect"}).map(l=>l.number),[4,6,8,11,15,16,28,31,32,33,34,35,36]);
  assert.equal(filterLevels({math:"2"}).length,3);
  assert.equal(filterLevels({chapter:"2"}).length,4);
  assert.equal(filterLevels({chapter:"3",spell:"rotate"}).length,3);
@@ -18,15 +18,15 @@ test("only released levels are playable and planned chapters cover 36 levels",()
  assert.deepEqual(filterLevels({chapter:"5",spell:"rotate"}).map(l=>l.number),[20,23,24]);
  assert.deepEqual(filterLevels({chapter:"6"}).map(l=>l.number),[25,26,27,28,29,30]);
  assert.deepEqual(filterLevels({chapter:"6",spell:"enlarge"}).map(l=>l.number),[25,26,30]);
- assert.deepEqual(filterLevels({chapter:"7"}).map(l=>l.number),[31,32,33,34]);
- assert.deepEqual(filterLevels({chapter:"7",spell:"rotate"}).map(l=>l.number),[32,33]);
+ assert.deepEqual(filterLevels({chapter:"7"}).map(l=>l.number),[31,32,33,34,35,36]);
+ assert.deepEqual(filterLevels({chapter:"7",spell:"rotate"}).map(l=>l.number),[32,33,36]);
  assert.equal(filterLevels({math:"1",puzzle:"1"}).length,4);
 });
 test("progress uses existing personal bests and resumes first incomplete level",()=>{
  const best=createBestResults({});assert.equal(campaignProgress(best).next.number,1);
  best.record({levelId:"gatehouse-02",moves:1,stars:3});assert.equal(campaignProgress(best).next.number,1);
  best.record({levelId:"gatehouse-01",moves:2,stars:2});
- const p=campaignProgress(best);assert.equal(p.completed,2);assert.equal(p.stars,5);assert.equal(p.maximum,102);assert.equal(p.next.number,3);
+ const p=campaignProgress(best);assert.equal(p.completed,2);assert.equal(p.stars,5);assert.equal(p.maximum,108);assert.equal(p.next.number,3);
 });
 
 function element(){
@@ -44,20 +44,21 @@ test("library shows only playable puzzles, filters, resumes and refreshes progre
  ui.render();
  assert.equal(els["campaign-map"].children.length,7);
  assert.equal(els["campaign-map"].children.filter(c=>c.disabled).length,0);
- assert.equal(els["campaign-levels"].children.length,34);
+ assert.equal(els["campaign-levels"].children.length,36);
  els["filter-spell"].value="reflect";els["filter-spell"].fire("change");
- assert.equal(els["campaign-levels"].children.length,11);
+ assert.equal(els["campaign-levels"].children.length,13);
  els["campaign-levels"].children[0].fire("click");
  assert.deepEqual(routes,["level4"]);
  els["filter-math"].value="5";els["filter-math"].fire("change");
- assert.equal(els["campaign-levels"].children.length,1);
+ assert.equal(els["campaign-levels"].children.length,3);
+ assert.deepEqual(els["campaign-levels"].children.map(e=>e.children[0].textContent),["32","35","36"]);
  assert.equal(els["campaign-levels"].children[0].children[0].textContent,"32");
  assert.match(els["campaign-levels"].children[0].children[1].textContent,/Astronomer/);
  els["filter-chapter"].value="1";els["filter-chapter"].fire("change");assert.match(els["campaign-levels"].children[0].textContent,/No released puzzles/);
  els["campaign-map"].children[1].fire("click");assert.equal(els["filter-spell"].value,"");assert.equal(els["filter-math"].value,"");assert.equal(els["filter-chapter"].value,"2");assert.equal(els["campaign-levels"].children.length,4);
- els["campaign-clear"].fire("click");assert.equal(els["campaign-levels"].children.length,34);
+ els["campaign-clear"].fire("click");assert.equal(els["campaign-levels"].children.length,36);
  best.record({levelId:"gatehouse-01",moves:2,stars:2});
- ui.render();assert.match(els["campaign-progress"].textContent,/1 \/ 34 released puzzles complete · 2 \/ 102 stars/);
+ ui.render();assert.match(els["campaign-progress"].textContent,/1 \/ 36 released puzzles complete · 2 \/ 108 stars/);
  els["campaign-resume"].fire("click");assert.deepEqual(routes,["level4","level2"]);
  assert.match(els["campaign-levels"].children[0].children.at(-1).textContent,/★★☆ · 2 moves/);
  ui.destroy();assert.ok(Object.values(els).every(e=>e.listeners.size===0));

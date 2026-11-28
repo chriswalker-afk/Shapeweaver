@@ -21,9 +21,13 @@
     <section class="game-viewport" aria-label="Shapeweaver mathematical puzzle adventure">
       <canvas id="world" aria-hidden="true"></canvas>
       <div class="title-art" id="title-art" aria-hidden="true">
-        <svg class="scene-composition" viewBox="0 0 1440 800" preserveAspectRatio="xMaxYMid slice" focusable="false" aria-hidden="true">
+        <svg class="scene-composition legacy-menu-composition" viewBox="0 0 1440 800" preserveAspectRatio="xMaxYMid slice" focusable="false" aria-hidden="true">
           <image href="./assets/environments/gatehouse-title.svg" width="1440" height="800"/>
           <image href="./assets/characters/apprentice.svg" x="965" y="407" width="105" height="147"/>
+        </svg>
+        <svg class="scene-composition home-kingdom-composition" viewBox="0 0 1440 800" preserveAspectRatio="xMaxYMid slice" focusable="false" aria-hidden="true">
+          <image id="home-kingdom-art" href="./assets/environments/home-kingdom.svg" width="1440" height="800"/>
+          <image href="./assets/characters/apprentice.svg" x="978" y="444" width="100" height="140"/>
         </svg>
         <div class="scene-shade"></div>
         <div class="fireflies"><i></i><i></i><i></i><i></i><i></i></div>
@@ -40,22 +44,22 @@
           <p class="intro">Four spells. A forgotten kingdom. A path only you can create.</p>
           <div class="title-actions" role="group" aria-label="Choose your adventure">
             <button type="button" class="home-card home-card-primary" id="open-continue" data-continuation="begin">
-              <img src="./assets/ui/home-continue.svg" alt="" width="104" height="90">
+              <img src="./assets/ui/home-continue.svg" alt="" width="160" height="132">
               <span class="home-card-copy"><strong>Continue</strong><span id="continue-detail">Begin · Level 1 · Across the Brook</span><small id="continue-note" hidden></small></span>
               <span class="home-card-arrow" aria-hidden="true">›</span>
             </button>
             <button type="button" class="home-card home-card-library" id="open-campaign">
-              <img src="./assets/ui/home-library.svg" alt="" width="104" height="90">
+              <img src="./assets/ui/home-library.svg" alt="" width="160" height="132">
               <span class="home-card-copy"><strong>Puzzle Library</strong><span>Explore all 36 puzzles and seven chapters.</span></span>
               <span class="home-card-arrow" aria-hidden="true">›</span>
             </button>
             <button type="button" class="home-card home-card-spellbook" id="open-spellbook">
-              <img src="./assets/ui/home-spellbook.svg" alt="" width="104" height="90">
+              <img src="./assets/ui/home-spellbook.svg" alt="" width="160" height="132">
               <span class="home-card-copy"><strong>Spellbook</strong><span>Learn the four transformation spells.</span></span>
               <span class="home-card-arrow" aria-hidden="true">›</span>
             </button>
             <button type="button" class="home-card home-card-practice" id="open-room">
-              <img src="./assets/ui/home-practice.svg" alt="" width="104" height="90">
+              <img src="./assets/ui/home-practice.svg" alt="" width="160" height="132">
               <span class="home-card-copy"><strong>Practice Room</strong><span>Experiment freely with the spells.</span></span>
               <span class="home-card-arrow" aria-hidden="true">›</span>
             </button>

@@ -35,9 +35,22 @@ try{
   assert.equal(await home.locator("button").count(),4);
   assert.deepEqual(await cards.locator("strong").allTextContents(),["Continue","Puzzle Library","Spellbook","Practice Room"]);
   assert.match(await page.locator("#continue-detail").innerText(),/Begin · Level 1/);
+  const hero=page.locator(".home-kingdom-composition"),legacy=page.locator(".legacy-menu-composition");
+  assert.equal(await hero.isVisible(),true);assert.equal(await legacy.isVisible(),false);
+  assert.equal(await hero.getAttribute("aria-hidden"),"true");
+  const heroSize=await page.locator("#home-kingdom-art").evaluate(async el=>{
+   const img=new Image();img.src=el.getAttribute("href");await img.decode();
+   return [img.naturalWidth,img.naturalHeight];
+  });
+  assert.deepEqual(heroSize,[1440,800],name+" home hero decoded");
   for(const card of await cards.all()){
    const b=await card.boundingBox();assert.ok(b&&b.x>=0&&b.x+b.width<=width+1&&b.y>=0&&b.y+b.height<=height+1,name+" home card fits");
-   assert.ok(b.height>=44);assert.ok(await card.locator("img").evaluate(img=>img.complete&&img.naturalWidth>0));
+   assert.ok(b.height>=44);
+   const image=card.locator("img"),copy=card.locator(".home-card-copy");
+   assert.deepEqual(await image.evaluate(async img=>{await img.decode();return [img.naturalWidth,img.naturalHeight,img.alt];}),[160,132,""]);
+   const artBox=await image.boundingBox(),copyBox=await copy.boundingBox();
+   assert.ok(artBox&&copyBox&&artBox.width>=30&&artBox.height>=30,name+" art visible");
+   assert.ok(artBox.x+artBox.width<=copyBox.x+1||artBox.y+artBox.height<=copyBox.y+1,name+" art never covers copy");
   }
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+" no horizontal overflow");
   await page.screenshot({path:out+"/"+name+"-home.png",fullPage:true});
@@ -49,6 +62,7 @@ try{
   await page.locator("#title-view").waitFor();assert.match(await page.locator("#continue-detail").innerText(),/Resume Level 1/);
   await page.locator("#open-campaign").click();
   await page.locator("#campaign-view").waitFor();
+  assert.equal(await hero.isVisible(),false);assert.equal(await legacy.isVisible(),true);
   assert.equal(await page.locator(".chapter-card").count(),7);
   assert.equal(await page.locator(".chapter-card:disabled").count(),0);
   assert.equal(await page.locator(".library-level").count(),36);

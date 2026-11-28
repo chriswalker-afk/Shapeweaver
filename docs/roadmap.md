@@ -82,8 +82,11 @@ Presentation polish only: fast close-up, object/image locator, bounded labels, f
 ## Historical milestone: PR36 — v1.0.0 release candidate
 The original 36-PR development roadmap is implemented. Production artifact verification, actual browser completion at both supported paths, gated Pages deployment and hosted commit verification are in place. Pages activation is a repository administrator action, followed by deployment, HTTPS/custom-domain configuration and manual classroom acceptance. See [release checklist](release.md). After release, choose optional PR37 (public drag-and-drop level workshop) only if useful; no additional campaign content is required for v1.0.0.
 
-## Current milestone: PR37 — Home page redesign
+## Historical milestone: PR37 — Home page redesign
 The title now has four illustrated actions and clear progress-aware Continue; obsolete direct tutorial shortcuts have been removed. See [home redesign](home-redesign.md). This post-release UX series takes precedence over the earlier optional public level workshop numbering; defer the workshop until after PR40.
-- PR38 — Home page art and card illustrations: create richer bespoke illustration assets, coherent storybook art direction, and improve the hero scene/composition.
+- PR38 — Home page art and card illustrations: bespoke static storybook artwork, isolated hero composition and asset/visual regression coverage. See [Home art](home-art.md).
 - PR39 — Ambient animated background: lightweight sequential spell demonstrations, particles and static/reduced-motion fallback.
 - PR40 — Home page polish and QA: responsive, keyboard, touch, visual and performance review.
+
+## Current milestone: PR38 — Home artwork
+The four bespoke illustrated navigation cards and twilight kingdom hero are authored. Run full CI, browser QA and inspect the retained home screenshots before merge. PR39 introduces the ambient mathematically accurate spell showcase on the static backdrop; PR40 is final visual and cross-device polish.

@@ -17,7 +17,7 @@ test("artifact verifier checks references, provenance, release identity and publ
  const fixture=await mkdtemp(join(tmpdir(),"shapeweaver-release-"));
  try{
   for(const path of ["index.html","src","assets"])await cp(join(root,path),join(fixture,path),{recursive:true});
-  const dist=await build(fixture),report=await verifyDist(dist,null);assert.equal(report.version,APP.version);assert.equal(report.assets,18);assert.ok(report.files>70);
+  const dist=await build(fixture),report=await verifyDist(dist,null);assert.equal(report.version,APP.version);assert.equal(report.assets,19);assert.ok(report.files>70);
   await assert.rejects(verifyDist(dist,sha),/commit mismatch/);
   await writeFile(join(dist,"private.txt"),"not public");await assert.rejects(verifyDist(dist,null),/Unexpected production root/);await rm(join(dist,"private.txt"));
   await rm(join(dist,"src/core/game-audio.js"));await assert.rejects(verifyDist(dist,null),/Missing published reference.*game-audio/);

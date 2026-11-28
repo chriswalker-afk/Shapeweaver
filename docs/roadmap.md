@@ -55,5 +55,8 @@ Review gates: PR06 (playable test room, screen composition); PR14 (first classro
 ## Historical milestone: PR21
 The internal workshop is local development tooling, outside the public build. It provides precise room authoring, real-engine playtest and versioned replay bundles. PR22 uses it to design and verify Levels 13–14 (modular bridge pieces, central supports and structural staircase combinations). The public custom-level feature remains optional after the production release.
 
-## Current milestone: PR28
+## Historical milestone: PR28
 Chapter VI opens with Levels 25–26, fractional scale factors and physical clearance. PR29 introduces movable rotation centres and attached object dependencies (The Wandering Pivot and The Mirrored Mechanism). Keep the PR review gates and do not merge unverified changes.
+
+## Current milestone: PR29
+Levels 27–28 introduce separately selectable movable sockets and attached beams, with atomic rigid carrying transformations. PR30 adds two-state selectors and multi-stage alchemist puzzles (One Opens, One Closes and The Alchemist’s Trial).

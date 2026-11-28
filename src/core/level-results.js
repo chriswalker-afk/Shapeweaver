@@ -36,7 +36,7 @@ export function completedResult(room,player,history){
     thresholds,stars:starsForMoves(summary.moves,thresholds),
     moves:summary.moves,undos:summary.undos,activeMoves:summary.activeMoves,returns:summary.respawns,
     entries:summary.entries.map(({record,undone},index)=>({
-      number:index+1,objectId:record.objectId,objectLabel:room.objects.find(o=>o.id===record.objectId)?.label??record.objectId,
+      number:index+1,objectId:record.objectId,objectLabel:(room.objects.find(o=>o.id===record.objectId)?.label??record.objectId)+(record.attachedIds?.length?" + "+record.attachedIds.map(id=>room.objects.find(o=>o.id===id)?.label??id).join(", "):""),
       type:record.type,...describeCast(record),undone
     }))
   });

@@ -5,6 +5,7 @@ import {resolveMechanisms,obstructedGate,multiPlateEffects} from "../mechanisms/
 import {ladderSegment,isSolidObject,isBridgeDeck} from "../mechanisms/transformable-ladders.js";
 import {dockedSocket,samePoint} from "../mechanisms/hinge-sockets.js";
 import {unsupportedBearing,validateBearingDefinition} from "../mechanisms/structural-bearings.js";
+import {attachedObjects,attachedImages,stationarySolids,applyCastGeometry,validateAttachments} from "../mechanisms/attached-pivots.js";
 import {TYPES,parsePreviewRequest,previewGeometry,referencePoints,isIdentity} from "../transformations/preview-math.js";
 
 const name=o=>o.label??o.id;
@@ -27,7 +28,7 @@ export function validateObjectDefinitions(room){
     if(o.fixedCentre!==undefined&&(!Array.isArray(o.fixedCentre)||o.fixedCentre.length!==2||!o.fixedCentre.every(Number.isFinite)||o.support!=="enchanted"||o.vertexIds?.includes("Centre")||o.hinge||o.dockable||o.pivotOnly||o.permissions.length!==1||o.permissions[0]!=="rotate"||pointPolygonDistance(o.fixedCentre,o.vertices)<=GEOMETRY_EPS||o.fixedCentre[0]<room.bounds.minX||o.fixedCentre[0]>room.bounds.maxX||o.fixedCentre[1]<room.bounds.minY||o.fixedCentre[1]>room.bounds.maxY))throw new Error("Invalid external centre: "+o.id);
     if(o.permissions.includes("enlarge")&&(!Array.isArray(o.scaleRange)||o.scaleRange.length!==2||!o.scaleRange.every(Number.isFinite)||o.scaleRange[0]<=0||o.scaleRange[1]<o.scaleRange[0]))throw new Error("Invalid scale range: "+o.id);
   }
-  return room;
+  return validateAttachments(room);
 }
 /** Nearest interior hit first, then a small CSS-pixel-derived tolerance for thin beams. */
 export function hitObject(room,point,tolerance=0){
@@ -65,7 +66,9 @@ export function previewObject(room,player,id,type,raw){
     if(!geometry.vertices.every(p=>p.every(Number.isFinite)))return failure("geometry","The resulting coordinates are not finite.");
     triangulate(geometry.vertices);
   }catch{return failure("geometry","The resulting shape is degenerate or outside numeric limits.");}
-  const extra={objectId:id,request,geometry};
+  const children=attachedObjects(room,id),images=attachedImages(room,id,request);
+  const extra={objectId:id,request,geometry,...(images.length?{attachedImages:images}:{})};
+  if(children.some(o=>lockedSocket(room,o.id)))return failure("socket-locked","An attached part is locked in its recess. Undo or Reset to release it.",extra);
   if(isIdentity(object,geometry))return failure("identity","This transformation does not change the object.",extra);
   const bounds=polygonBounds(geometry.vertices),b=room.bounds;
   if(!boundsContain({minX:b.minX-GEOMETRY_EPS,maxX:b.maxX+GEOMETRY_EPS,minY:b.minY-GEOMETRY_EPS,maxY:b.maxY+GEOMETRY_EPS},bounds))return failure("bounds","The preview extends outside the room.",extra);
@@ -73,14 +76,23 @@ export function previewObject(room,player,id,type,raw){
   if(player&&climb&&player.climbing&&Math.abs(player.x-climb.x)<=climb.width/2+.39&&player.y>=climb.bottom-.06&&player.y<=climb.top+.025)return failure("player-supported","Climb off this ladder before transforming it.",extra);
   if(playerOnObject(object,player))return failure("player-supported","Move the apprentice off this object before transforming it.",extra);
   if(player&&polygonIntersectsBox(geometry.vertices,playerBox(player)))return failure("player-overlap","The preview would overlap the apprentice.",extra);
-  const solids=[...room.terrain,...room.objects.filter(o=>o.id!==id&&!o.decorative)];
+  const solids=stationarySolids(room,id);
   for(const s of solids)if(polygonsOverlap(geometry.vertices,s.vertices))return failure("solid-overlap","The preview overlaps "+name(s)+".",extra);
   for(const h of room.hazards)if(polygonsOverlap(geometry.vertices,h.vertices))return failure("hazard-overlap","The preview overlaps a hazard.",extra);
   if(object.support==="supported"){
     const down=geometry.vertices.map(([x,y])=>[x,y-.002]);
     if(!solids.some(s=>(!room.objects.includes(s)||isSolidObject(s))&&polygonsOverlap(down,s.vertices)))return failure("unsupported","The preview has no support beneath it.",extra);
   }
-  const candidate=resolveMechanisms({...room,objects:room.objects.map(o=>o.id===id?{...o,vertices:geometry.vertices}:o)});
+  for(const {id:childId,geometry:image} of images){
+    const child=children.find(o=>o.id===childId);
+    if(!boundsContain({minX:b.minX-GEOMETRY_EPS,maxX:b.maxX+GEOMETRY_EPS,minY:b.minY-GEOMETRY_EPS,maxY:b.maxY+GEOMETRY_EPS},polygonBounds(image.vertices)))return failure("bounds","The attached "+name(child)+" would leave the room.",extra);
+    if(playerOnObject(child,player))return failure("player-supported","Move the apprentice off the attached "+name(child)+" before transforming it.",extra);
+    if(player&&polygonIntersectsBox(image.vertices,playerBox(player)))return failure("player-overlap","The attached "+name(child)+" would overlap the apprentice.",extra);
+    for(const s of solids)if(polygonsOverlap(image.vertices,s.vertices))return failure("solid-overlap","The attached "+name(child)+" would overlap "+name(s)+".",extra);
+    for(const h of room.hazards)if(polygonsOverlap(image.vertices,h.vertices))return failure("hazard-overlap","The attached "+name(child)+" would overlap a hazard.",extra);
+  }
+  const candidate=resolveMechanisms({...room,objects:applyCastGeometry(room,id,extra)});
+  if(images.length)extra.mechanismEffects=images.map(({id:childId,geometry:image})=>name(children.find(o=>o.id===childId))+" moves with the socket. New pivot H = ("+image.hinge.join(", ")+").");
   const unstable=unsupportedBearing(candidate);
   if(unstable)return failure("bearing-unsupported",unstable.id===id?"Both ends of this construction piece need support beneath them.":"This move would remove support from "+name(unstable)+". Move that piece first.",extra);
   if(object.bearing==="both-ends")extra.mechanismEffects=["Both bearing ends will be supported."];

@@ -83,7 +83,15 @@ export function moveItem(room,group,id,dx,dy){
  if(finite(o.x))o.x=round(o.x+dx);
  if(finite(o.y))o.y=round(o.y+dy);
  if(group==="ladders"){o.bottom=round(o.bottom+dy);o.top=round(o.top+dy);}
- return replaceItem(room,group,id,o);
+ const changed=replaceItem(room,group,id,o);
+ if(group==="objects"&&old.kind==="pivot-carrier"){
+  for(const child of changed.objects.filter(v=>v.attachedTo===id)){
+   child.vertices=child.vertices.map(([x,y])=>[round(x+dx),round(y+dy)]);
+   child.hinge=[round(child.hinge[0]+dx),round(child.hinge[1]+dy)];
+  }
+  return prepareDraft(changed);
+ }
+ return changed;
 }
 export function removeItem(room,group,id){
  require(GROUPS.includes(group),"Spawn and exit cannot be deleted");const r=copy(room);

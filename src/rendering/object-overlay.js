@@ -124,6 +124,11 @@ export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview,{sh
     }
     path(ctx,camera,geometry.vertices);ctx.fillStyle=preview.ok?"rgba(112,210,195,.24)":"rgba(255,110,104,.22)";ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2.2;ctx.stroke();ctx.restore();
     markReferences(ctx,camera,geometry.points,c,"′",rect,occupied);
+    for(const part of preview.attachedImages??[]){
+      ctx.save();ctx.setLineDash?.([5,4]);path(ctx,camera,part.geometry.vertices);
+      ctx.fillStyle=preview.ok?"rgba(112,210,195,.24)":"rgba(255,110,104,.22)";ctx.fill();ctx.strokeStyle=c;ctx.lineWidth=2.2;ctx.stroke();ctx.restore();
+      markReferences(ctx,camera,part.geometry.points.map(r=>({...r,id:"Beam "+r.id})),c,"′",rect,occupied);
+    }
   }
   ctx.restore();
 }

@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR25 — The Mirror Archives: Levels 19–20. Twenty released puzzles, chronological cast/movement replays, player-aware hints, reusable archive chest and horizontal bridge/upright ladder. Next: PR26 Levels 21–22.
+PR26 — The Mirror Archives: Levels 21–22. Twenty-two released puzzles; one-way latches, locking recesses and key scarcity. Next: PR27 Levels 23–24.
 
 ## Design documents
 

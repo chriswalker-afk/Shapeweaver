@@ -53,8 +53,8 @@ export function mountObjectInspector(document,room,getPlayer,onChange,onToggle,a
     result.dataset.state="";const object=engine.get(selected);select.value=object?.id??"";
     spell.replaceChildren(option("","Choose a transformation…"),...(object?.permissions??[]).map(t=>option(t,getSpell(t).label)));
     spell.disabled=!object;spell.value=type??"";
-    const socket=object&&(room.shapeSockets??[]).find(s=>s.objectId===object.id);
-    refs.textContent=object?refsText(engine.references(object.id))+(socket?" · Lock outline: "+socket.vertices.map((p,i)=>"S"+(i+1)+" "+format(p)).join(" · "):""):"Select a highlighted object in the room or from the list.";
+    const sockets=object?(room.shapeSockets??[]).filter(s=>s.objectId===object.id):[];
+    refs.textContent=object?refsText(engine.references(object.id))+(sockets.length?" · "+sockets.map(socket=>(socket.locking?(socket.label??"Lock")+" (captures key)":"Lock outline")+": "+socket.vertices.map((p,i)=>"S"+(i+1)+" "+format(p)).join(" · ")).join(" | "):""):"Select a highlighted object in the room or from the list.";
     permissions.textContent=object?"Allowed: "+object.permissions.map(t=>getSpell(t).label).join(", ")+(object.hinge?" · "+(object.dockable?"Mobile hinge H "+format(object.hinge)+(dockedSocket(room,object)?" (docked)":" (undocked; translate to socket)"):object.pivotOnly?"Marked pivot H "+format(object.hinge):"Fixed hinge H "+format(object.hinge)):"")+(object.fixedCentre?" · Fixed external centre "+format(object.fixedCentre):"")+(object.bridgeDeck?" · Horizontal: solid bridge; upright: climbable ladder":"")+(object.scaleRange?" · Scale factor per cast: "+object.scaleRange.join("–"):"")+(object.bearing==="both-ends"?" · Both ends require support":""):"";
     buildFields();result.textContent=object?"Choose a transformation and enter its parameters.":"No object selected.";
   }

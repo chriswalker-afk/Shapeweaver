@@ -8,8 +8,9 @@ import {unsupportedBearing,validateBearingDefinition} from "../mechanisms/struct
 import {TYPES,parsePreviewRequest,previewGeometry,referencePoints,isIdentity} from "../transformations/preview-math.js";
 
 const name=o=>o.label??o.id;
+export const lockedSocket=(room,id)=>(room.shapeSockets??[]).find(s=>s.objectId===id&&s.locking&&s.filled);
 const failure=(code,message,extra={})=>({ok:false,code,message,scope:"final-pose",...extra});
-export function selectableObjects(room){return room.objects.filter(o=>!o.decorative&&Array.isArray(o.permissions)&&o.permissions.length>0);}
+export function selectableObjects(room){return room.objects.filter(o=>!o.decorative&&!lockedSocket(room,o.id)&&Array.isArray(o.permissions)&&o.permissions.length>0);}
 export function validateObjectDefinitions(room){
   for(const o of room.objects){
     validateBearingDefinition(o);
@@ -47,6 +48,7 @@ function playerOnObject(object,player){
 /** Shared final-pose validator. Apply must revalidate through the chosen spell-specific
  * validator, which defines whether travel is continuous or a magical transfer. */
 export function previewObject(room,player,id,type,raw){
+  if(lockedSocket(room,id))return failure("socket-locked","This key is locked in its recess. Undo or Reset to release it.");
   const object=selectableObjects(room).find(o=>o.id===id);
   if(!object)return failure("not-selectable","Choose an interactive object.");
   if(!object.permissions.includes(type))return failure("permission","That transformation is not permitted for "+name(object)+".");
@@ -83,7 +85,8 @@ export function previewObject(room,player,id,type,raw){
   if(unstable)return failure("bearing-unsupported",unstable.id===id?"Both ends of this construction piece need support beneath them.":"This move would remove support from "+name(unstable)+". Move that piece first.",extra);
   if(object.bearing==="both-ends")extra.mechanismEffects=["Both bearing ends will be supported."];
   if(room.plates?.length||room.shapeSockets?.length){
-    extra.mechanismEffects=[...(extra.mechanismEffects??[]),...(candidate.shapeSockets??[]).filter(s=>s.filled!==(room.shapeSockets??[]).find(p=>p.id===s.id)?.filled).map(s=>s.filled?"Key will fit "+(s.label??s.id)+".":"Key will leave "+(s.label??s.id)+".")];
+    extra.mechanismEffects=[...(extra.mechanismEffects??[]),...(candidate.shapeSockets??[]).filter(s=>s.filled!==(room.shapeSockets??[]).find(p=>p.id===s.id)?.filled).map(s=>s.filled?"Key will fit "+(s.label??s.id)+"."+(s.locking?" It will lock in place until Undo or Reset.":""):"Key will leave "+(s.label??s.id)+".")];
+    extra.mechanismEffects.push(...(candidate.plates??[]).filter(p=>p.latch&&p.latched&&!(room.plates??[]).find(q=>q.id===p.id)?.latched).map(p=>(p.label??p.id)+" will latch open; the weight can be reused."));
     extra.mechanismEffects.push(...multiPlateEffects(room,candidate));
     extra.mechanismEffects.push(...candidate.objects.filter(g=>g.kind==="linked-gate"&&g.open!==room.objects.find(o=>o.id===g.id)?.open).map(g=>g.label+(g.open?" will open.":" will close.")));
     if(obstructedGate(candidate))return failure("gate-obstructed","A linked gate would close on an object. Clear the gate first.",extra);

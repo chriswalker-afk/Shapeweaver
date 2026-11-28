@@ -448,3 +448,27 @@ body:has(#room-view:not([hidden])) .game-viewport{overflow:visible}
 }
 @media(prefers-reduced-motion:reduce){.home-card{transition:none}.home-card:hover{transform:none}}
 :root[data-motion="reduced"] .home-card:hover{transform:none}
+
+/* PR38 — home-only storybook composition. Other views retain the original gatehouse. */
+.home-kingdom-composition{display:none}
+.game-viewport:has(#title-view:not([hidden])) .legacy-menu-composition{display:none}
+.game-viewport:has(#title-view:not([hidden])) .home-kingdom-composition{display:block}
+.game-viewport:has(#title-view:not([hidden])) .scene-shade{
+ background:linear-gradient(90deg,#1a192deF 0%,#211b2fe8 27%,#211b2fb0 48%,#211b2f38 67%,#211b2f08 88%),linear-gradient(0deg,#181d3280,transparent 32%);
+}
+#title-view .home-card{
+ --card-edge:#ad93ba;--card-base:#30283e;--card-light:#745b784a;
+ background:radial-gradient(ellipse at 18% 28%,var(--card-light),transparent 68%),linear-gradient(145deg,var(--card-base),#252338);
+ border-color:var(--card-edge);box-shadow:inset 0 1px 0 #fff2cb20,inset 0 0 0 2px #100f2229,0 6px 15px #100e2166;
+}
+#title-view .home-card-primary{--card-edge:#e1bb7b;--card-base:#503d3a;--card-light:#c8985f42;box-shadow:inset 0 0 0 1px #e7bd7938,0 6px 18px #100e2170}
+#title-view .home-card-library{--card-edge:#91b5bc;--card-base:#313e50;--card-light:#83b7c63d}
+#title-view .home-card-spellbook{--card-edge:#b8a0d0;--card-base:#443354;--card-light:#bb90df36}
+#title-view .home-card-practice{--card-edge:#8dbda6;--card-base:#2c4743;--card-light:#91cbb33b}
+#title-view .home-card img{display:block;filter:drop-shadow(0 3px 4px #15132170)}
+#title-view .home-card:focus-visible{border-color:#ffe5a8}
+@media(hover:hover){#title-view .home-card:hover{border-color:#ffe0a6;box-shadow:inset 0 0 0 1px #ffe0a650,0 6px 18px #100e2180}}
+@media(min-width:1051px) and (min-height:521px){#title-view .home-card{grid-template-columns:minmax(48px,32%) minmax(0,1fr) 10px}}
+@media(max-width:650px) and (orientation:portrait){
+ .game-viewport:has(#title-view:not([hidden])) .scene-shade{background:linear-gradient(0deg,#211b2f 0%,#211b2f 45%,#211b2fce 65%,#211b2f08 97%)}
+}

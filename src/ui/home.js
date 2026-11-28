@@ -1,4 +1,5 @@
 import {homeContinuation} from "../core/home-progress.js";
+export const HOME_HERO="environments/home-kingdom.svg";
 export const HOME_ART=Object.freeze(["ui/home-continue.svg","ui/home-library.svg","ui/home-spellbook.svg","ui/home-practice.svg"]);
 /** Home is a view of existing progress, not a second source of scores. */
 export function renderHome(document,best,pausedRoute,savedRoute){

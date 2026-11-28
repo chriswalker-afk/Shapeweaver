@@ -2,7 +2,7 @@ import {polygonBounds,boundsContain,deepFreeze} from "../geometry/world.js";
 import {pointPolygonDistance,polygonsOverlap,triangulate,GEOMETRY_EPS} from "../geometry/polygons.js";
 import {playerBox,polygonIntersectsBox} from "../physics/collision.js";
 import {resolveMechanisms,obstructedGate,multiPlateEffects} from "../mechanisms/pressure-plates.js";
-import {ladderSegment,isSolidObject} from "../mechanisms/transformable-ladders.js";
+import {ladderSegment,isSolidObject,isBridgeDeck} from "../mechanisms/transformable-ladders.js";
 import {dockedSocket,samePoint} from "../mechanisms/hinge-sockets.js";
 import {unsupportedBearing,validateBearingDefinition} from "../mechanisms/structural-bearings.js";
 import {TYPES,parsePreviewRequest,previewGeometry,referencePoints,isIdentity} from "../transformations/preview-math.js";
@@ -16,6 +16,7 @@ export function validateObjectDefinitions(room){
     if(o.decorative){if(o.permissions?.length)throw new Error("Decorative objects cannot be selected");continue;}
     triangulate(o.vertices);
     if(o.vertexIds!==undefined&&(!Array.isArray(o.vertexIds)||o.vertexIds.length!==o.vertices.length||new Set(o.vertexIds).size!==o.vertexIds.length||o.vertexIds.some(id=>typeof id!=="string"||!id.length)))throw new Error("Invalid vertex IDs: "+o.id);
+    if(o.bridgeDeck!==undefined&&(o.kind!=="ladder"||o.bridgeDeck!==true||!o.permissions?.includes("rotate")||!o.permissions?.includes("translate")))throw Error("Invalid dual-purpose ladder: "+o.id);
     if(o.kind==="ladder"&&(o.vertices.length!==4||!ladderSegment(o)&&!ladderSegment({...o,vertices:o.vertices.map(([x,y])=>[-y,x])})))throw new Error("Invalid rectangular ladder: "+o.id);
     if(!Array.isArray(o.permissions)||new Set(o.permissions).size!==o.permissions.length||o.permissions.some(t=>!TYPES.includes(t)))throw new Error("Invalid permissions: "+o.id);
     if(!["supported","hinged","enchanted"].includes(o.support))throw new Error("Invalid support mode: "+o.id);
@@ -89,7 +90,7 @@ export function previewObject(room,player,id,type,raw){
     if(player&&candidate.objects.some(o=>o.kind==="linked-gate"&&!o.open&&polygonIntersectsBox(o.vertices,playerBox(player))))return failure("gate-obstructed","A linked gate would close on the apprentice. Move clear first.",extra);
   }
   if(object.dockable){const socket=dockedSocket(room,object,geometry.hinge);extra.mechanismEffects=[...(extra.mechanismEffects??[]),socket?"Hinge will dock at "+(socket.label??socket.id)+". Rotation available.":"Hinge will be undocked. Rotation requires a socket."];}
-  if(object.kind==="ladder")extra.mechanismEffects=[ladderSegment({...object,vertices:geometry.vertices})?"Ladder will be upright and climbable.":"Ladder will not be climbable in this orientation."];
+  if(object.kind==="ladder"){const image={...object,vertices:geometry.vertices};extra.mechanismEffects=[...(extra.mechanismEffects??[]),ladderSegment(image)?"Ladder will be upright and climbable.":isBridgeDeck(image)?"Ladder will form a solid walkable bridge.":"Ladder will not be climbable in this orientation."];}
   return {ok:true,code:"final-clear",scope:"final-pose",message:"Final position is clear. Travel path is not yet checked; Apply is unavailable.",...extra};
 }
 export function createObjectEngine(room){

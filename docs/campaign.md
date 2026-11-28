@@ -110,3 +110,6 @@ Levels 15–16 introduce simultaneous linked pressure plates and diagonal reflec
 
 ## PR24 — The Riverworks finale
 Levels 17–18 combine rotation of a linked two-paddle waterwheel and ramp enlargement, then rotation about a fixed external centre and a translated structural approach. See [Riverworks finale](riverworks-finale.md). Chapter IV is complete, halfway through the planned 36 levels.
+
+## PR25 — The Mirror Archives opening
+Levels 19–20 reuse a single object after traversing an earlier obstacle. Both have an intermediate raised checkpoint and verified chronological cast/movement fixtures. See [Mirror Archives](mirror-archives.md).

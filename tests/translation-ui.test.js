@@ -589,7 +589,7 @@ test("waterwheel rotates the entire rotor, enlargement completes the approach an
  els["results-next"].fire("click");assert.equal(app.state.view,"level18");assert.equal(c.room.id,"riverworks-18");
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });
-test("external centre is displayed, wrong centre is free, undo restores geometry, and chapter IV completes",()=>{
+test("external centre is displayed, wrong centre is free, undo restores geometry, and chapter V opens",()=>{
  const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
  app.identity.show("level18");c.setObjectMode(true);c.inspector.selectObject("orbit-walkway");
  assert.match(els["object-permissions"].textContent,/Fixed external centre.*32.*11/);
@@ -607,6 +607,49 @@ test("external centre is displayed, wrong centre is free, undo restores geometry
  view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(75);
  view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(275);view.fire("keyup",{code:"ArrowRight"});
  assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,2);assert.equal(c.getResult().returns,0);
+ assert.equal(els["results-next"].hidden,false);assert.equal(els["results-next"].disabled,false);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level19");assert.equal(c.room.id,"archives-19");
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+
+test("archive chest is reused after reaching the balcony, with live hints and results navigation",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level19");
+ assert.equal(cast(f,"archive-crate","translate",{dx:13,dy:0}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");assert.match(els["tutorial-guide"].textContent,/reading balcony/);
+ frame(2);view.fire("keydown",{code:"ArrowRight"});frame(120);
+ view.fire("keydown",{code:"Space"});frame(50);view.fire("keyup",{code:"Space"});frame(38);
+ view.fire("keydown",{code:"Space"});frame(80);view.fire("keyup",{code:"Space"});view.fire("keyup",{code:"ArrowRight"});frame(10);
+ assert.equal(c.getPlayer().checkpoint,"reading-refuge");assert.equal(c.getTutorialState().step,"Explore");
+ c.setHintStage(5);assert.match(els["tutorial-hint-text"].textContent,/24.*0/);c.setHintStage(0);
+ assert.equal(cast(f,"archive-crate","translate",{dx:24,dy:0}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ view.fire("keydown",{code:"ArrowRight"});frame(29);
+ view.fire("keydown",{code:"Space"});frame(65);view.fire("keyup",{code:"Space"});frame(24);
+ view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(200);view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().stars,3);assert.equal(c.getResult().moves,2);assert.equal(c.getResult().returns,0);
+ els["results-next"].fire("click");assert.equal(app.state.view,"level20");
+ c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
+});
+test("the horizontal ladder is a solid bridge, then a climbable ladder after safe reuse",()=>{
+ const f=fixture(true,true),{controller:c,els,view,frame,app}=f;
+ app.identity.show("level20");assert.equal(els["climb-controls"].hidden,true);
+ c.setObjectMode(true);c.inspector.selectObject("archive-ladder");
+ assert.match(els["object-permissions"].textContent,/Horizontal: solid bridge/);
+ assert.equal(cast(f,"archive-ladder","translate",{dx:14,dy:0}).ok,true);
+ assert.equal(c.getTutorialState().step,"Traverse");
+ frame(2);view.fire("keydown",{code:"ArrowRight"});frame(125);
+ view.fire("keydown",{code:"Space"});frame(60);view.fire("keyup",{code:"Space"});frame(58);
+ view.fire("keydown",{code:"Space"});frame(50);view.fire("keyup",{code:"Space"});view.fire("keyup",{code:"ArrowRight"});frame(13);
+ assert.equal(c.getPlayer().checkpoint,"catalogue-refuge");assert.equal(c.getTutorialState().step,"Explore");
+ assert.equal(cast(f,"archive-ladder","translate",{dx:22,dy:0}).ok,true);
+ assert.deepEqual(c.room.objects[0].hinge,[53,3]);assert.equal(els["climb-controls"].hidden,true);
+ assert.equal(cast(f,"archive-ladder","rotate",{angle:90,direction:"clockwise",cx:53,cy:3}).ok,true);
+ assert.equal(els["climb-controls"].hidden,false);assert.equal(c.getTutorialState().step,"Traverse");assert.equal(c.getAttemptSummary().moves,3);
+ view.fire("keydown",{code:"ArrowRight"});frame(135);view.fire("keyup",{code:"ArrowRight"});
+ view.fire("keydown",{code:"ArrowUp"});frame(222);view.fire("keyup",{code:"ArrowUp"});
+ view.fire("keydown",{code:"ArrowRight"});view.fire("keydown",{code:"Space"});frame(126);view.fire("keyup",{code:"Space"});view.fire("keyup",{code:"ArrowRight"});
+ assert.equal(app.state.view,"results");assert.equal(c.getResult().moves,3);assert.equal(c.getResult().stars,3);assert.equal(c.getResult().returns,0);
  assert.equal(els["results-next"].hidden,true);assert.equal(els["results-next"].disabled,true);
  c.destroy();app.identity.destroy();app.results.destroy();app.viewport.destroy();
 });

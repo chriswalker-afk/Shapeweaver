@@ -1,4 +1,5 @@
 import {polygonBounds} from "../geometry/world.js";
+import {previewGeometry,parsePreviewRequest} from "../transformations/preview-math.js";
 const near=(a,b)=>Math.abs(a-b)<1e-6,round=n=>Number(n.toFixed(8)),pt=(x,y)=>"("+round(x)+", "+round(y)+")";
 const state=(phase,config,details={})=>({phase,config,ready:false,travel:false,reasoning:"",worked:"",raw:null,...details});
 const ready=(config)=>state("traverse",config,{ready:true});
@@ -35,6 +36,28 @@ export function alchemistSituation(room){
   }
   if(b.minX>=24-1e-6)return resize("grow-bridge",o,b,{x:28,y:2.5,w:12},config);
   return resize("shrink-bridge",o,b,{x:4,y:11,w:6},config);
+ }
+ if(room.id==="alchemist-27"||room.id==="alchemist-28"){
+  const mirror=room.id==="alchemist-28",o=room.objects.find(o=>o.kind==="pivot-carrier"),beam=room.objects.find(v=>v.attachedTo===o.id),b=polygonBounds(beam.vertices),target=mirror?24:22,far=mirror?37:34;
+  const config={objective:"Make a continuous deck by moving a socket and rotating its beam.",obstacle:"The channel is wider than a jump. The beam is attached to a movable socket.",object:"Move the socket to the near edge. The beam and its hinge move with it. Select the beam separately for rotation.",traverse:"Approach the channel, jump onto the horizontal beam, cross and walk to the portal."};
+  if(b.minX<=target+1e-6&&b.maxX>=far-1e-6&&b.maxY-b.minY<1&&b.maxY>=3&&b.maxY<=5.7)return ready(config);
+  const [cx,cy]=o.hinge;
+  if(!near(cx,target)||!near(cy,4)){
+   if(mirror){
+    const c={...config,objectId:o.id,type:"reflect",name:"Reflection",spell:"A vertical mirror maps x to 2a − x and leaves y unchanged. The attached beam and pivot are reflected together.",fields:"Enter the vertical mirror line equation."};
+    if(!near(cy,4))return state("recover-pivot",c,{reasoning:"The pivot needs the same height as the channel edge.",worked:"Undo or Reset to recover the original mechanism."});
+    const a=round((cx+target)/2);
+    return state("reflect-socket",c,{reasoning:"The current pivot is "+pt(cx,cy)+". The target is "+pt(target,4)+". Find their horizontal midpoint.",worked:"Mirror line x = ("+round(cx)+" + "+target+") / 2 = "+a+". The hinge image is "+pt(target,4)+".",raw:{line:"x = "+a}});
+   }
+   const dx=round(target-cx),dy=round(4-cy);
+   return state("translate-socket",{...config,objectId:o.id,type:"translate",name:"Translation",spell:"The same signed vector moves both the socket and every point of its attached beam.",fields:"Enter both components of the column vector."},{reasoning:"The current pivot is "+pt(cx,cy)+". Target pivot "+pt(target,4)+". Subtract current from target.",worked:"Column vector "+pt(dx,dy)+". The pivot and attached beam move together.",raw:{dx,dy}});
+  }
+  const c={...config,objectId:beam.id,type:"rotate",name:"Rotation",spell:"Turn the beam about the current shared pivot. The socket stays in place.",fields:"Enter the angle, direction and the new centre coordinates."};
+  for(const [angle,direction] of [[90,"clockwise"],[90,"anticlockwise"],[180,"clockwise"]]){
+   const raw={angle,direction,cx,cy},image=polygonBounds(previewGeometry(beam,parsePreviewRequest("rotate",raw)).vertices);
+   if(image.minX<=target+1e-6&&image.maxX>=far-1e-6&&image.maxY-image.minY<1&&image.maxY>=3&&image.maxY<=5.7)return state("rotate-attached",c,{reasoning:"Use the current pivot H = "+pt(cx,cy)+". Compare the beam's long edge with the required horizontal deck.",worked:"Rotate "+angle+"° "+direction+" about "+pt(cx,cy)+". The socket stays fixed during this cast.",raw});
+  }
+  return state("recover-pivot",c,{reasoning:"The beam is not aligned with the crossing.",worked:"Undo or Reset to restore the intended arrangement."});
  }
  return null;
 }

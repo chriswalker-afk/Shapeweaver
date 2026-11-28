@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR28 — The Alchemist’s Workshop: Levels 25–26. Twenty-six released puzzles; fractional reductions, narrow clearance, shrink–translate–grow. Next: PR29 — The Alchemist’s Workshop: Levels 27–28.
+PR29 — The Alchemist’s Workshop: Levels 27–28. Twenty-eight released puzzles; movable sockets, attached beams and atomic dependent casts. Next: PR30 — The Alchemist’s Workshop: Levels 29–30.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR28 — The Alchemist’s Workshop: Levels 25–26. Twenty-six released puzzles
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Alchemist’s movable pivots](docs/alchemist-pivots.md) — attached beams and shared moving centres.
 - [Alchemist’s Workshop opening](docs/alchemist-workshop.md) — fractional scale factors and physical clearance.
 - [Mirror Archives finale](docs/archives-finale.md) — rigid compound assemblies and linked pressure/shape mechanisms.
 - [Mirror Archives latches](docs/archives-latches.md) — one-way latches and key capture.

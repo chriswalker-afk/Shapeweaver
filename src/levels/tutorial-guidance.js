@@ -135,7 +135,9 @@ const CHALLENGE_GOALS=deepFreeze({
  "archives-23":"Open the double seal gate.",
  "archives-24":"Reach the final archive portal.",
  "alchemist-25":"Reach the raised workbench.",
- "alchemist-26":"Reach the far side of the channel."
+ "alchemist-26":"Reach the far side of the channel.",
+ "alchemist-27":"Cross the wandering pivot channel.",
+ "alchemist-28":"Cross the mirrored channel."
 });
 export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
 const FIELD_GUIDES=Object.freeze({

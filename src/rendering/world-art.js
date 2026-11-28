@@ -487,11 +487,13 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   for(const o of room.objects){
     if(!o.decorative&&o.fixedCentre)worldLabel(ctx,camera,o.fixedCentre[0],o.fixedCentre[1]+.55,"EXTERNAL CENTRE","#ffe1a7");
     else if(!o.decorative&&o.kind==="waterwheel"&&o.hinge)worldLabel(ctx,camera,o.hinge[0],o.hinge[1]+.85,"AXLE","#ffe1a7");
+    else if(o.kind==="pivot-carrier"&&o.reflectionOpacity===undefined)worldLabel(ctx,camera,o.hinge[0],o.hinge[1]-.8,"MOVABLE H","#d1eac9");
   }
   if(room.id==="archives-19")worldLabel(ctx,camera,34,7.35,"READING BALCONY","#e9cffa");
   if(room.id==="archives-20")worldLabel(ctx,camera,36,6.35,"SAFE BALCONY","#e9cffa");
    if(room.id==="alchemist-25")worldLabel(ctx,camera,29,8.2,"RAISED WORKBENCH","#d1eac9");
    if(room.id==="alchemist-26"){worldLabel(ctx,camera,21,13.45,"NARROW CHANNEL","#d1eac9");worldLabel(ctx,camera,21,10.15,"1.6 UNITS CLEAR","#d1eac9");}
+  if(room.id==="alchemist-28")worldLabel(ctx,camera,17,7.4,"MIRROR PARTITION","#d1eac9");
   for(const o of room.objects)if(o.bridgeDeck){const b=polygonBounds(o.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.45,isBridgeDeck(o)?"BRIDGE":ladderSegment(o)?"LADDER":"TURNING","#f7d7a1");}
   if(room.id==="riverworks-14")worldLabel(ctx,camera,6,5.6,"STORAGE RACK","#f7d7a1");
   if(room.id==="clockwork-10")worldLabel(ctx,camera,21.5,6.65,"LOW ARCH","#f1d09b");

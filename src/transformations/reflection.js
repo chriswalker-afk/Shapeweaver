@@ -21,9 +21,10 @@ export function commitReflection(room,player,id,raw){
  * squeezed intermediate polygon or a physical object moving through a wall. */
 export function reflectedFrame(room,transition,progress){
   const t=Math.max(0,Math.min(1,progress));if(t===1)return room;
+  const parts=new Map([transition,...(transition.attached??[])].map(p=>[p.id,p]));
   return {...room,objects:room.objects.map(o=>{
-    if(o.id!==transition.id)return o;
-    if(t<.5)return {...o,vertices:transition.from,vertexIds:transition.fromIds??undefined,reflectionOpacity:1-2*t};
+    const part=parts.get(o.id);if(!part)return o;
+    if(t<.5)return {...o,vertices:part.from,vertexIds:part.fromIds??undefined,...(part.fromHinge?{hinge:part.fromHinge}:{}),reflectionOpacity:1-2*t};
     return {...o,reflectionOpacity:2*t-1};
   })};
 }

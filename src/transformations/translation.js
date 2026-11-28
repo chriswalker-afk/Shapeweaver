@@ -1,4 +1,5 @@
 import {deepFreeze,rectangle} from "../geometry/world.js";
+import {castMembers,stationarySolids} from "../mechanisms/attached-pivots.js";
 import {previewObject} from "../core/object-engine.js";
 import {translationSweepOverlaps} from "../geometry/translation-sweep.js";
 import {playerBox} from "../physics/collision.js";
@@ -9,9 +10,9 @@ export function previewTranslation(room,player,id,raw){
   const final=previewObject(room,player,id,"translate",raw);
   const result=(ok,code,message)=>deepFreeze({...final,ok,code,message,scope:"translation-path"});
   if(!final.ok)return result(false,final.code,final.message);
-  const object=room.objects.find(o=>o.id===id),{dx,dy}=final.request;
-  const crosses=vertices=>translationSweepOverlaps(object.vertices,vertices,dx,dy);
-  for(const s of [...room.terrain,...room.objects.filter(o=>o.id!==id&&!o.decorative)]){
+  const members=castMembers(room,id),{dx,dy}=final.request;
+  const crosses=vertices=>members.some(o=>translationSweepOverlaps(o.vertices,vertices,dx,dy));
+  for(const s of stationarySolids(room,id)){
     if(crosses(s.vertices))return result(false,"path-solid","The object's travel path intersects "+(s.label??s.id)+".");
   }
   for(const h of room.hazards)if(crosses(h.vertices))return result(false,"path-hazard","The travel path intersects a hazard.");
@@ -35,5 +36,6 @@ export function commitTranslation(room,player,id,raw){
 export function translatedFrame(room,transition,progress){
   const t=Math.max(0,Math.min(1,progress));
   if(t===1)return room;
-  return {...room,objects:room.objects.map(o=>o.id!==transition.id?o:{...o,vertices:transition.from.map(([x,y])=>[x+transition.dx*t,y+transition.dy*t]),...(o.hinge?{hinge:[o.hinge[0]-transition.dx*(1-t),o.hinge[1]-transition.dy*(1-t)]}:{})})};
+  const parts=new Map([transition,...(transition.attached??[])].map(p=>[p.id,p]));
+  return {...room,objects:room.objects.map(o=>{const part=parts.get(o.id);return !part?o:{...o,vertices:part.from.map(([x,y])=>[x+transition.dx*t,y+transition.dy*t]),...(o.hinge?{hinge:[o.hinge[0]-transition.dx*(1-t),o.hinge[1]-transition.dy*(1-t)]}:{})};})};
 }

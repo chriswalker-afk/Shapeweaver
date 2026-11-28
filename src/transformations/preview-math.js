@@ -61,7 +61,8 @@ export function transformPoint(p,request){
 /** Preserve vertex IDs even when reflection reverses winding. */
 export function referencePoints(object){
   return object.vertices.map((p,i)=>({id:object.vertexIds?.[i]??(i<26?String.fromCharCode(65+i):"V"+(i+1)),point:[...p]}))
-    .concat(object.hinge?[{id:object.vertices.length>=8?"Hinge":"H",point:[...object.hinge]}]:[]);
+    .concat(object.hinge?[{id:object.vertices.length>=8?"Hinge":"H",point:[...object.hinge]}]:[])
+    .concat(object.fixedCentre?[{id:"Centre",point:[...object.fixedCentre]}]:[]);
 }
 export function previewGeometry(object,request){
   const points=referencePoints(object).map(ref=>({id:ref.id,point:transformPoint(ref.point,request)}));

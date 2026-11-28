@@ -121,7 +121,9 @@ const CHALLENGE_GOALS=deepFreeze({
  "riverworks-13":"Cross both channels of the river.",
  "riverworks-14":"Reach the upper works.",
  "riverworks-15":"Release the sluice gate and reach the far portal.",
- "riverworks-16":"Make a connected route between the docks."
+ "riverworks-16":"Make a connected route between the docks.",
+ "riverworks-17":"Reach the elevated mill quay.",
+ "riverworks-18":"Build a route across the tower and both channels."
 });
 export function campaignGoal(room){return CHALLENGE_GOALS[room?.id]??"Reach the exit portal.";}
 const FIELD_GUIDES=Object.freeze({

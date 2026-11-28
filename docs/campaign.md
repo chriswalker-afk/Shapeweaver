@@ -107,3 +107,6 @@ Levels 13–14 are implemented. Bridge Builders requires two supported spans acr
 
 ## PR23 — The Riverworks mechanisms
 Levels 15–16 introduce simultaneous linked pressure plates and diagonal reflection of a concave dock bracket that supports a translated upper span. See [Riverworks mechanisms](riverworks-mechanisms.md).
+
+## PR24 — The Riverworks finale
+Levels 17–18 combine rotation of a linked two-paddle waterwheel and ramp enlargement, then rotation about a fixed external centre and a translated structural approach. See [Riverworks finale](riverworks-finale.md). Chapter IV is complete, halfway through the planned 36 levels.

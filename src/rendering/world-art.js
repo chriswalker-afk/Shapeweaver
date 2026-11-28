@@ -93,6 +93,23 @@ function hazard(ctx,camera,item,art) {
   }
   ctx.stroke();
 }
+// The axle and external-centre orbit guides are non-solid scenery. Only
+// the selected timber polygon is a physical platform. Guides are deliberately
+// thin/dashed, never rendered as extra walkable spokes or bridges.
+function drawRotationMechanisms(ctx,camera,room){
+ for(const o of room.objects){
+  const centre=o.kind==="waterwheel"?o.hinge:o.fixedCentre;
+  if(!centre||o.decorative)continue;
+  const p=xy(camera,centre),b=polygonBounds(o.vertices),q=worldToScreen(camera,{x:(b.minX+b.maxX)/2,y:(b.minY+b.maxY)/2});
+  const radius=o.kind==="waterwheel"?Math.max(...o.vertices.map(v=>Math.hypot(v[0]-centre[0],v[1]-centre[1]))):Math.hypot((b.minX+b.maxX)/2-centre[0],(b.minY+b.maxY)/2-centre[1]);
+  ctx.save();ctx.strokeStyle="#f1cf9588";ctx.lineWidth=Math.max(1,camera.scale*.07);ctx.setLineDash([4,5]);
+  ctx.beginPath();ctx.arc(p.x,p.y,radius*camera.scale,0,Math.PI*2);ctx.stroke();
+  if(o.fixedCentre){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();}
+  ctx.setLineDash([]);ctx.fillStyle="#594f4c";ctx.strokeStyle="#f0ce96";ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.arc(p.x,p.y,Math.max(3,camera.scale*.18),0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.restore();
+ }
+}
 function object(ctx,camera,item,art) {
   if(item.kind==="ladder"){
     // Rail and rung positions use the actual long and short edges, including
@@ -109,6 +126,12 @@ function object(ctx,camera,item,art) {
     ctx.strokeStyle="#dfb779";ctx.lineWidth=Math.max(1,width*.17);
     ctx.beginPath();line(at(a,d,.13),at(b,c,.13));line(at(a,d,.87),at(b,c,.87));
     for(let i=1;i<count;i++){line(at(a,b,i/count),at(d,c,i/count));}ctx.stroke();ctx.restore();
+  }else if(item.kind==="waterwheel"){
+    tilePolygon(ctx,camera,item.vertices,art.timber,"#ae825c",2.5,.65);
+    outline(ctx,camera,item.vertices,"#58473e",2);
+    ctx.save();polygon(ctx,camera,item.vertices);ctx.clip();
+    for(const v of item.vertices){const p=xy(camera,v);ctx.fillStyle="#e7c186";ctx.beginPath();ctx.arc(p.x,p.y,Math.max(1,camera.scale*.10),0,Math.PI*2);ctx.fill();}
+    ctx.restore();
   }else if(item.kind==="mushroom"){
     const b=screenBounds(camera,item.vertices),capHeight=b.h*.48;
     ctx.save();polygon(ctx,camera,item.vertices);ctx.clip();
@@ -391,6 +414,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   sceneDetails(ctx,camera,room);
   for(const item of room.hazards)hazard(ctx,camera,item,art);
   for(const item of room.terrain)terrain(ctx,camera,item,art);
+  drawRotationMechanisms(ctx,camera,room);
   drawPlates(ctx,camera,room);
   drawSockets(ctx,camera,room);
   drawShapeSockets(ctx,camera,room);
@@ -407,6 +431,10 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   if(room.id==="gardens-06"){const m=room.objects.find(o=>o.kind==="mushroom"),b=polygonBounds(m.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.65,"SPRING CAP","#f9dcb4");}
   if(room.id==="riverworks-13")worldLabel(ctx,camera,42,1.5,"CENTRAL PIER","#f7d7a1");
   if(room.id==="riverworks-16")worldLabel(ctx,camera,3.5,8,"STORAGE SHELF","#f7d7a1");
+  for(const o of room.objects){
+    if(!o.decorative&&o.fixedCentre)worldLabel(ctx,camera,o.fixedCentre[0],o.fixedCentre[1]+.55,"EXTERNAL CENTRE","#ffe1a7");
+    else if(!o.decorative&&o.kind==="waterwheel"&&o.hinge)worldLabel(ctx,camera,o.hinge[0],o.hinge[1]+.85,"AXLE","#ffe1a7");
+  }
   if(room.id==="riverworks-14")worldLabel(ctx,camera,6,5.6,"STORAGE RACK","#f7d7a1");
   if(room.id==="clockwork-10")worldLabel(ctx,camera,21.5,6.65,"LOW ARCH","#f1d09b");
   if(room.tutorial){objectRunes(ctx,camera,room);worldLabel(ctx,camera,room.exit.x,room.exit.y+room.exit.height+.35,"EXIT","#ffe2a5");}

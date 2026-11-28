@@ -666,13 +666,15 @@ test("presentation controls locate actual geometry without casting and restore m
 });
 
 test("home Continue restores a paused campaign attempt after practice, including undo history",()=>{
- const {controller:c,els,app,saved}=fixture(true,true),click=id=>els[id].fire("click");
+ const f=fixture(true,true),{controller:c,els,app,saved}=f,click=id=>els[id].fire("click");
  assert.match(els["continue-detail"].textContent,/Begin · Level 1/);
  click("open-continue");assert.equal(app.state.view,"level1");
- c.setObjectMode(true);c.inspector.selectObject("brook-beam");c.inspector.selectType("translate");
- assert.ok(c.inspector.showPreview({dx:12,dy:0}).ok);click("object-apply");
+ // Commit through the real form: a preview alone does not populate the inputs.
+ assert.equal(cast(f,"brook-beam","translate",{dx:12,dy:0}).ok,true);
+ assert.deepEqual(c.getRecords(),[{objectId:"brook-beam",type:"translate",dx:12,dy:0}]);
+ assert.equal(c.room.objects[0].vertices[0][0],15);
  assert.equal(c.getAttemptSummary().moves,1);const geometry=JSON.stringify(c.room),pose=c.getPlayer();
- click("close-room");assert.match(els["continue-detail"].textContent,/Resume Level 1/);
+ click("open-home");assert.equal(app.state.view,"title");assert.match(els["continue-detail"].textContent,/Resume Level 1/);
  assert.equal(JSON.parse(saved.get("shapeweaver.resume-level.v1")).route,"level1");
  click("open-room");assert.equal(app.state.view,"room");assert.equal(c.getAttemptSummary().moves,0);
  click("close-room");click("open-continue");assert.equal(app.state.view,"level1");

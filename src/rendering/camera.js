@@ -34,3 +34,12 @@ export function zoomCamera(camera,bounds,multiplier,focus=null) {
   const next=clamp(camera.zoom*multiplier,1,MAX_ZOOM);
   return createCamera(bounds,camera.width,camera.height,next===1?"overview":"inspect",focus??{x:camera.cx,y:camera.cy},next);
 }
+
+/** Fit selected source/image geometry with CSS-pixel padding. Keep scale uniform
+ * and never change the mathematical world or exceed the legal zoom range. */
+export function frameBoundsCamera(camera,bounds,box){
+ const width=Math.max(1,box.maxX-box.minX+2),height=Math.max(1,box.maxY-box.minY+2);
+ const scale=Math.min(Math.max(1,camera.width-48)/width,Math.max(1,camera.height-48)/height);
+ const factor=clamp(scale/camera.fitScale,1,MAX_ZOOM);
+ return createCamera(bounds,camera.width,camera.height,factor===1?"overview":"inspect",{x:(box.minX+box.maxX)/2,y:(box.minY+box.maxY)/2},factor);
+}

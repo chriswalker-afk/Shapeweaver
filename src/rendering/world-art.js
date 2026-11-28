@@ -1,3 +1,4 @@
+import {layoutWorldLabels} from "./label-layout.js";
 import {deliveryReady,deliveryFilled} from "../mechanisms/delivery.js";
 import {mirrorRails,railMirrorValue,railEquation} from "../mechanisms/movable-mirrors.js";
 import {isBridgeDeck,ladderSegment} from "../mechanisms/transformable-ladders.js";
@@ -457,10 +458,19 @@ function sceneDetails(ctx,camera,room){
     rect(26,12,.35,2,"#87758766");rect(33,12,.35,2,"#87758766");
   }
 }
+const labelQueues=new WeakMap();
 function worldLabel(ctx,camera,x,y,label,colour){
-  const p=worldToScreen(camera,{x,y});
-  if(p.x<22||p.x>camera.width-22||p.y<10||p.y>camera.height-10)return;
-  ctx.save();ctx.font="700 11px system-ui, sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.lineWidth=3.2;ctx.lineJoin="round";ctx.strokeStyle="#272034";ctx.strokeText(label,p.x,p.y);ctx.fillStyle=colour;ctx.fillText(label,p.x,p.y);ctx.restore();
+ const p=worldToScreen(camera,{x,y});
+ labelQueues.get(ctx)?.push({...p,text:label,colour});
+}
+function drawWorldLabels(ctx,labels,rect){
+ ctx.save();ctx.font="700 11px system-ui, sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";
+ for(const l of layoutWorldLabels(labels,rect,t=>ctx.measureText?.(t)?.width??t.length*6.5)){
+  if(l.distance>17){ctx.strokeStyle="#e7dcca99";ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(l.x,l.y);ctx.lineTo(l.cx,l.cy);ctx.stroke();}
+  ctx.fillStyle="#211c31e8";ctx.fillRect(l.left,l.top,l.right-l.left,l.bottom-l.top);
+  ctx.fillStyle=l.colour;ctx.fillText(l.text,l.cx,l.cy);
+ }
+ ctx.restore();
 }
 function objectRunes(ctx,camera,room){
   for(const o of room.objects){
@@ -472,13 +482,16 @@ function objectRunes(ctx,camera,room){
     ctx.fillStyle=SPELL_COLOURS[o.permissions[0]]??"#f5d69a";ctx.fill();ctx.strokeStyle="#34273e";ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
   }
 }
-function portal(ctx,camera,exit,art) {
+function portal(ctx,camera,exit,art,ready=true) {
   const p=worldToScreen(camera,exit),w=exit.width*camera.scale,h=exit.height*camera.scale;
   const glow=ctx.createRadialGradient(p.x,p.y-h*.5,0,p.x,p.y-h*.5,h);
-  glow.addColorStop(0,"#ffce8780");glow.addColorStop(1,"#ffce8700");
+  glow.addColorStop(0,ready?"#ffce8780":"#a9b9f34a");glow.addColorStop(1,"#ffce8700");
   ctx.fillStyle=glow;ctx.fillRect(p.x-h,p.y-h*1.5,h*2,h*2);
+  ctx.save();if(!ready)ctx.globalAlpha=.48;
   if(art.portal)ctx.drawImage(art.portal,p.x-w/2,p.y-h,w,h);
   else{ctx.fillStyle="#efc47f";ctx.beginPath();ctx.moveTo(p.x-w/2,p.y);ctx.lineTo(p.x-w/2,p.y-h*.63);ctx.quadraticCurveTo(p.x-w/2,p.y-h,p.x,p.y-h);ctx.quadraticCurveTo(p.x+w/2,p.y-h,p.x+w/2,p.y-h*.63);ctx.lineTo(p.x+w/2,p.y);ctx.closePath();ctx.fill();}
+  ctx.restore();
+  if(!ready){const s=Math.max(5,Math.min(10,w*.38)),y=p.y-h*.43;ctx.save();ctx.strokeStyle="#e6eaff";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,y-s*.28,s*.35,Math.PI,0);ctx.stroke();ctx.fillStyle="#e6eaff";ctx.fillRect(p.x-s*.55,y-s*.12,s*1.1,s*.8);ctx.restore();}
 }
 function ladder(ctx,camera,l) {
   const a=worldToScreen(camera,{x:l.x-l.width/2,y:l.top}),b=worldToScreen(camera,{x:l.x+l.width/2,y:l.bottom});
@@ -509,7 +522,8 @@ function apprentice(ctx,camera,player,art,reducedMotion) {
 }
 
 /** A deterministic scene draw. Art never modifies the room or collision polygons. */
-export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,reducedMotion=false) {
+export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,reducedMotion=false,{axes=false}={}) {
+  const labels=[];labelQueues.set(ctx,labels);
   ctx.setTransform(metrics.scaleX,0,0,metrics.scaleY,0,0);
   const sky=ctx.createLinearGradient(0,0,0,metrics.height);sky.addColorStop(0,room.chapter===7?"#202846":room.chapter===6?"#263e43":room.chapter===5?"#302b45":room.chapter===4?"#31596d":room.chapter===3?"#34434e":room.chapter===2?"#34584f":"#514963");sky.addColorStop(1,room.chapter===7?"#747da8":room.chapter===6?"#8ca79b":room.chapter===5?"#9c8ba9":room.chapter===4?"#b4d0ca":room.chapter===3?"#a6a99b":room.chapter===2?"#c7d3a4":"#d3a68d");ctx.fillStyle=sky;ctx.fillRect(0,0,metrics.width,metrics.height);
   if(![2,3,4,5,6,7].includes(room.chapter)){backdrop(ctx,art.distant,camera,room.bounds,.28);backdrop(ctx,art.ruins,camera,room.bounds,.48);}
@@ -541,7 +555,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   drawDeliveries(ctx,camera,room);
   for(const item of room.checkpoints??[])checkpoint(ctx,camera,item,player.checkpoint===item.id);
   for(const item of room.decor)decorate(ctx,camera,item);
-  portal(ctx,camera,room.exit,art);apprentice(ctx,camera,player,art,reducedMotion);
+  const exitReady=deliveryReady(room);portal(ctx,camera,room.exit,art,exitReady);apprentice(ctx,camera,player,art,reducedMotion);
   if(room.id==="gardens-06"){const m=room.objects.find(o=>o.kind==="mushroom"),b=polygonBounds(m.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.65,"SPRING CAP","#f9dcb4");}
   if(room.id==="riverworks-13")worldLabel(ctx,camera,42,1.5,"CENTRAL PIER","#f7d7a1");
   if(room.id==="riverworks-16")worldLabel(ctx,camera,3.5,8,"STORAGE SHELF","#f7d7a1");
@@ -564,9 +578,11 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   for(const o of room.objects)if(o.bridgeDeck){const b=polygonBounds(o.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.45,isBridgeDeck(o)?"BRIDGE":ladderSegment(o)?"LADDER":"TURNING","#f7d7a1");}
   if(room.id==="riverworks-14")worldLabel(ctx,camera,6,5.6,"STORAGE RACK","#f7d7a1");
   if(room.id==="clockwork-10")worldLabel(ctx,camera,21.5,6.65,"LOW ARCH","#f1d09b");
-  if(room.tutorial){objectRunes(ctx,camera,room);worldLabel(ctx,camera,room.exit.x,room.exit.y+room.exit.height+.35,deliveryReady(room)?"EXIT":"EXIT · STAR REQUIRED",deliveryReady(room)?"#ffe2a5":"#c6d8ff");}
+  if(room.tutorial){objectRunes(ctx,camera,room);worldLabel(ctx,camera,room.exit.x,room.exit.y+room.exit.height+.35,exitReady?"EXIT":"EXIT · STAR REQUIRED",exitReady?"#ffe2a5":"#c6d8ff");}
   ctx.restore();
   // Subtle vignette establishes the playable area without darkening the whole room.
   const v=ctx.createLinearGradient(0,0,0,metrics.height);v.addColorStop(0,"#28223930");v.addColorStop(.28,"#28223900");v.addColorStop(.82,"#28223900");v.addColorStop(1,"#28223950");
   ctx.fillStyle=v;ctx.fillRect(0,0,metrics.width,metrics.height);
+  const left=Math.max(0,tl.x),right=Math.min(camera.width,br.x),top=Math.max(0,tl.y),bottom=Math.min(camera.height,br.y),rulers=axes&&right-left>=68&&bottom-top>=64;
+  drawWorldLabels(ctx,labels,{left:left+(rulers?26:2),right:right-2,top:top+2,bottom:bottom-(rulers?26:2)});labelQueues.delete(ctx);
 }

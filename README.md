@@ -6,12 +6,13 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR34 — Final campaign audit. All 36 campaign puzzles implemented; expanded independent coordinate, recovery and replay acceptance checks. Next: PR35 — Final polish.
+PR35 — Final polish. Presentation preferences, close-up and object/image framing, visual feedback, responsive controls, efficient redraw and campaign completion. Next: PR36 — Production release.
 
 ## Design documents
 
 - [Game design](docs/game-design.md) — player experience, mathematics, rules, recovery, accessibility and visual direction.
 - [Campaign](docs/campaign.md) — 36 authored levels across seven chapters, new mechanics and validation targets.
+- [Final polish](docs/final-polish.md) — controls, visual feedback, audio, accessibility, performance and QA checklist.
 - [Final campaign audit](docs/final-campaign-audit.md) — release acceptance matrix, progression review, scope and outstanding QA.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.

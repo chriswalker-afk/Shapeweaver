@@ -8,6 +8,7 @@ await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
 const origin="http://127.0.0.1:"+server.address().port+"/";
 const browser=await chromium.launch({headless:true});
 const out="browser-qa";await mkdir(out,{recursive:true});
+async function backToTitle(page){await page.locator("#close-room").click();await page.locator("#campaign-view").waitFor();await page.locator("#close-campaign").click();}
 const report=[];
 const viewports=["desktop","small-desktop","landscape-phone","portrait-phone"];
 const cases=[
@@ -36,23 +37,38 @@ try{
   assert.equal(await page.locator(".library-level").count(),13);
   await page.locator(".library-level").filter({hasText:"The Missing Barrel"}).click();
   assert.match(await page.locator("#room-heading").innerText(),/The Missing Barrel/);
-  await page.locator("#close-room").click();
+  await backToTitle(page);
   await page.locator("#open-campaign").click();
   await page.locator("#campaign-clear").click();
   assert.equal(await page.locator(".library-level").count(),36);
   await page.screenshot({path:out+"/"+name+"-campaign.png",fullPage:true});
   await page.locator("#campaign-resume").click();
   assert.match(await page.locator("#room-heading").innerText(),/Across the Brook/);
-  await page.locator("#close-room").click();
+  await backToTitle(page);
   for(const [index,[id,type,fields]] of cases.entries()){
    await page.locator("#open-level"+(index+1)).click();
    await page.locator("#room-canvas").waitFor();
    const initial=await page.locator("#room-stage").boundingBox();
    assert.ok(initial&&initial.height>=138,name+" stage");
    assert.ok(await page.locator("#room-secondary-tools").isHidden(),name+" tools initially collapsed");
+   if(index===0){
+    await page.locator("#quick-camera").click();assert.equal(await page.locator("#quick-camera").getAttribute("aria-pressed"),"true");
+    await page.locator("#quick-camera").click();assert.equal(await page.locator("#quick-camera").getAttribute("aria-pressed"),"false");
+    await page.locator("#room-tools-toggle").click();assert.equal(await page.locator("#sound-toggle").getAttribute("aria-pressed"),"false");
+    await page.locator("#sound-toggle").click();assert.equal(await page.locator("#sound-toggle").getAttribute("aria-pressed"),"true");
+    await page.locator("#sound-toggle").click();assert.equal(await page.locator("#sound-toggle").getAttribute("aria-pressed"),"false");
+    await page.locator("#motion-toggle").click();assert.equal(await page.locator("html").getAttribute("data-motion"),"reduced");
+    await page.locator("#motion-toggle").click();assert.equal(await page.locator("html").getAttribute("data-motion"),"system");
+    await page.locator("#focus-toggle").click();assert.equal(await page.locator("#room-view").getAttribute("data-focus"),"true");
+    assert.ok((await page.locator("#room-stage").boundingBox()).height>=138);
+    await page.screenshot({path:out+"/"+name+"-focus-view.png",fullPage:true});
+    await page.locator("#room-tools-toggle").click();await page.locator("#focus-toggle").click();await page.locator("#room-tools-toggle").click();
+   }
    await page.screenshot({path:out+"/"+name+"-level"+(index+1)+"-initial.png",fullPage:true});
    await page.locator("#object-toggle").click();
    await page.locator("#object-select").selectOption(id);
+   assert.ok(await page.locator("#object-locate").isEnabled());
+   if(index===0){await page.locator("#object-locate").click();assert.equal(await page.locator("#quick-camera").getAttribute("aria-pressed"),"true");await page.locator("#quick-camera").click();}
    await page.locator("#object-spell").selectOption(type);
    for(const [key,value] of Object.entries(fields)){
     const field=page.locator('#object-fields [name="'+key+'"]');
@@ -60,12 +76,14 @@ try{
    }
    await page.locator('#object-form button[type="submit"]').click();
    assert.equal(await page.locator("#object-apply").isEnabled(),true,name+" legal preview "+id);
+   assert.ok(await page.locator("#object-image").isEnabled());
+   if(index===0){await page.locator("#object-image").click();assert.equal(await page.locator("#quick-camera").getAttribute("aria-pressed"),"true");await page.locator("#quick-camera").click();}
    const inspected=await page.locator("#room-stage").boundingBox();
    await page.screenshot({path:out+"/"+name+"-level"+(index+1)+"-preview.png",fullPage:true});
    await page.locator("#object-apply").click();
    assert.match(await page.locator("#tutorial-moves").innerText(),/Moves: 1/);
    report.push({viewport:name,level:index+1,stageHeight:initial.height,inspectionHeight:inspected.height});
-   await page.locator("#close-room").click();
+   await backToTitle(page);
   }
   for(const [index,spells] of [...gardens,...clockwork,...riverworks,...archives,...alchemists,...observatory].entries()){
    await page.locator("#open-campaign").click();
@@ -127,7 +145,7 @@ try{
    if(chapter==="5"&&index<16){assert.match(await page.locator("#tutorial-guide").innerText(),/Traverse.*balcony/);assert.equal(await page.locator("#climb-controls").isHidden(),true);}
    await page.screenshot({path:out+"/"+name+"-level"+(index+5)+(chapter==="5"?"-first-crossing":"-ready")+".png",fullPage:true});
    report.push({viewport:name,level:index+5,stageHeight:initial.height,casts:spells.length});
-   await page.locator("#close-room").click();
+   await backToTitle(page);
   }
   assert.deepEqual(errors,[],name+" runtime errors");
   assert.deepEqual(report.filter(r=>r.viewport===name).map(r=>r.level),Array.from({length:36},(_,i)=>i+1),name+" all campaign levels covered");

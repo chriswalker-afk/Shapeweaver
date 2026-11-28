@@ -57,7 +57,7 @@ function mirrorSegment(line,b){
   const lo=Math.max(b.minX,-b.maxY),hi=Math.min(b.maxX,-b.minY);return lo<=hi?[[lo,-lo],[hi,-hi]]:null;
 }
 /** Draw above grid. Original geometry, reference vertices, ghost and mathematical construction guides. */
-export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview,{shapeSockets=[],gridPlan=null,axes=false}={}){
+export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview,{shapeSockets=[],deliveries=[],gridPlan=null,axes=false}={}){
   ctx.save();
   const a=screen(camera,[bounds.minX,bounds.maxY]),b=screen(camera,[bounds.maxX,bounds.minY]);
   ctx.beginPath();ctx.rect(a.x,a.y,b.x-a.x,b.y-a.y);ctx.clip();
@@ -72,6 +72,7 @@ export function drawObjectOverlay(ctx,camera,bounds,objects,selected,preview,{sh
   for(const slot of shapeSockets.filter(s=>s.objectId===selected)){
     markReferences(ctx,camera,slot.vertices.map((point,i)=>({id:"S"+(i+1),point})),slot.filled?"#c7e9a4":"#e9bd7b","",rect,occupied);
   }
+  for(const target of deliveries.filter(t=>t.objectId===selected))markReferences(ctx,camera,target.vertices.map((point,i)=>({id:"T"+(i+1),point})),target.filled?"#c7e9a4":"#c6d8ff","",rect,occupied);
   for(const o of objects){
     const active=o.id===selected;
     path(ctx,camera,o.vertices);ctx.strokeStyle="#211c31";ctx.lineWidth=active?4:3;ctx.stroke();

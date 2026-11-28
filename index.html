@@ -13,10 +13,10 @@
 <body>
   <header class="app-header">
     <a class="brand" href="./" aria-label="Shapeweaver home"><img src="./assets/ui/crest.svg" alt="" width="35" height="35"><span>Shapeweaver</span></a>
-    <span class="stage-label">The Gatehouse · Chapter I</span>
+    <span class="stage-label">36 puzzles · 7 chapters</span>
   </header>
   <main class="app-main" id="app">
-    <section class="game-viewport" aria-label="Shapeweaver development preview">
+    <section class="game-viewport" aria-label="Shapeweaver mathematical puzzle adventure">
       <canvas id="world" aria-hidden="true"></canvas>
       <div class="title-art" id="title-art" aria-hidden="true">
         <svg class="scene-composition" viewBox="0 0 1440 800" preserveAspectRatio="xMaxYMid slice" focusable="false" aria-hidden="true">
@@ -35,13 +35,13 @@
           <div class="ornament" aria-hidden="true"><span></span><b>◆</b><span></span></div>
           <p class="intro">Four spells. A forgotten kingdom. A path only you can create.</p>
           <div class="title-actions"><button type="button" class="gold-button" id="open-campaign">Adventure &amp; puzzle library <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level1">Level 1 · Across the Brook <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level2">Level 2 · The Stubborn Gate <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level3">Level 3 · A Little Cheesy <span aria-hidden="true">›</span></button><button type="button" class="gold-button" id="open-level4">Level 4 · The Missing Barrel <span aria-hidden="true">›</span></button><button type="button" class="secondary-title-button" id="open-room">Practice room</button><button type="button" class="secondary-title-button" id="open-spellbook">Open the spellbook</button></div>
-          <p class="preview-note" id="app-status" role="status">Loading the development scaffold…</p>
+          <p class="preview-note" id="app-status" role="status">Loading Shapeweaver…</p>
           <noscript><p class="preview-note">Enable JavaScript to open the spellbook.</p></noscript>
         </div>
         <div class="chapter-marker"><span>Chapter I</span><strong>The Gatehouse</strong></div>
       </section>
       <section id="campaign-view" class="campaign-view" aria-labelledby="campaign-heading" hidden>
-        <header class="campaign-header"><div><p class="eyebrow">The journey begins</p><h2 id="campaign-heading" tabindex="-1">Adventure &amp; puzzle library</h2><p id="campaign-progress"></p></div><button id="campaign-resume" class="gold-button" type="button">Continue</button><button id="close-campaign" class="room-back" type="button">← Title</button></header>
+        <header class="campaign-header"><div><p class="eyebrow">The journey begins</p><h2 id="campaign-heading" tabindex="-1">Adventure &amp; puzzle library</h2><p id="campaign-progress" role="status"></p><p id="campaign-celebration" class="campaign-celebration" hidden></p></div><button id="campaign-resume" class="gold-button" type="button">Continue</button><button id="close-campaign" class="room-back" type="button">← Title</button></header>
         <h3>Chapter map</h3><div id="campaign-map" class="campaign-map"></div>
         <h3>Choose any released puzzle</h3><div class="library-filters">
           <label>Transformation <select id="filter-spell"><option value="">All</option><option value="translate">Translation</option><option value="rotate">Rotation</option><option value="enlarge">Enlargement</option><option value="reflect">Reflection</option></select></label>
@@ -64,7 +64,7 @@
             <div class="spell-sigil"><img id="spell-image" src="./assets/ui/translate.svg" alt=""></div>
             <div class="spell-text"><h3 id="spell-name">Translation</h3><p id="spell-description">Move without turning or resizing.</p><div class="spell-example"><span class="column-vector" id="translation-vector" role="img" aria-label="Column vector 4, negative 2"><span aria-hidden="true">4</span><span aria-hidden="true">−2</span></span><span id="spell-example">Four units right, two units down.</span></div></div>
           </div>
-          <p class="book-footer">Explore individual spells, combine objects in the Gardens, sequence spells in Clockwork build connected structures in the Riverworks, and reuse objects in the Mirror Archives.</p>
+          <p class="book-footer">Practise individual spells, combine transformations, reuse objects, move reference points and solve the Observatory’s mastery puzzles.</p>
         </div>
       </section>
       <section class="results-view" id="results-view" aria-labelledby="results-heading" hidden>
@@ -78,7 +78,7 @@
             <p id="results-message"></p>
             <dl id="results-stats" class="results-stats"></dl>
             <p id="results-thresholds" class="results-note"></p>
-            <p id="results-best" class="results-best"></p>
+            <p id="results-best" class="results-best"></p><p id="results-campaign-progress" class="campaign-celebration" hidden></p>
           </section>
           <section class="results-solution" aria-labelledby="results-solution-heading">
             <h3 id="results-solution-heading">Your mathematical solution</h3>
@@ -87,7 +87,7 @@
             <p id="results-empty" class="results-note" hidden>No transformations were needed for this completed route.</p>
           </section>
           <nav class="results-actions" aria-label="After completing the level">
-            <button type="button" id="results-title" class="secondary-title-button">Back to levels</button>
+            <button type="button" id="results-title" class="secondary-title-button">Puzzle library</button>
             <button type="button" id="results-replay" class="secondary-title-button">Replay level</button>
             <button type="button" id="results-next" class="gold-button">Next level →</button>
           </nav>
@@ -98,7 +98,7 @@
           <div class="room-heading"><p id="room-chapter">Chapter I · Interactive object practice</p><h2 id="room-heading" tabindex="-1">The Gatehouse</h2></div>
           <div class="coordinate-controls primary-tools" role="group" aria-label="Puzzle tools">
             <button type="button" id="grid-toggle" aria-pressed="true">Grid: on</button>
-            <button type="button" id="object-toggle" class="object-primary" aria-pressed="false" aria-controls="object-panel">Objects</button>
+            <button type="button" id="object-toggle" class="object-primary" aria-pressed="false" aria-controls="object-panel">Objects</button><button type="button" id="quick-camera" aria-pressed="false" title="Zoom in and follow the apprentice; press again for the full room">Close-up</button>
           </div>
           <button type="button" id="room-tools-toggle" class="room-back" aria-expanded="false" aria-controls="room-secondary-tools">View tools ▾</button>
           <div id="tutorial-tools" class="tutorial-tools" hidden><span id="tutorial-moves">Moves: 0</span><button type="button" id="tutorial-guidance-toggle" class="room-back" aria-pressed="true">Guide: on</button><button type="button" id="tutorial-hint" class="room-back" aria-expanded="false" aria-controls="tutorial-hint-panel">Hints</button></div>
@@ -124,11 +124,11 @@
             </div>
           </div>
             <div class="coordinate-controls"><button type="button" id="axes-toggle" aria-pressed="true">Axes: on</button><button type="button" id="pick-toggle" aria-pressed="false" aria-controls="coordinate-panel">Pick point</button></div>
-            <button type="button" id="follow-toggle" class="room-back" aria-pressed="true">Follow</button>
+            <button type="button" id="follow-toggle" class="room-back" aria-pressed="true">Follow</button><div class="presentation-controls" role="group" aria-label="Presentation preferences"><button type="button" id="focus-toggle" class="room-back" aria-pressed="false">Focus view</button><button type="button" id="sound-toggle" class="room-back" aria-pressed="false">Sound: off</button><button type="button" id="motion-toggle" class="room-back" aria-pressed="false">Motion: system</button></div>
           </div>
         </header>
         <div class="room-stage" id="room-stage">
-          <canvas id="room-canvas" tabindex="0" aria-label="Gatehouse puzzle. Arrow keys or WASD to move; Space or Z to jump. Coordinate picking and object inspection pause movement."></canvas>
+          <canvas id="room-canvas" tabindex="0" aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Space A D W S Z" aria-label="Gatehouse puzzle. Arrow keys or WASD to move; Space or Z to jump. Coordinate picking and object inspection pause movement."></canvas>
         </div>
         <section id="coordinate-panel" class="coordinate-panel" aria-label="Coordinate picker" hidden>
           <label class="snap-field" for="coordinate-snap">Click snap <select id="coordinate-snap"><option value="1">1 unit</option><option value="0.5">½ unit</option><option value="0.1">0.1 unit</option></select></label>
@@ -146,6 +146,7 @@
             <label>Object <select id="object-select"></select></label>
             <label>Transformation <select id="object-spell" disabled></select></label>
             <span id="object-permissions"></span>
+            <div class="locate-controls" role="group" aria-label="Locate selected geometry"><button type="button" id="object-locate" disabled>Locate object</button><button type="button" id="object-image" disabled>Locate image</button></div>
             <button type="button" id="object-close">Back to movement</button>
           </div>
           <p id="object-references" class="object-references"></p>

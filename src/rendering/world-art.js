@@ -1,5 +1,5 @@
 import {isBridgeDeck,ladderSegment} from "../mechanisms/transformable-ladders.js";
-import {plateGroups,mixedGateProgress} from "../mechanisms/pressure-plates.js";
+import {plateGroups,mixedGateProgress,selectorPlates,plateHeld} from "../mechanisms/pressure-plates.js";
 import { polygonBounds } from "../geometry/world.js";
 import { worldToScreen } from "./camera.js";
 import {SPELL_COLOURS} from "./cast-effects.js";
@@ -363,6 +363,7 @@ function drawPlates(ctx,camera,room){
   for(const group of plateGroups(room)){
     const g=room.objects.find(o=>o.id===group.gateId),b=polygonBounds(g.vertices);
     for(const [i,plate] of group.plates.entries()){
+      if(plate.closedGateId!==undefined)continue;
       const p=worldToScreen(camera,plate),q=worldToScreen(camera,{x:(b.minX+b.maxX)/2,y:plate.y});
       const s=camera.scale,colour=plate.pressed?"#c7ef9d":"#f1c37b",lane=s*(.72+i*.65);
       ctx.save();ctx.strokeStyle=colour;ctx.lineWidth=Math.max(1.5,s*.07);ctx.setLineDash([4,3]);ctx.beginPath();
@@ -374,13 +375,32 @@ function drawPlates(ctx,camera,room){
     }
   }
 }
+function drawSelectors(ctx,camera,room){
+ for(const plate of selectorPlates(room)){
+  const held=plateHeld(room,plate),s=camera.scale,p=worldToScreen(camera,{x:plate.x+plate.width/2,y:plate.y});
+  const colours=["#aee8ab","#e6ad76"];
+  ctx.save();
+  for(const [i,id] of [plate.closedGateId,plate.gateId].entries()){
+   const gate=room.objects.find(o=>o.id===id),b=polygonBounds(gate.vertices),q=worldToScreen(camera,{x:(b.minX+b.maxX)/2,y:plate.y}),lane=s*(.75+i*.65);
+   ctx.strokeStyle=gate.open?colours[0]:colours[1];ctx.lineWidth=Math.max(1.4,s*.07);ctx.setLineDash(gate.open?[]:[4,3]);
+   ctx.beginPath();ctx.moveTo(p.x,p.y+3);ctx.lineTo(p.x,p.y+lane);ctx.lineTo(q.x,q.y+lane);ctx.lineTo(q.x,q.y);ctx.stroke();ctx.setLineDash([]);
+  }
+  ctx.fillStyle=held?colours[0]:colours[1];ctx.fillRect(p.x-plate.width*s/2,p.y+1,plate.width*s,Math.max(3,s*.13));ctx.restore();
+  worldLabel(ctx,camera,plate.x+plate.width/2,plate.y-.55,"SELECTOR · "+(held?"HELD":"FREE"),held?colours[0]:colours[1]);
+ }
+}
 function drawPlateGateStates(ctx,camera,room){
   for(const group of plateGroups(room)){
     const g=room.objects.find(o=>o.id===group.gateId),b=polygonBounds(g.vertices);
+    if(group.plates.some(p=>p.closedGateId!==undefined))continue;
     const mixed=mixedGateProgress(room,g.id);
     const label=(mixed?mixed.held+"/"+mixed.total+" LINKED · ":group.total>1?group.held+"/"+group.total+" HELD · ":"")+(g.open?"OPEN":"CLOSED");
     worldLabel(ctx,camera,(b.minX+b.maxX)/2,Math.min(b.maxY-.55,b.minY+4),label,g.open?"#c7ef9d":"#f1c37b");
   }
+ for(const plate of selectorPlates(room))for(const [i,id] of [plate.closedGateId,plate.gateId].entries()){
+  const g=room.objects.find(o=>o.id===id),b=polygonBounds(g.vertices);
+  worldLabel(ctx,camera,(b.minX+b.maxX)/2,Math.min(b.maxY-.6,b.minY+4),(i===0?"FREE":"HELD")+" → "+(g.open?"OPEN":"CLOSED"),g.open?"#aee8ab":"#e6ad76");
+ }
 }
 
 function sceneDetails(ctx,camera,room){
@@ -469,6 +489,7 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   for(const item of room.terrain)terrain(ctx,camera,item,art);
   drawRotationMechanisms(ctx,camera,room);
   drawPlates(ctx,camera,room);
+  drawSelectors(ctx,camera,room);
   drawSockets(ctx,camera,room);
   drawShapeSockets(ctx,camera,room);
   for(const item of room.ladders??[])ladder(ctx,camera,item);
@@ -493,6 +514,8 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   if(room.id==="archives-20")worldLabel(ctx,camera,36,6.35,"SAFE BALCONY","#e9cffa");
    if(room.id==="alchemist-25")worldLabel(ctx,camera,29,8.2,"RAISED WORKBENCH","#d1eac9");
    if(room.id==="alchemist-26"){worldLabel(ctx,camera,21,13.45,"NARROW CHANNEL","#d1eac9");worldLabel(ctx,camera,21,10.15,"1.6 UNITS CLEAR","#d1eac9");}
+  if(room.id==="alchemist-29")worldLabel(ctx,camera,24,5.4,"SAFE CHAMBER","#d1eac9");
+  if(room.id==="alchemist-30"){worldLabel(ctx,camera,21,12.8,"NARROW CHANNEL","#d1eac9");worldLabel(ctx,camera,44.5,8.85,"SAFE WORKBENCH","#d1eac9");}
   if(room.id==="alchemist-28")worldLabel(ctx,camera,17,7.4,"MIRROR PARTITION","#d1eac9");
   for(const o of room.objects)if(o.bridgeDeck){const b=polygonBounds(o.vertices);worldLabel(ctx,camera,(b.minX+b.maxX)/2,b.maxY+.45,isBridgeDeck(o)?"BRIDGE":ladderSegment(o)?"LADDER":"TURNING","#f7d7a1");}
   if(room.id==="riverworks-14")worldLabel(ctx,camera,6,5.6,"STORAGE RACK","#f7d7a1");

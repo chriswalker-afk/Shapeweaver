@@ -17,6 +17,7 @@ import {NO_GOING_BACK_CASTS,LOCKED_PASSAGE_CASTS} from "../src/levels/archives-l
 import {DOUBLE_SEAL_CASTS,ARCHIVISTS_CHAIN_CASTS} from "../src/levels/archives-finale.js";
 import {TOO_BIG_CASTS,SMALL_NOW_CASTS} from "../src/levels/alchemist-workshop.js";
 import {WANDERING_PIVOT_CASTS,MIRRORED_MECHANISM_CASTS} from "../src/levels/alchemist-pivots.js";
+import {AIRLOCK_CASTS,TRIAL_CASTS} from "../src/levels/alchemist-finale.js";
 import {attachedObjects} from "../src/mechanisms/attached-pivots.js";
 import {createPhysicsWorld} from "../src/physics/collision.js";
 import {createPlayer,stepPlayer} from "../src/physics/platformer.js";
@@ -64,7 +65,10 @@ export const RECORDED_ROUTES=deepFreeze([
   [],
   [[270,1,0],[25,0,0,1],[420,0,0,1],[1,1,1,0],[250,1,0]]
  ]]
-].map(([number,casts,segments])=>({number,casts,segments,route:segments.flat()}))).concat([{number:21,casts:NO_GOING_BACK_CASTS,route:walk(1000)},{number:22,casts:LOCKED_PASSAGE_CASTS,route:walk(1000)},{number:23,casts:DOUBLE_SEAL_CASTS,route:walk(1000)},{number:24,casts:ARCHIVISTS_CHAIN_CASTS,route:walk(1000)},{number:25,casts:TOO_BIG_CASTS,route:[[180,1,0],[95,1,1],[120,1,1],[400,1,0]]},{number:26,casts:SMALL_NOW_CASTS,route:[[400,1,0],[110,1,1],[500,1,0]]},{number:27,casts:WANDERING_PIVOT_CASTS,route:[[300,1,0],[120,1,1],[500,1,0]]},{number:28,casts:MIRRORED_MECHANISM_CASTS,route:[[335,1,0],[120,1,1],[500,1,0]]}]));
+].map(([number,casts,segments])=>({number,casts,segments,route:segments.flat()}))).concat([{number:21,casts:NO_GOING_BACK_CASTS,route:walk(1000)},{number:22,casts:LOCKED_PASSAGE_CASTS,route:walk(1000)},{number:23,casts:DOUBLE_SEAL_CASTS,route:walk(1000)},{number:24,casts:ARCHIVISTS_CHAIN_CASTS,route:walk(1000)},{number:25,casts:TOO_BIG_CASTS,route:[[180,1,0],[95,1,1],[120,1,1],[400,1,0]]},{number:26,casts:SMALL_NOW_CASTS,route:[[400,1,0],[110,1,1],[500,1,0]]},{number:27,casts:WANDERING_PIVOT_CASTS,route:[[300,1,0],[120,1,1],[500,1,0]]},{number:28,casts:MIRRORED_MECHANISM_CASTS,route:[[335,1,0],[120,1,1],[500,1,0]]}]).concat([
+ [29,AIRLOCK_CASTS,[[[380,1,0]],[[400,1,0]]]],
+ [30,TRIAL_CASTS,[[],[],[[400,1,0],[110,1,1],[100,1,0],[120,1,1]],[],[[70,1,0],[80,0,0],[120,1,1],[500,1,0]]]]
+].map(([number,casts,segments])=>({number,casts,segments,route:segments.flat()}))));
 export function replayRoute(world,route,start=createPlayer(world)){
  let player=start,ticks=0;
  for(const [n,move,jump,climb=0] of route){

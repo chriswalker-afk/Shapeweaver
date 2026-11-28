@@ -58,5 +58,8 @@ The internal workshop is local development tooling, outside the public build. It
 ## Historical milestone: PR28
 Chapter VI opens with Levels 25–26, fractional scale factors and physical clearance. PR29 introduces movable rotation centres and attached object dependencies (The Wandering Pivot and The Mirrored Mechanism). Keep the PR review gates and do not merge unverified changes.
 
-## Current milestone: PR29
+## Historical milestone: PR29
 Levels 27–28 introduce separately selectable movable sockets and attached beams, with atomic rigid carrying transformations. PR30 adds two-state selectors and multi-stage alchemist puzzles (One Opens, One Closes and The Alchemist’s Trial).
+
+## Current milestone: PR30
+Chapter VI closes with a complementary-gate airlock and five-cast bridge-reuse trial. Review gate: run the full recorded/hinted campaign audit and independent workshop replays; review chapter progression and keep browser/manual QA distinct. PR31 opens The Celestial Observatory with The Wandering Mirror and The Astronomer’s Bridge (movable mirror lines and combined reference-point mechanisms).

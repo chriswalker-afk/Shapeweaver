@@ -19,7 +19,7 @@ function shift(o,b,target,config){
  reasoning:"Subtract the present lower-left coordinates from the intended image coordinates. Check the whole passage, not just the endpoints.",
  worked:"Move "+pt(b.minX,b.minY)+" to "+pt(target.x,target.y)+". Column vector "+pt(dx,dy)+".",raw:{dx,dy}});
 }
-export function alchemistSituation(room){
+export function alchemistSituation(room,player=null){
  if(room.id==="alchemist-25"){
   const o=room.objects.find(o=>o.id==="oversized-block"),b=polygonBounds(o.vertices);
   const config={objective:"Split the rise into two manageable jumps using an enlargement.",obstacle:"The original block is too tall to jump onto. Split the total rise into two manageable jumps.",object:"Make the block half its original height and width, keeping its right-hand base corner against the workbench.",traverse:"Move right, jump onto the smaller block, then jump again onto the raised workbench and reach the portal."};
@@ -58,6 +58,34 @@ export function alchemistSituation(room){
    if(image.minX<=target+1e-6&&image.maxX>=far-1e-6&&image.maxY-image.minY<1&&image.maxY>=3&&image.maxY<=5.7)return state("rotate-attached",c,{reasoning:"Use the current pivot H = "+pt(cx,cy)+". Compare the beam's long edge with the required horizontal deck.",worked:"Rotate "+angle+"° "+direction+" about "+pt(cx,cy)+". The socket stays fixed during this cast.",raw});
   }
   return state("recover-pivot",c,{reasoning:"The beam is not aligned with the crossing.",worked:"Undo or Reset to restore the intended arrangement."});
+ }
+ if(room.id==="alchemist-29"){
+  const o=room.objects.find(o=>o.id==="selector-weight"),b=polygonBounds(o.vertices),plate=room.plates[0],x=player?.x??room.spawn.x;
+  const config={objective:"Use the selector at two different times.",obstacle:"The selector opens one gate and closes the other. The entrance is open only while the plate is free.",object:"Move the weight off the plate first, walk to the safe chamber, then return the weight to the plate.",traverse:"Walk right through the open exit gate to the portal."};
+  if(x>19.5&&plate.pressed)return ready(config);
+  if(x<=19.5&&!plate.pressed)return state("enter-airlock",{...config,traverse:"Walk into the safe chamber between the gates. Stop on the central checkpoint before changing the selector."},{travel:true});
+  const target=x>19.5?10:4,dx=round(target-b.minX),dy=round(8-b.minY);
+  return state(x>19.5?"hold-selector":"free-selector",{...config,objectId:o.id,type:"translate",name:"Translation",spell:"Translate the weight; its contact with the selector changes which gate is open.",fields:"Enter the signed horizontal and vertical vector components."},{reasoning:"Compare the lower-left corner with the desired "+(x>19.5?"plate":"storage shelf")+" position.",worked:"Column vector "+pt(dx,dy)+". The "+(x>19.5?"exit":"entrance")+" gate opens and the other closes.",raw:{dx,dy}});
+ }
+ if(room.id==="alchemist-30"){
+  const o=room.objects.find(o=>o.id==="trial-bridge"),g=room.objects.find(o=>o.id==="trial-gate"),b=polygonBounds(o.vertices),gb=polygonBounds(g.vertices),w=b.maxX-b.minX,x=player?.x??room.spawn.x;
+  const config={objective:"Build two crossings with a single resized bridge, then turn the gate.",obstacle:"The narrow partition and two wide channels require a reusable bridge. The last gate blocks the exit.",object:"Shrink the bridge, move it through the slit, and grow it over the first channel. Reach the middle workbench before reusing the bridge.",traverse:"Step off the workbench onto the middle bank, jump onto the second bridge, cross and walk beneath the open gate to the portal."};
+  const first=near(b.minX,28)&&near(b.maxX,40)&&near(b.minY,4)&&near(b.maxY,6),second=near(b.minX,52)&&near(b.maxX,64)&&near(b.minY,4)&&near(b.maxY,6);
+  if(second){
+   if(gb.minY>=7.9)return ready(config);
+   const [cx,cy]=g.hinge,raw={angle:90,direction:"anticlockwise",cx,cy};
+   return state("turn-trial-gate",{...config,objectId:g.id,type:"rotate",name:"Rotation",spell:"Turn the gate around its fixed hinge, creating clearance below.",fields:"Enter the angle, direction and hinge coordinates."},{reasoning:"The gate is vertical and the desired image is horizontal. Use the fixed hinge "+pt(cx,cy)+".",worked:"Rotate 90° anticlockwise about "+pt(cx,cy)+".",raw});
+  }
+  if(first){
+   if(x<42||x>47||!(player?.y>=8.19))return state("first-crossing",{...config,traverse:"Walk under the partition, jump onto the bridge, then jump from it onto the elevated middle workbench. Stop at the checkpoint above the bridge travel path before moving it. If needed, Return to the checkpoint or Undo."},{travel:true});
+   return shift(o,b,{x:52,y:4},config);
+  }
+  if(near(w,6)){
+   if(near(b.minX,31)&&near(b.minY,11))return resize("grow-first",o,b,{x:28,y:4,w:12},config);
+   return shift(o,b,{x:31,y:11},config);
+  }
+  if(b.minX>=24-1e-6)return resize("grow-first",o,b,{x:28,y:4,w:12},config);
+  return resize("shrink-trial",o,b,{x:4,y:11,w:6},config);
  }
  return null;
 }

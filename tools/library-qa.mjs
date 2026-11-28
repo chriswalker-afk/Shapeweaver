@@ -24,10 +24,10 @@ async function noOverflow(page,name){
  const geometry=await page.evaluate(()=>{
   const cards=[...document.querySelectorAll(".chapter-card,.library-level")].filter(e=>e.getClientRects().length);
   const bad=cards.filter(e=>{const r=e.getBoundingClientRect();return r.x< -1||r.right>innerWidth+1||r.width<44||r.height<44||e.scrollWidth>e.clientWidth+1||e.scrollHeight>e.clientHeight+1;}).map(e=>e.getAttribute("aria-label"));
-  return {width:document.documentElement.scrollWidth,viewport:innerWidth,bad};
+  return {width:document.documentElement.scrollWidth,viewport:innerWidth,bad,tiles:[...document.querySelectorAll(".library-level")].map(e=>({level:e.dataset.level,width:e.clientWidth,scrollWidth:e.scrollWidth,height:e.clientHeight,scrollHeight:e.scrollHeight})),columns:getComputedStyle(document.getElementById("campaign-levels")).gridTemplateColumns};
  });
  assert.ok(geometry.width<=geometry.viewport+1,name+" horizontal overflow "+JSON.stringify(geometry));
- assert.deepEqual(geometry.bad,[],name+" visible cards fit");
+ assert.deepEqual(geometry.bad,[],name+" visible cards fit "+JSON.stringify({columns:geometry.columns,tiles:geometry.tiles}));
 }
 try{
  for(const v of viewports){
@@ -72,6 +72,10 @@ try{
    assert.equal(await page.locator("#library-detail-spells").innerText(),"Rotation");
    await page.keyboard.press("Tab");assert.equal(await page.evaluate(()=>document.activeElement.id),"library-play");
    await noOverflow(page,v.name+" chapter");
+   if(v.zoom===2){
+    const tracks=await page.locator("#campaign-levels").evaluate(e=>getComputedStyle(e).gridTemplateColumns.trim().split(/\s+/).length);
+    assert.ok(tracks<=2,"enlarged text reflows to fewer puzzle columns");
+   }
    await page.screenshot({path:out+"/"+v.name+"-chapter.png",fullPage:true});
    await page.keyboard.press("Enter");await page.locator("#room-view").waitFor();
    assert.match(await page.locator("#room-heading").innerText(),/The Stubborn Gate/);

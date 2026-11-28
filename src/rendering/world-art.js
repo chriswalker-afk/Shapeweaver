@@ -554,6 +554,8 @@ export function renderWorld(ctx,metrics,camera,room,art={},player=room.spawn,red
   if(room.id==="archives-20")worldLabel(ctx,camera,36,6.35,"SAFE BALCONY","#e9cffa");
    if(room.id==="alchemist-25")worldLabel(ctx,camera,29,8.2,"RAISED WORKBENCH","#d1eac9");
    if(room.id==="alchemist-26"){worldLabel(ctx,camera,21,13.45,"NARROW CHANNEL","#d1eac9");worldLabel(ctx,camera,21,10.15,"1.6 UNITS CLEAR","#d1eac9");}
+  if(room.id==="observatory-35")worldLabel(ctx,camera,39,5.35,"MACHINE ISLAND","#e5d7ff");
+  if(room.id==="observatory-36"){worldLabel(ctx,camera,39,4.5,"SAFE ISLAND","#e5d7ff");worldLabel(ctx,camera,83,14.2,"SUMMIT","#e5d7ff");}
   if(room.id==="observatory-33")worldLabel(ctx,camera,39,3.8,"STAR ISLAND","#e5d7ff");
   if(room.id==="observatory-32")worldLabel(ctx,camera,39,5.35,"SAFE STAR PLATFORM","#e5d7ff");
   if(room.id==="alchemist-29")worldLabel(ctx,camera,24,5.4,"SAFE CHAMBER","#d1eac9");

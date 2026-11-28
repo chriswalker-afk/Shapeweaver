@@ -6,7 +6,7 @@ A storybook fantasy puzzle platformer in which an apprentice magician uses mathe
 
 ## Project status
 
-PR32 — The Celestial Observatory: Levels 33–34. Thirty-four released puzzles; distinct alternative routes and crystal delivery. Next: PR33 — The Celestial Observatory: Levels 35–36.
+PR33 — The Celestial Observatory: Levels 35–36. All thirty-six planned campaign puzzles implemented; interconnected machinery and a four-transformation summit challenge. Next: PR34 — Final campaign audit.
 
 ## Design documents
 
@@ -14,6 +14,7 @@ PR32 — The Celestial Observatory: Levels 33–34. Thirty-four released puzzles
 - [Campaign](docs/campaign.md) — 36 proposed levels across seven chapters, new mechanics and validation targets.
 - [Implementation roadmap](docs/roadmap.md) — PR01–36 and optional extensions.
 - [Visual identity](docs/visual-identity.md) — branding, artwork, spell symbols and chapter palettes.
+- [Observatory finale](docs/observatory-finale.md) — interconnected machine and summit mastery routes.
 - [Observatory alternative routes and delivery](docs/observatory-routes.md) — three verified strategies and live receiver fit.
 - [Observatory opening](docs/observatory-mirrors.md) — live movable mirror equations and bridge reuse.
 - [Alchemist’s Workshop finale and review](docs/alchemist-finale.md) — selector state, chronological bridge reuse, chapter review.
